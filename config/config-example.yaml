@@ -1,0 +1,25 @@
+app:
+  addr: ":8080" # 应用运行的地址和端口
+
+jwt:
+  secretKey: "your-secret-key" # JWT 加密秘钥
+  timeout: 3600                # JWT 过期时间（秒）
+
+db:
+  addr: "127.0.0.1:3306"       # 数据库地址
+
+cache:
+  addr: "127.0.0.1:6379"       # Redis 地址
+  password: ""                 # Redis 密码（为空表示无密码）
+
+oauth:
+  addr: "https://example.com/oauth" # OAuth 服务地址
+  client_id: "your-client-id"       # OAuth 客户端 ID
+  client_secret: "your-client-secret" # OAuth 客户端秘钥
+
+log:
+  path: "./logs/app.log"       # 日志文件路径
+  max_size: 10                 # 单个日志文件最大大小（MB）
+  max_backups: 5               # 保留旧日志文件的最大个数
+  max_age: 7                   # 保留旧日志文件的最大天数
+  compress: 1                  # 是否压缩旧日志文件（1 表示是，0 表示否）
