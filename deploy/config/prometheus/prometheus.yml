@@ -1,0 +1,9 @@
+global:
+  scrape_interval: 5s # 抓取间隔时间
+  evaluation_interval: 5s # 规则评估间隔时间
+
+scrape_configs:
+  - job_name: 'my_app' # 自定义任务名称
+    static_configs:
+      - targets:
+          - 'host.docker.internal:8080' # 指向你的服务（如暴露 /metrics）

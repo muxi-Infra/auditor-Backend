@@ -26,15 +26,15 @@ func InitWebServer(confPath string) *App {
 		config.NewDBConf,
 		config.NewLogConf,
 		config.NewCacheConf,
-
+		config.NewPrometheusConf,
+		config.NewMiddleWareConf,
 		// 初始化基础依赖
 		ioc.InitDB,
 		ioc.InitLogger,
 		ioc.InitCache,
-
+		ioc.InitPrometheus,
 		// 初始化具体模块
 		dao.NewUserDAO,
-
 		jwt.NewRedisJWTHandler,
 		service.NewAuthService,
 		controller.NewOAuthController,
@@ -43,8 +43,8 @@ func InitWebServer(confPath string) *App {
 
 		// 中间件
 		middleware.NewAuthMiddleware,
+		middleware.NewLoggerMiddleware,
 		middleware.NewCorsMiddleware,
-
 		// 应用入口
 		NewApp,
 	)
