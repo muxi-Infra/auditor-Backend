@@ -19,6 +19,7 @@ type RedisJWTHandler struct {
 
 // NewRedisJWTHandler 创建并返回一个新的 RedisJWTHandler 实例
 func NewRedisJWTHandler(cmd *redis.Client, conf *config.JWTConfig) *RedisJWTHandler {
+
 	return &RedisJWTHandler{
 		cmd: cmd, //redis实体
 		jwt: NewJWT(time.Duration(conf.Timeout), conf.SecretKey),

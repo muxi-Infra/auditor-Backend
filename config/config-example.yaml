@@ -1,25 +1,53 @@
+# 应用配置
 app:
-  addr: ":8080" # 应用运行的地址和端口
+  addr: ":8080"  # 应用监听地址，格式为 IP:PORT，例如 ":8080"
 
+# JWT 配置
 jwt:
-  secretKey: "your-secret-key" # JWT 加密秘钥
-  timeout: 3600                # JWT 过期时间（秒）
+  secretKey: "your-secret-key"  # JWT 加密秘钥
+  timeout: 2592000          # 一个月过期一次
 
+# 数据库配置
 db:
-  addr: "127.0.0.1:3306"       # 数据库地址
+  dsn: "root:123456@tcp(localhost:3306)/muxiAuditor?charset=utf8mb4&parseTime=True&loc=Local"
 
+# 缓存配置
 cache:
-  addr: "127.0.0.1:6379"       # Redis 地址
-  password: ""                 # Redis 密码（为空表示无密码）
+  addr: "127.0.0.1:6379"  # Redis 地址，格式为 IP:PORT，例如 "127.0.0.1:6379"
+  password: "" # Redis 密码（如果没有设置密码，可留空）
 
+# OAuth 配置
 oauth:
-  addr: "https://example.com/oauth" # OAuth 服务地址
-  client_id: "your-client-id"       # OAuth 客户端 ID
-  client_secret: "your-client-secret" # OAuth 客户端秘钥
+  addr: "http://127.0.0.1:8081" # OAuth 服务地址
+  clientId: "your-client-id"   # OAuth Client ID
+  clientSecret: "your-client-secret" # OAuth Client Secret
 
+# 日志配置
 log:
-  path: "./logs/app.log"       # 日志文件路径
-  max_size: 10                 # 单个日志文件最大大小（MB）
-  max_backups: 5               # 保留旧日志文件的最大个数
-  max_age: 7                   # 保留旧日志文件的最大天数
-  compress: 1                  # 是否压缩旧日志文件（1 表示是，0 表示否）
+  path: "./logs/app.log"  # 日志文件路径
+  maxSize: 100           # 单个日志文件的最大大小（MB）
+  maxBackups: 7          # 保留旧日志文件的最大数量
+  maxAge: 30             # 日志文件保留天数
+  compress: 1             # 是否压缩旧日志文件（1 表示压缩，0 表示不压缩）
+
+# Prometheus 配置
+prometheus:
+  namespace: "muxiAuditor" # Prometheus 命名空间，通常为项目名称
+
+  routerCounter:
+    name: "http_requests_total"  # 路由请求总数指标名称
+    help: "Total number of HTTP requests" # 指标说明
+
+  activeConnections:
+    name: "active_connections"  # 活跃连接指标名称
+    help: "Number of active connections per route" # 指标说明
+
+  durationTime:
+    name: "http_request_duration_seconds"  # 请求时长直方图名称
+    help: "Histogram of response times for HTTP requests" # 指标说明
+
+# 中间件配置
+middleware:
+  allowedOrigins:
+    - "http://localhost:3000"  # 允许跨域访问的来源地址，例如前端开发服务器地址
+    - "https://auditor.muxixyz.com"     # 生产环境中允许的域名

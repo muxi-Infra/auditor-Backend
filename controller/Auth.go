@@ -2,10 +2,12 @@ package controller
 
 import (
 	"context"
+	"errors"
 	"github.com/gin-gonic/gin"
+	api_errors "muxi_auditor/api/errors"
 	"muxi_auditor/api/request"
+	"muxi_auditor/api/response"
 	"muxi_auditor/client"
-	"muxi_auditor/pkg/ginx"
 	"muxi_auditor/service"
 )
 
@@ -25,22 +27,23 @@ func NewOAuthController(client *client.OAuthClient, service *service.AuthService
 	}
 }
 
-func (c *AuthController) Login(ctx *gin.Context, req request.LoginReq) (ginx.Response, error) {
-	//随便写的逻辑,你需要进行更改
-	username, err := c.client.GetOAuth(req.Code)
-	if err != nil {
-		return ginx.Response{}, err
-	}
+func (c *AuthController) Login(ctx *gin.Context, req request.LoginReq) (response.Response, error) {
 
-	err = c.service.Login(ctx, username)
-	if err != nil {
-		return ginx.Response{}, err
-	}
-
+	////随便写的逻辑,你需要进行更改
+	//username, err := c.client.GetOAuth(req.Code)
+	//if err != nil {
+	//	return response.Response{}, err
+	//}
+	//
+	//err = c.service.Login(ctx, username)
+	//if err != nil {
+	//	return response.Response{}, err
+	//}
+	return response.Response{}, api_errors.LOGIN_ERROR(errors.New("登陆失败测试"))
 	//返回
-	return ginx.Response{
-		Msg:  "",
-		Code: 0,
-		Data: nil,
-	}, err
+	//return response.Response{
+	//	Msg:  "",
+	//	Code: 0,
+	//	Data: nil,
+	//}, nil
 }

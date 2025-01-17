@@ -1,2 +1,6 @@
 config/config.yaml
+deploy/db
 .idea
+logs
+
+
