@@ -44,14 +44,14 @@ func (j *JWT) ParseToken(tokenStr string) (UserClaims, error) {
 }
 
 // SetJWTToken 生成并设置用户的 JWT
-func (j *JWT) SetJWTToken(uid uint, name string) (string, error) {
+func (j *JWT) SetJWTToken(uid uint, email string) (string, error) {
 	uc := UserClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(j.rcExpiration)),
 			ID:        uuid.New().String(),
 		},
-		Uid:  uid,
-		Name: name,
+		Uid:   uid,
+		Email: email,
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, uc)
 	tokenStr, err := token.SignedString(j.jwtKey)
@@ -64,6 +64,6 @@ func (j *JWT) SetJWTToken(uid uint, name string) (string, error) {
 // UserClaims 定义了 JWT 中用户相关的声明
 type UserClaims struct {
 	jwt.RegisteredClaims
-	Uid  uint   // 用户 ID
-	Name string //用户名称
+	Uid   uint   // 用户 ID
+	Email string //用户名称
 }
