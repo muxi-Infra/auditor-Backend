@@ -1,30 +1,41 @@
 package errors
 
-import "muxi_auditor/pkg/errorx"
+import (
+	"muxi_auditor/pkg/errorx"
+	"net/http"
+)
 
-// OAUTH_ERROR
+// 400
+const (
+	UNAUTHORIED_ERROR_CODE = 40001
+	BAD_ENTITY_ERROR_CODE  = 40002
+)
+
+// 500
+const (
+	ERROR_TYPE_ERROR_CODE    = 50001
+	OAUTH_GETINFO_ERROR_CODE = 50002
+	LOGIN_ERROR_CODE         = 50003
+)
+
+// Auth
 var (
 	OAUTH_GETINFO_ERROR = func(err error) error {
-		return errorx.New(500, 50001, "从通行证获取用户信息失败!", "OAuth", err)
+		return errorx.New(http.StatusInternalServerError, OAUTH_GETINFO_ERROR_CODE, "从通行证获取用户信息失败!", "Auth", err)
 	}
+
 	LOGIN_ERROR = func(err error) error {
-		return errorx.New(500, 50002, "系统发生内部错误,登陆失败!", "User", err)
+		return errorx.New(http.StatusInternalServerError, LOGIN_ERROR_CODE, "系统发生内部错误,登陆失败!", "Auth", err)
 	}
 )
 
-// Common 错误快捷方法,一般不推荐使用
-func BadRequest(msg string) error {
-	return errorx.New(400, 40001, msg, "Common", nil)
-}
+// Common
+var (
+	BAD_ENTITY_ERROR = func(err error) error {
+		return errorx.New(http.StatusUnprocessableEntity, BAD_ENTITY_ERROR_CODE, "请求参数错误", "Common", err)
+	}
 
-func Unauthorized(msg string) error {
-	return errorx.New(401, 40001, msg, "Common", nil)
-}
-
-func InternalServerError(msg string, cause error) error {
-	return errorx.New(500, 50001, msg, "Common", cause)
-}
-
-func NewError(httpCode int, code int, msg string, err error) error {
-	return errorx.New(httpCode, code, msg, "common", err)
-}
+	UNAUTHORIED_ERROR = func(err error) error {
+		return errorx.New(http.StatusUnauthorized, UNAUTHORIED_ERROR_CODE, "Authorization错误", "Common", err)
+	}
+)

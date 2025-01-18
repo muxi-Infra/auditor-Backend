@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./deploy/config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro  # 配置文件挂载
+      - ./deploy/db/PrometheusData:/prometheus  # 将当前目录下的 PrometheusData 文件夹挂载到容器中的 /prometheus 文件夹
+    user: root  # 让容器以 root 用户运行
+    environment:
+      TZ: Asia/Shanghai  # 设置时区为上海时间
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"  # 指定配置文件路径
+      - "--storage.tsdb.path=/prometheus"  # 指定数据存储路径
+      - "--web.enable-lifecycle"  # 可选：启用动态重载配置的 API
+      - "--log.level=debug"

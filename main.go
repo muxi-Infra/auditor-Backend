@@ -6,9 +6,11 @@ import (
 )
 
 func main() {
+
 	//TODO,改为从环境变量读取
 	app := InitWebServer("./config/config.yaml")
 	app.Run()
+
 }
 
 type App struct {
@@ -25,5 +27,8 @@ func NewApp(r *gin.Engine, c *conf.AppConf) *App {
 
 // 启动
 func (a *App) Run() {
-	a.r.Run(a.c.Addr)
+	err := a.r.Run(a.c.Addr)
+	if err != nil {
+		panic(err)
+	}
 }

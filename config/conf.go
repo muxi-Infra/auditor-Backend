@@ -14,7 +14,7 @@ type JWTConfig struct {
 }
 
 type DBConfig struct {
-	Addr string `yaml:"addr"`
+	Dsn string `yaml:"dsn"`
 }
 
 type CacheConfig struct {
@@ -24,16 +24,39 @@ type CacheConfig struct {
 
 type OAuthConfig struct {
 	Addr         string `yaml:"addr"`
-	ClientID     string `yaml:"client_id"`
-	ClientSecret string `yaml:"client_secret"`
+	ClientID     string `yaml:"clientId"`
+	ClientSecret string `yaml:"clientSecret"`
 }
 
 type LogConfig struct {
 	Path       string `yaml:"path"`
-	MaxSize    int    `yaml:"max_size"`    // 每个日志文件的最大大小，单位：MB
-	MaxBackups int    `yaml:"max_backups"` // 保留旧日志文件的最大个数
-	MaxAge     int    `yaml:"max_age"`     // 保留旧日志文件的最大天数
-	Compress   int    `yaml:"compress"`    // 是否压缩旧的日志文件
+	MaxSize    int    `yaml:"maxSize"`    // 每个日志文件的最大大小，单位：MB
+	MaxBackups int    `yaml:"maxBackups"` // 保留旧日志文件的最大个数
+	MaxAge     int    `yaml:"maxAge"`     // 保留旧日志文件的最大天数
+	Compress   int    `yaml:"compress"`   // 是否压缩旧的日志文件
+}
+
+type PrometheusConfig struct {
+	Namespace string `yaml:"namespace"` //项目名称
+
+	RouterCounter struct {
+		Name string `yaml:"name"`
+		Help string `yaml:"help"`
+	} `yaml:"routerCounter"`
+
+	ActiveConnections struct {
+		Name string `yaml:"name"`
+		Help string `yaml:"help"`
+	} `yaml:"activeConnections"`
+
+	DurationTime struct {
+		Name string `yaml:"name"`
+		Help string `yaml:"help"`
+	} `yaml:"durationTime"`
+}
+
+type MiddlewareConf struct {
+	AllowedOrigins []string `yaml:"allowedOrigins"`
 }
 
 func NewAppConf(s *viperx.VipperSetting) *AppConf {
@@ -80,6 +103,7 @@ func NewCacheConf(s *viperx.VipperSetting) *CacheConfig {
 	}
 	return cacheConf
 }
+
 func NewLogConf(s *viperx.VipperSetting) *LogConfig {
 	var logConf = &LogConfig{}
 	err := s.ReadSection("log", logConf)
@@ -87,4 +111,22 @@ func NewLogConf(s *viperx.VipperSetting) *LogConfig {
 		return nil
 	}
 	return logConf
+}
+
+func NewPrometheusConf(s *viperx.VipperSetting) *PrometheusConfig {
+	var prometheusConf = &PrometheusConfig{}
+	err := s.ReadSection("prometheus", prometheusConf)
+	if err != nil {
+		return nil
+	}
+	return prometheusConf
+}
+
+func NewMiddleWareConf(s *viperx.VipperSetting) *MiddlewareConf {
+	var middlewareConf = &MiddlewareConf{}
+	err := s.ReadSection("middleware", middlewareConf)
+	if err != nil {
+		return nil
+	}
+	return middlewareConf
 }
