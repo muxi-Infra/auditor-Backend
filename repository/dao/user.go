@@ -2,7 +2,7 @@ package dao
 
 import (
 	"context"
-
+	"errors"
 	"gorm.io/gorm"
 	"muxi_auditor/repository/model"
 )
@@ -53,4 +53,15 @@ func (d *UserDAO) List(ctx context.Context) ([]model.User, error) {
 		return nil, err
 	}
 	return users, nil
+}
+func (d *UserDAO) FindByEmail(ctx context.Context, email string) (*model.User, error) {
+	var user model.User
+	err := d.DB.WithContext(ctx).Where("email = ?", email).First(&user).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &user, nil
 }

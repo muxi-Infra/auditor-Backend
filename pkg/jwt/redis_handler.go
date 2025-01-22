@@ -14,7 +14,7 @@ const BASENAME = "muxiAuthor:users:ssid:"
 // RedisJWTHandler 实现了处理 JWT 的接口，并使用 Redis 进行支持
 type RedisJWTHandler struct {
 	cmd redis.Cmdable // Redis 命令接口，用于与 Redis 进行交互
-	jwt *JWT
+	Jwt *JWT
 }
 
 // NewRedisJWTHandler 创建并返回一个新的 RedisJWTHandler 实例
@@ -22,7 +22,7 @@ func NewRedisJWTHandler(cmd *redis.Client, conf *config.JWTConfig) *RedisJWTHand
 
 	return &RedisJWTHandler{
 		cmd: cmd, //redis实体
-		jwt: NewJWT(time.Duration(conf.Timeout), conf.SecretKey),
+		Jwt: NewJWT(time.Duration(conf.Timeout), conf.SecretKey),
 	}
 }
 
@@ -49,7 +49,7 @@ func (r *RedisJWTHandler) ParseToken(ctx *gin.Context) (UserClaims, error) {
 		return UserClaims{}, errors.New("请求头格式错误!")
 	}
 	//解析Token
-	uc, err := r.jwt.ParseToken(segs[1])
+	uc, err := r.Jwt.ParseToken(segs[1])
 	if err != nil {
 		return UserClaims{}, err
 	}
@@ -64,7 +64,7 @@ func (r *RedisJWTHandler) ParseToken(ctx *gin.Context) (UserClaims, error) {
 
 // SetJWTToken 生成并设置用户的 JWT
 func (r *RedisJWTHandler) SetJWTToken(ctx *gin.Context, uid uint, name string) error {
-	tokenStr, err := r.jwt.SetJWTToken(uid, name)
+	tokenStr, err := r.Jwt.SetJWTToken(uid, name)
 	if err != nil {
 		return err
 	}
