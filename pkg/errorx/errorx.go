@@ -30,7 +30,7 @@ func (e *CustomError) Error() string {
 // New 创建新的 CustomError
 func New(httpCode int, code int, message string, category string, cause error) error {
 	// 获取调用栈信息
-	file, line, function := getCallerInfo(2)
+	file, line, function := getCallerInfo(3)
 	return &CustomError{
 		HttpCode: httpCode,
 		Code:     code,
@@ -45,7 +45,7 @@ func New(httpCode int, code int, message string, category string, cause error) e
 
 // getCallerInfo 获取调用信息
 func getCallerInfo(skip int) (string, int, string) {
-	// skip: 调用栈层级，1 表示当前函数，2 表示上层调用函数
+	// skip: 调用栈层级，1 表示当前函数，2 表示上层调用函数 3表示上上级函数
 	pc, file, line, ok := runtime.Caller(skip)
 	if !ok {
 		return "unknown", 0, "unknown"
