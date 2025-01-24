@@ -7,6 +7,9 @@ import (
 	"net/http"
 )
 
+const RESP_CTX = "ginx_resp"
+const UC_CTX = "ginx_user"
+
 // ctx表示上下文,req表示请求结构体,Resp表示响应结构体(这里全部填response.Response),UserClaims表示用户信息
 func WrapClaimsAndReq[Req any, UserClaims any, Resp any](fn func(*gin.Context, Req, UserClaims) (Resp, error)) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
@@ -14,14 +17,23 @@ func WrapClaimsAndReq[Req any, UserClaims any, Resp any](fn func(*gin.Context, R
 		var req Req
 		err := bind(ctx, req)
 		if err != nil {
-			ctx.Set("err", err)
+			ctx.Error(err)
+			return
 		}
-		//调用函数
-		res, err := fn(ctx, req, getClaims[UserClaims](ctx))
+
+		//获取uc参数
+		uc, err := GetClaims[UserClaims](ctx)
 		if err != nil {
-			ctx.Set("err", err)
+			ctx.Error(err)
+			return
+		}
+
+		//执行函数
+		res, err := fn(ctx, req, uc)
+		if err != nil {
+			ctx.Error(err)
 		} else {
-			ctx.Set("resp", res)
+			ctx.Set(RESP_CTX, res)
 		}
 
 	}
@@ -35,15 +47,17 @@ func WrapReq[Req any, Resp any](fn func(*gin.Context, Req) (Resp, error)) gin.Ha
 		var req Req
 		err := bind(ctx, req)
 		if err != nil {
-			ctx.Set("err", err)
+			ctx.Error(err)
+			return
 		}
 
 		// 调用业务逻辑函数
 		res, err := fn(ctx, req)
 		if err != nil {
-			ctx.Set("err", err)
+			ctx.Error(err)
+			return
 		} else {
-			ctx.Set("resp", res)
+			ctx.Set(RESP_CTX, res)
 		}
 	}
 }
@@ -54,9 +68,10 @@ func Wrap[Resp any](fn func(*gin.Context) (Resp, error)) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		res, err := fn(ctx)
 		if err != nil {
-			ctx.Set("err", err)
+			ctx.Error(err)
+			return
 		} else {
-			ctx.Set("resp", res)
+			ctx.Set(RESP_CTX, res)
 		}
 	}
 }
@@ -65,11 +80,19 @@ func Wrap[Resp any](fn func(*gin.Context) (Resp, error)) gin.HandlerFunc {
 // ctx表示上下文,Resp表示响应结构体(这里全部填response.Response),UserClaims表示用户信息
 func WrapClaims[UserClaims any, Resp any](fn func(*gin.Context, UserClaims) (Resp, error)) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		res, err := fn(ctx, getClaims[UserClaims](ctx))
+		//获取uc参数
+		uc, err := GetClaims[UserClaims](ctx)
 		if err != nil {
-			ctx.Set("err", err)
+			ctx.Error(err)
+			return
+		}
+		//执行函数
+		res, err := fn(ctx, uc)
+		if err != nil {
+			ctx.Error(err)
+			return
 		} else {
-			ctx.Set("resp", res)
+			ctx.Set(RESP_CTX, res)
 		}
 	}
 }
@@ -92,20 +115,33 @@ func bind(ctx *gin.Context, req any) error {
 }
 
 // 获取Claims通用函数
-func getClaims[UserClaims any](ctx *gin.Context) (claims UserClaims) {
-	rawVal, ok := ctx.Get("user")
+func GetClaims[UserClaims any](ctx *gin.Context) (claims UserClaims, err error) {
+	rawVal, ok := ctx.Get(UC_CTX)
 	if !ok {
-		ctx.Set("err", api_errors.BAD_ENTITY_ERROR(errors.New("从上下文获取userClaims失败")))
-		ctx.Abort()
-		return
+		return claims, api_errors.BAD_ENTITY_ERROR(errors.New("从上下文获取userClaims失败"))
 	}
 
 	// 注意，这里要求放进去 ctx 的不能是*UserClaims，这是常见的一个错误
 	claims, ok = rawVal.(UserClaims)
 	if !ok {
-		ctx.Set("err", api_errors.BAD_ENTITY_ERROR(errors.New("userClaims类型断言失败了")))
-		ctx.Abort()
-		return
+		return claims, api_errors.BAD_ENTITY_ERROR(errors.New("userClaims类型断言失败了"))
 	}
-	return claims
+
+	return claims, nil
+}
+
+// 设置Claims通用函数
+func SetClaims[UserClaims any](ctx *gin.Context, claims UserClaims) {
+	ctx.Set(UC_CTX, claims)
+}
+
+func GetResp[Resp any](ctx *gin.Context) Resp {
+	var resp Resp
+	respVal, ok := ctx.Get(RESP_CTX)
+	if ok {
+		if resp, ok = respVal.(Resp); ok {
+			return resp
+		}
+	}
+	return resp
 }
