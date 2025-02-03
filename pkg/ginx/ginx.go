@@ -13,9 +13,14 @@ const UC_CTX = "ginx_user"
 // ctx表示上下文,req表示请求结构体,Resp表示响应结构体(这里全部填response.Response),UserClaims表示用户信息
 func WrapClaimsAndReq[Req any, UserClaims any, Resp any](fn func(*gin.Context, Req, UserClaims) (Resp, error)) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+
+		//检查前置中间件是否存在错误,如果存在应当直接返回
+		if len(ctx.Errors) > 0 {
+			return
+		}
 		//解析请求
 		var req Req
-		err := bind(ctx, req)
+		err := bind(ctx, &req)
 		if err != nil {
 			ctx.Error(err)
 			return
@@ -43,9 +48,13 @@ func WrapClaimsAndReq[Req any, UserClaims any, Resp any](fn func(*gin.Context, R
 // ctx表示上下文,req表示请求结构体,Resp表示响应结构体(这里全部填response.Response)
 func WrapReq[Req any, Resp any](fn func(*gin.Context, Req) (Resp, error)) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		//检查前置中间件是否存在错误,如果存在应当直接返回
+		if len(ctx.Errors) > 0 {
+			return
+		}
 		//解析参数
 		var req Req
-		err := bind(ctx, req)
+		err := bind(ctx, &req)
 		if err != nil {
 			ctx.Error(err)
 			return
@@ -66,6 +75,10 @@ func WrapReq[Req any, Resp any](fn func(*gin.Context, Req) (Resp, error)) gin.Ha
 // ctx表示上下文,Resp表示响应结构体(这里全部填response.Response)
 func Wrap[Resp any](fn func(*gin.Context) (Resp, error)) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		//检查前置中间件是否存在错误,如果存在应当直接返回
+		if len(ctx.Errors) > 0 {
+			return
+		}
 		res, err := fn(ctx)
 		if err != nil {
 			ctx.Error(err)
@@ -80,6 +93,10 @@ func Wrap[Resp any](fn func(*gin.Context) (Resp, error)) gin.HandlerFunc {
 // ctx表示上下文,Resp表示响应结构体(这里全部填response.Response),UserClaims表示用户信息
 func WrapClaims[UserClaims any, Resp any](fn func(*gin.Context, UserClaims) (Resp, error)) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		//检查前置中间件是否存在错误,如果存在应当直接返回
+		if len(ctx.Errors) > 0 {
+			return
+		}
 		//获取uc参数
 		uc, err := GetClaims[UserClaims](ctx)
 		if err != nil {
@@ -102,9 +119,9 @@ func bind(ctx *gin.Context, req any) error {
 	var err error
 	// 根据请求方法选择合适的绑定方式
 	if ctx.Request.Method == http.MethodGet {
-		err = ctx.ShouldBindQuery(&req) // 处理GET请求的查询参数
+		err = ctx.ShouldBindQuery(req) // 处理GET请求的查询参数
 	} else {
-		err = ctx.ShouldBind(&req) // 处理POST、PUT等请求的请求体数据
+		err = ctx.ShouldBind(req) // 处理POST、PUT等请求的请求体数据
 	}
 
 	if err != nil {

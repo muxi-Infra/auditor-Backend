@@ -2,7 +2,9 @@ package service
 
 import (
 	"context"
+	"github.com/gin-gonic/gin"
 	"muxi_auditor/api/errors"
+	"muxi_auditor/api/request"
 	"muxi_auditor/pkg/jwt"
 	"muxi_auditor/repository/dao"
 	"muxi_auditor/repository/model"
@@ -48,4 +50,22 @@ func (s *AuthService) Register(ctx context.Context, email string, username strin
 		return "", err
 	}
 	return token, nil
+}
+
+func (s *AuthService) Logout(ctx *gin.Context) error {
+	err := s.redisJwtHandler.ClearToken(ctx)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func (s *AuthService) UpdateMyInfo(ctx context.Context, req request.UpdateUserReq) error {
+	var user model.User
+	user.Email = req.Email
+	user.Name = req.Name
+	err := s.userDAO.Update(ctx, &user)
+	if err != nil {
+		return err
+	}
+	return nil
 }

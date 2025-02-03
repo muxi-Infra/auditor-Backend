@@ -2,6 +2,8 @@ package controller
 
 import (
 	"context"
+	"muxi_auditor/pkg/ginx"
+	"muxi_auditor/pkg/jwt"
 	//"errors"
 	"github.com/gin-gonic/gin"
 	//api_errors "muxi_auditor/api/errors"
@@ -19,6 +21,8 @@ type AuthController struct {
 type AuthService interface {
 	Login(ctx context.Context, email string) (string, string, error)
 	Register(ctx context.Context, email string, username string) (string, error)
+	Logout(ctx *gin.Context) error
+	UpdateMyInfo(ctx context.Context, req request.UpdateUserReq) error
 }
 
 func NewOAuthController(client *client.OAuthClient, service *service.AuthService) *AuthController {
@@ -86,5 +90,39 @@ func (c *AuthController) Register(ctx *gin.Context, req request.RegisterReq) (re
 			"username": req.Name,
 			"role":     1,
 		},
+	}, nil
+}
+func (c *AuthController) Logout(ctx *gin.Context) (response.Response, error) {
+	_, err := ginx.GetClaims[jwt.UserClaims](ctx)
+	if err != nil {
+		return response.Response{
+			Msg:  "",
+			Code: 40001,
+			Data: nil,
+		}, err
+	}
+	err = c.service.Logout(ctx)
+	if err != nil {
+		return response.Response{
+			Msg:  "",
+			Code: 40001,
+			Data: nil,
+		}, err
+	}
+	return response.Response{
+		Msg:  "成功登出",
+		Code: 200,
+		Data: nil,
+	}, nil
+}
+func (c *AuthController) UpdateMyInfo(ctx *gin.Context, req request.UpdateUserReq) (response.Response, error) {
+	err := c.service.UpdateMyInfo(ctx, req)
+	if err != nil {
+		return response.Response{}, err
+	}
+	return response.Response{
+		Msg:  "更新用户信息成功",
+		Code: 200,
+		Data: nil,
 	}, nil
 }

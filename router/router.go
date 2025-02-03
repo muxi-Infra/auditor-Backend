@@ -9,9 +9,11 @@ import (
 
 func NewRouter(
 	OAuth *controller.AuthController,
+	User *controller.UserController,
 	AuthMiddleware *middleware.AuthMiddleware,
 	corsMiddleware *middleware.CorsMiddleware,
 	loggerMiddleware *middleware.LoggerMiddleware,
+
 ) *gin.Engine {
 
 	r := gin.New()
@@ -26,6 +28,6 @@ func NewRouter(
 	g := r.Group("/api/v1")
 	//注册router
 	RegisterOAuthRoutes(g, AuthMiddleware.MiddlewareFunc(), OAuth)
-
+	UserRoutes(g, AuthMiddleware.MiddlewareFunc(), User)
 	return r
 }
