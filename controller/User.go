@@ -5,6 +5,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"muxi_auditor/api/request"
 	"muxi_auditor/api/response"
+	"muxi_auditor/pkg/ginx"
+	"muxi_auditor/pkg/jwt"
 	"muxi_auditor/repository/model"
 	"muxi_auditor/service"
 )
@@ -14,7 +16,7 @@ type UserController struct {
 }
 type UserService interface {
 	GetUsers(ctx context.Context, id int) ([]model.UserResponse, error)
-	UpdateUserRole(ctx context.Context, userId int, projectPermit []model.ProjectPermit) error
+	UpdateUserRole(ctx context.Context, userId int, projectPermit []model.ProjectPermit, role int) error
 }
 
 func NewUserController(service *service.UserService) *UserController {
@@ -31,7 +33,7 @@ func (uc *UserController) GetUsers(ctx *gin.Context, req request.GetUserReq) (re
 		}, nil
 
 	}
-	userResponse, err := uc.service.GetUsers(ctx, req.Projecet_id)
+	userResponse, err := uc.service.GetUsers(ctx, req.Project_id)
 	if err != nil {
 		return response.Response{}, err
 	}
@@ -43,14 +45,18 @@ func (uc *UserController) GetUsers(ctx *gin.Context, req request.GetUserReq) (re
 	}, nil
 }
 func (uc *UserController) UpdateUsers(ctx *gin.Context, req request.UpdateUserRoleReq) (response.Response, error) {
-	if req.Role != 2 {
+	token, err := ginx.GetClaims[jwt.UserClaims](ctx)
+	if err != nil {
+		return response.Response{}, err
+	}
+	if token.UserRule != 2 {
 		return response.Response{
 			Msg:  "无权限",
 			Code: 40001,
 			Data: nil,
 		}, nil
 	}
-	err := uc.service.UpdateUserRole(ctx, req.UserId, req.ProjectPermit)
+	err = uc.service.UpdateUserRole(ctx, req.UserId, req.ProjectPermit, req.Role)
 	if err != nil {
 		return response.Response{}, err
 	}

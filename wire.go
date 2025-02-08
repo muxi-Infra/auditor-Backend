@@ -38,8 +38,10 @@ func InitWebServer(confPath string) *App {
 		jwt.NewRedisJWTHandler,
 		service.NewAuthService,
 		service.NewUserService,
+		service.NewProjectService,
 		controller.NewOAuthController,
 		controller.NewUserController,
+		controller.NewProjectController,
 		client.NewOAuthClient,
 		router.NewRouter,
 

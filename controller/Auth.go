@@ -22,7 +22,7 @@ type AuthService interface {
 	Login(ctx context.Context, email string) (string, string, error)
 	Register(ctx context.Context, email string, username string) (string, error)
 	Logout(ctx *gin.Context) error
-	UpdateMyInfo(ctx context.Context, req request.UpdateUserReq) error
+	UpdateMyInfo(ctx context.Context, req request.UpdateUserReq, id uint) error
 }
 
 func NewOAuthController(client *client.OAuthClient, service *service.AuthService) *AuthController {
@@ -116,7 +116,15 @@ func (c *AuthController) Logout(ctx *gin.Context) (response.Response, error) {
 	}, nil
 }
 func (c *AuthController) UpdateMyInfo(ctx *gin.Context, req request.UpdateUserReq) (response.Response, error) {
-	err := c.service.UpdateMyInfo(ctx, req)
+	token, err := ginx.GetClaims[jwt.UserClaims](ctx)
+	if err != nil {
+		return response.Response{
+			Msg:  "Invalid or expired token",
+			Code: 40001,
+			Data: nil,
+		}, err
+	}
+	err = c.service.UpdateMyInfo(ctx, req, token.Uid)
 	if err != nil {
 		return response.Response{}, err
 	}

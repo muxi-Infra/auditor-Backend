@@ -44,7 +44,9 @@ func InitWebServer(confPath string) *App {
 	prometheusConfig := config.NewPrometheusConf(vipperSetting)
 	prometheus := ioc.InitPrometheus(prometheusConfig)
 	loggerMiddleware := middleware.NewLoggerMiddleware(logger, prometheus)
-	engine := router.NewRouter(authController, userController, authMiddleware, corsMiddleware, loggerMiddleware)
+	projectService := service.NewProjectService(userDAO, redisJWTHandler)
+	projectController := controller.NewProjectController(projectService)
+	engine := router.NewRouter(authController, userController, authMiddleware, corsMiddleware, loggerMiddleware, projectController)
 	appConf := config.NewAppConf(vipperSetting)
 	app := NewApp(engine, appConf)
 	return app

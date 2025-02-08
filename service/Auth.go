@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	merr "errors"
 	"github.com/gin-gonic/gin"
 	"muxi_auditor/api/errors"
 	"muxi_auditor/api/request"
@@ -28,7 +29,7 @@ func (s *AuthService) Login(ctx context.Context, email string) (string, string, 
 	if user == nil {
 		return "0", "", nil
 	}
-	token, err := s.redisJwtHandler.Jwt.SetJWTToken(user.ID, user.Name)
+	token, err := s.redisJwtHandler.Jwt.SetJWTToken(user.ID, user.Name, user.UserRole)
 	if err != nil {
 		return "", "", err
 	}
@@ -38,14 +39,15 @@ func (s *AuthService) Login(ctx context.Context, email string) (string, string, 
 }
 func (s *AuthService) Register(ctx context.Context, email string, username string) (string, error) {
 	user := model.User{
-		Email: email,
-		Name:  username,
+		Email:    email,
+		Name:     username,
+		UserRole: 1,
 	}
 	err := s.userDAO.Create(ctx, &user)
 	if err != nil {
 		return "", errors.LOGIN_ERROR(err)
 	}
-	token, err := s.redisJwtHandler.Jwt.SetJWTToken(user.ID, user.Name)
+	token, err := s.redisJwtHandler.Jwt.SetJWTToken(user.ID, user.Name, user.UserRole)
 	if err != nil {
 		return "", err
 	}
@@ -59,11 +61,23 @@ func (s *AuthService) Logout(ctx *gin.Context) error {
 	}
 	return nil
 }
-func (s *AuthService) UpdateMyInfo(ctx context.Context, req request.UpdateUserReq) error {
+func (s *AuthService) UpdateMyInfo(ctx context.Context, req request.UpdateUserReq, id uint) error {
+	if req.Email == "" || req.Name == "" {
+		return merr.New("email and name are required")
+	}
+
+	// Check if user exists
+	existingUser, err := s.userDAO.Read(ctx, id)
+	if err != nil {
+		return err
+	}
+	if existingUser == nil {
+		return merr.New("user not found")
+	}
 	var user model.User
 	user.Email = req.Email
 	user.Name = req.Name
-	err := s.userDAO.Update(ctx, &user)
+	err = s.userDAO.Update(ctx, &user)
 	if err != nil {
 		return err
 	}

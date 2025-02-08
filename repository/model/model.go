@@ -13,7 +13,11 @@ type User struct {
 type Project struct {
 	gorm.Model
 	ProjectName string `gorm:"column:project_name;not null"`
+	Logo        string `gorm:"column:logo;not null"`
+	AudioRule   string `gorm:"column:audio_rule;not null"`
 	Users       []User `gorm:"many2many:user_projects;"`
+	Items       []Item
+	Apikey      string `gorm:"column:apikey;not null"`
 }
 type UserProject struct {
 	UserID    uint `gorm:"primaryKey"`
@@ -31,4 +35,13 @@ type UserResponse struct {
 	Avatar        string          `json:"avatar"`
 	ProjectPermit []ProjectPermit `json:"project_permit"`
 	Role          int             `json:"role"`
+}
+type ProjectList struct {
+	ProjectId   uint   `json:"project_id"`
+	ProjectName string `json:"project_name"`
+}
+type Item struct {
+	gorm.Model
+	Status    int  `gorm:"column:status;not null"` //0:未审核1：通过2：否决
+	ProjectId uint `gorm:"column:project_id;not null"`
 }

@@ -63,8 +63,8 @@ func (r *RedisJWTHandler) ParseToken(ctx *gin.Context) (UserClaims, error) {
 }
 
 // SetJWTToken 生成并设置用户的 JWT
-func (r *RedisJWTHandler) SetJWTToken(ctx *gin.Context, uid uint, name string) error {
-	tokenStr, err := r.Jwt.SetJWTToken(uid, name)
+func (r *RedisJWTHandler) SetJWTToken(ctx *gin.Context, uid uint, name string, userRole int) error {
+	tokenStr, err := r.Jwt.SetJWTToken(uid, name, userRole)
 	if err != nil {
 		return err
 	}

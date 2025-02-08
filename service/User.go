@@ -17,7 +17,7 @@ func NewUserService(userDAO *dao.UserDAO, redisJwtHandler *jwt.RedisJWTHandler) 
 }
 
 func (userService *UserService) GetUsers(ctx context.Context, id int) ([]model.UserResponse, error) {
-	users, err := userService.userDAO.FindByID(ctx, id)
+	users, err := userService.userDAO.FindByProjectID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -27,8 +27,8 @@ func (userService *UserService) GetUsers(ctx context.Context, id int) ([]model.U
 	}
 	return userResponse, nil
 }
-func (userService *UserService) UpdateUserRole(ctx context.Context, userId int, projectPermit []model.ProjectPermit) error {
-	err := userService.userDAO.ChangeProjectRole(ctx, userId, projectPermit)
+func (userService *UserService) UpdateUserRole(ctx context.Context, userId int, projectPermit []model.ProjectPermit, role int) error {
+	err := userService.userDAO.ChangeProjectRole(ctx, userId, projectPermit, role)
 	if err != nil {
 		return err
 	}
