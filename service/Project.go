@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"muxi_auditor/api/response"
 	"muxi_auditor/pkg/jwt"
 	"muxi_auditor/repository/dao"
@@ -15,6 +16,10 @@ type ProjectService struct {
 type Count struct {
 	AllCount     int
 	CurrentCount int
+}
+
+var LogoMap = map[string]string{
+	"logo1": "url1",
 }
 
 func NewProjectService(userDAO *dao.UserDAO, redisJwtHandler *jwt.RedisJWTHandler) *ProjectService {
@@ -38,8 +43,11 @@ func (s *ProjectService) Create(ctx context.Context, name string, logo string, a
 	}
 	return nil
 }
-func (s *ProjectService) GetProjectList(ctx context.Context) ([]model.ProjectList, error) {
-	list, err := s.userDAO.GetProjectList(ctx)
+func (s *ProjectService) GetProjectList(ctx context.Context, logo string) ([]model.ProjectList, error) {
+	if _, ok := LogoMap[logo]; !ok {
+		return nil, errors.New("不合法的Logo")
+	}
+	list, err := s.userDAO.GetProjectList(ctx, logo)
 	if err != nil {
 		return nil, err
 	}

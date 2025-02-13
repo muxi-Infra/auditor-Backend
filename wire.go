@@ -39,9 +39,11 @@ func InitWebServer(confPath string) *App {
 		service.NewAuthService,
 		service.NewUserService,
 		service.NewProjectService,
+		service.NewItemService,
 		controller.NewOAuthController,
 		controller.NewUserController,
 		controller.NewProjectController,
+		controller.NewItemController,
 		client.NewOAuthClient,
 		router.NewRouter,
 

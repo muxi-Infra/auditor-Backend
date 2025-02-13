@@ -10,6 +10,7 @@ import (
 func NewRouter(
 	OAuth *controller.AuthController,
 	User *controller.UserController,
+	Item *controller.ItemController,
 	AuthMiddleware *middleware.AuthMiddleware,
 	corsMiddleware *middleware.CorsMiddleware,
 	loggerMiddleware *middleware.LoggerMiddleware,
@@ -31,5 +32,6 @@ func NewRouter(
 	RegisterOAuthRoutes(g, AuthMiddleware.MiddlewareFunc(), OAuth)
 	UserRoutes(g, AuthMiddleware.MiddlewareFunc(), User)
 	RegisterProjectRoutes(g, AuthMiddleware.MiddlewareFunc(), Project)
+	ItemRoutes(g, AuthMiddleware.MiddlewareFunc(), Item)
 	return r
 }

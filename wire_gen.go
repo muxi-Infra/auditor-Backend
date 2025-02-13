@@ -38,6 +38,8 @@ func InitWebServer(confPath string) *App {
 	authController := controller.NewOAuthController(oAuthClient, authService)
 	userService := service.NewUserService(userDAO, redisJWTHandler)
 	userController := controller.NewUserController(userService)
+	itemService := service.NewItemService(userDAO, redisJWTHandler)
+	itemController := controller.NewItemController(itemService)
 	authMiddleware := middleware.NewAuthMiddleware(redisJWTHandler)
 	middlewareConf := config.NewMiddleWareConf(vipperSetting)
 	corsMiddleware := middleware.NewCorsMiddleware(middlewareConf)
@@ -46,7 +48,7 @@ func InitWebServer(confPath string) *App {
 	loggerMiddleware := middleware.NewLoggerMiddleware(logger, prometheus)
 	projectService := service.NewProjectService(userDAO, redisJWTHandler)
 	projectController := controller.NewProjectController(projectService)
-	engine := router.NewRouter(authController, userController, authMiddleware, corsMiddleware, loggerMiddleware, projectController)
+	engine := router.NewRouter(authController, userController, itemController, authMiddleware, corsMiddleware, loggerMiddleware, projectController)
 	appConf := config.NewAppConf(vipperSetting)
 	app := NewApp(engine, appConf)
 	return app

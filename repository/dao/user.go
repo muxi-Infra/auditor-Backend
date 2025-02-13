@@ -4,10 +4,11 @@ import (
 	"context"
 	"errors"
 	"gorm.io/gorm"
+	"muxi_auditor/api/request"
 	"muxi_auditor/api/response"
 	"muxi_auditor/pkg/apikey"
 	"muxi_auditor/repository/model"
-	"strconv"
+	"time"
 )
 
 type UserDAO struct {
@@ -128,9 +129,9 @@ func (d *UserDAO) ChangeProjectRole(ctx context.Context, userId int, projectPerm
 	}
 	return nil
 }
-func (d *UserDAO) GetProjectList(ctx context.Context) ([]model.ProjectList, error) {
+func (d *UserDAO) GetProjectList(ctx context.Context, logo string) ([]model.ProjectList, error) {
 	var projects []model.Project
-	if err := d.DB.WithContext(ctx).Find(&projects).Error; err != nil {
+	if err := d.DB.WithContext(ctx).Where("logo = ?", logo).Find(&projects).Error; err != nil {
 		return nil, errors.New("查询数据库错误")
 	}
 	var projectlist []model.ProjectList
@@ -146,7 +147,7 @@ func (d *UserDAO) CreateProject(ctx context.Context, project *model.Project) err
 	if err := d.DB.WithContext(ctx).Create(project).Error; err != nil {
 		return errors.New("创建项目失败")
 	}
-	key, err := apikey.GenerateAPIKey(strconv.Itoa(int(project.ID)))
+	key, err := apikey.GenerateAPIKey(project.ID)
 	if err != nil {
 		return errors.New("生成apikey失败")
 	}
@@ -188,4 +189,135 @@ func (d *UserDAO) GetProjectDetails(ctx context.Context, id uint) (response.GetD
 		Members:       users,
 	}
 	return re, nil
+}
+func (d *UserDAO) Select(ctx context.Context, req request.SelectReq) ([]model.Project, error) {
+	query := d.DB.WithContext(ctx).Model(&model.Project{})
+
+	if req.ProjectID != 0 {
+		query = query.Where("id = ?", req.ProjectID)
+	}
+	if req.Tag != "" {
+		query = query.Where("JSON_CONTAINS(tag, ?)", "\""+req.Tag+"\"")
+	}
+	if req.Status != "" {
+		query = query.Where("status = ?", req.Status)
+	}
+	if req.Auditor != "" {
+		query = query.Where("auditor = ?", req.Auditor)
+	}
+	if req.Query != "" {
+		query = query.Where("project_name LIKE ?", "%"+req.Query+"%")
+	}
+	var projects []model.Project
+	if err := query.Find(&projects).Error; err != nil {
+		return nil, errors.New("查询 Project 失败")
+	}
+
+	if len(projects) == 0 {
+		return nil, nil
+	}
+
+	for i := range projects {
+		var items []model.Item
+		err := d.DB.
+			Where("project_id = ?", projects[i].ID).
+			Order("created_at DESC").
+			Offset((req.Page-1)*req.PageSize).Limit(req.PageSize).
+			Preload("Comments", func(db *gorm.DB) *gorm.DB {
+				return db.Order("created_at DESC").Limit(2)
+			}).
+			Find(&items).Error
+		if err != nil {
+			return nil, errors.New("查询 Items 失败")
+		}
+		projects[i].Items = items
+	}
+
+	return projects, nil
+}
+func (d *UserDAO) AuditItem(ctx context.Context, req request.AuditReq, id uint) error {
+	var item model.Item
+	err := d.DB.WithContext(ctx).Where("project_id = ? AND item_id = ?", req.ProjectID, req.ItemId).First(&item).Error
+	if err != nil {
+		return err
+	}
+	err = d.DB.WithContext(ctx).
+		Model(&model.Item{}).
+		Where("project_id = ? AND item_id = ?", req.ProjectID, req.ItemId).
+		Updates(map[string]interface{}{
+			"status": req.Status,
+			"reason": req.Reason,
+		}).Error
+
+	if err != nil {
+		return err
+	}
+	var history = model.History{
+		UserID: id,
+		ItemId: req.ItemId,
+	}
+
+	if err := d.DB.WithContext(ctx).Create(history).Error; err != nil {
+		return err
+	}
+	return nil
+}
+func (d *UserDAO) SearchHistory(ctx context.Context, items *[]model.Item, id uint) error {
+	var user model.User
+	err := d.DB.WithContext(ctx).Preload("History").Where("id = ?", id).First(&user).Error
+	if err != nil {
+		return errors.New("未找到用户")
+	}
+	var itemIds []uint
+	for _, h := range user.History {
+		itemIds = append(itemIds, h.ItemId)
+	}
+	err = d.DB.WithContext(ctx).Where("id in ?", itemIds).Order("created_at DESC").Preload("Comments", func(db *gorm.DB) *gorm.DB {
+		return db.Order("created_at DESC").Limit(2)
+	}).Find(items).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func (d *UserDAO) Upload(ctx context.Context, req request.UploadReq, id uint, time time.Time) error {
+	var project model.Project
+	err := d.DB.WithContext(ctx).Where("project_id = ?", id).First(&project).Error
+	if err != nil {
+		return err
+	}
+	var item = model.Item{
+		Status:     0,
+		ProjectId:  project.ID,
+		Auditor:    req.Auditor,
+		Author:     req.Author,
+		Tags:       req.Tags,
+		PublicTime: time,
+		Content:    req.Content.Topic.Content,
+		Title:      req.Content.Topic.Title,
+		Pictures:   req.Content.Topic.Pictures,
+	}
+	err = d.DB.WithContext(ctx).Create(&item).Error
+	if err != nil {
+		return err
+	}
+	var comment1 = model.Comment{
+		Content:  req.Content.LastComment.Content,
+		Pictures: req.Content.LastComment.Pictures,
+		ItemId:   item.ID,
+	}
+	var comment2 = model.Comment{
+		Content:  req.Content.NextComment.Content,
+		Pictures: req.Content.NextComment.Pictures,
+		ItemId:   item.ID,
+	}
+	err = d.DB.WithContext(ctx).Create(&comment1).Error
+	if err != nil {
+		return err
+	}
+	err = d.DB.WithContext(ctx).Create(&comment2).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }

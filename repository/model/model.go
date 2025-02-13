@@ -1,6 +1,9 @@
 package model
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+	"time"
+)
 
 type User struct {
 	gorm.Model
@@ -9,6 +12,7 @@ type User struct {
 	Avatar   string    `gorm:"column:avatar"`
 	UserRole int       `gorm:"column:user_role"`
 	Projects []Project `gorm:"many2many:user_projects;"`
+	History  []History `gorm:"foreignKey:UserID"`
 }
 type Project struct {
 	gorm.Model
@@ -16,7 +20,7 @@ type Project struct {
 	Logo        string `gorm:"column:logo;not null"`
 	AudioRule   string `gorm:"column:audio_rule;not null"`
 	Users       []User `gorm:"many2many:user_projects;"`
-	Items       []Item
+	Items       []Item `gorm:"foreignKey:ProjectId"`
 	Apikey      string `gorm:"column:apikey;not null"`
 }
 type UserProject struct {
@@ -42,6 +46,27 @@ type ProjectList struct {
 }
 type Item struct {
 	gorm.Model
-	Status    int  `gorm:"column:status;not null"` //0:未审核1：通过2：否决
-	ProjectId uint `gorm:"column:project_id;not null"`
+	Status     int       `gorm:"column:status;not null"`
+	ProjectId  uint      `gorm:"column:project_id;not null"`
+	Author     string    `gorm:"column:author;not null"`
+	Tags       []string  `gorm:"type:json"`
+	PublicTime time.Time `gorm:"column:public_time;not null"`
+	Content    string    `gorm:"column:content;not null"`
+	Title      string    `gorm:"column:title;not null"`
+	Comments   []Comment `gorm:"foreignKey:ItemId"`
+	Auditor    string    `gorm:"column:auditor;not null"`
+	Reason     string    `gorm:"column:reason"`
+	Pictures   []string  `gorm:"type:json"`
+}
+
+type Comment struct {
+	gorm.Model
+	Content  string   `gorm:"column:content;not null"`
+	Pictures []string `gorm:"type:json"`
+	ItemId   uint     `gorm:"not null;index"`
+}
+type History struct {
+	gorm.Model
+	UserID uint `gorm:"index"`
+	ItemId uint `gorm:"index"`
 }

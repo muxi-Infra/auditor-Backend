@@ -15,7 +15,7 @@ type ProjectController struct {
 	service ProjectService
 }
 type ProjectService interface {
-	GetProjectList(ctx context.Context) ([]model.ProjectList, error)
+	GetProjectList(ctx context.Context, logo string) ([]model.ProjectList, error)
 	Create(ctx context.Context, name string, logo string, audioRule string, ids []uint) error
 	Detail(ctx context.Context, id uint) (response.GetDetailResp, error)
 }
@@ -26,7 +26,8 @@ func NewProjectController(service *service.ProjectService) *ProjectController {
 	}
 }
 func (ctrl *ProjectController) GetProjectList(ctx *gin.Context) (response.Response, error) {
-	list, err := ctrl.service.GetProjectList(ctx)
+	logo := ctx.GetHeader("X-Header-Param")
+	list, err := ctrl.service.GetProjectList(ctx, logo)
 	if err != nil {
 		return response.Response{
 			Code: 400,
