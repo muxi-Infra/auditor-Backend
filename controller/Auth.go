@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"muxi_auditor/config"
 	"muxi_auditor/pkg/ginx"
 	"muxi_auditor/pkg/jwt"
 	//"errors"
@@ -13,16 +14,24 @@ import (
 	"muxi_auditor/service"
 )
 
+type UserInfo struct {
+	Token string `json:"token"`
+	Name  string `json:"name"`
+	Role  int    `json:"role"`
+	Email string `json:"email"`
+}
 type AuthController struct {
 	client  *client.OAuthClient
 	service AuthService
+	qi      *config.QiNiuYunConfig
 }
 
 type AuthService interface {
-	Login(ctx context.Context, email string) (string, string, error)
+	Login(ctx context.Context, email string) (string, string, int, error)
 	Register(ctx context.Context, email string, username string) (string, error)
 	Logout(ctx *gin.Context) error
 	UpdateMyInfo(ctx context.Context, req request.UpdateUserReq, id uint) error
+	GetQiToken(ctx context.Context) (string, error)
 }
 
 func NewOAuthController(client *client.OAuthClient, service *service.AuthService) *AuthController {
@@ -43,19 +52,19 @@ func (c *AuthController) Login(ctx *gin.Context, req request.LoginReq) (response
 	if err != nil {
 		return response.Response{}, err
 	}
-	role, token, err := c.service.Login(ctx, email)
+	username, token, role, err := c.service.Login(ctx, email)
 	if err != nil {
 		return response.Response{}, err
 	}
-	if role == "0" {
+	if role == 0 {
 		return response.Response{
 			Msg:  "",
 			Code: 20001,
-			Data: map[string]interface{}{
-				"token":    "",
-				"username": "",
-				"role":     0,
-				"email":    email,
+			Data: UserInfo{
+				Token: "",
+				Name:  username,
+				Role:  0,
+				Email: email,
 			},
 		}, nil
 	}
@@ -63,10 +72,11 @@ func (c *AuthController) Login(ctx *gin.Context, req request.LoginReq) (response
 	return response.Response{
 		Msg:  "",
 		Code: 200,
-		Data: map[string]interface{}{
-			"token":    token,
-			"username": role,
-			"role":     1,
+		Data: UserInfo{
+			Token: token,
+			Name:  username,
+			Role:  role,
+			Email: email,
 		},
 	}, nil
 	//返回
@@ -85,10 +95,10 @@ func (c *AuthController) Register(ctx *gin.Context, req request.RegisterReq) (re
 	return response.Response{
 		Msg:  "",
 		Code: 200,
-		Data: map[string]interface{}{
-			"token":    token,
-			"username": req.Name,
-			"role":     1,
+		Data: UserInfo{
+			Token: token,
+			Name:  req.Name,
+			Role:  0,
 		},
 	}, nil
 }
@@ -133,4 +143,19 @@ func (c *AuthController) UpdateMyInfo(ctx *gin.Context, req request.UpdateUserRe
 		Code: 200,
 		Data: nil,
 	}, nil
+}
+func (c *AuthController) GetQiToken(ctx *gin.Context) (response.Response, error) {
+	token,err:=c.service.GetQiToken(ctx)
+	if err != nil {
+		return response.Response{
+			Code: 400,
+			Data: nil,
+			Msg: "获取图床token失败",
+		}, err
+	}
+	return response.Response{
+		Code: 200,
+		Data: token,
+		Msg:"获取成功",
+	},nil
 }

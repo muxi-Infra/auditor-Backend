@@ -36,8 +36,8 @@ func (d *UserDAO) Read(ctx context.Context, id uint) (*model.User, error) {
 }
 
 // 预计用不上
-func (d *UserDAO) Update(ctx context.Context, user *model.User) error {
-	if err := d.DB.WithContext(ctx).Save(user).Error; err != nil {
+func (d *UserDAO) Update(ctx context.Context, user *model.User, id uint) error {
+	if err := d.DB.WithContext(ctx).Where("id =?", id).Updates(user).Error; err != nil {
 		return err
 	}
 	return nil
@@ -69,7 +69,7 @@ func (d *UserDAO) FindByEmail(ctx context.Context, email string) (*model.User, e
 	}
 	return &user, nil
 }
-func (d *UserDAO) FindByProjectID(ctx context.Context, id int) ([]model.User, error) {
+func (d *UserDAO) FindByProjectID(ctx context.Context, id uint) ([]model.User, error) {
 	var users []model.User
 	err := d.DB.WithContext(ctx).Preload("Projects").Joins("JOIN user_projects ON user_projects.user_id = users.id").
 		Where("user_projects.project_id = ? AND user_projects.role = ?", id, 1).Find(&users).Error
@@ -113,35 +113,36 @@ func (d *UserDAO) GetResponse(ctx context.Context, users []model.User) ([]model.
 
 	return userResponses, nil
 }
-func (d *UserDAO) ChangeProjectRole(ctx context.Context, userId int, projectPermit []model.ProjectPermit, role int) error {
+func (d *UserDAO) PPFUserByid(ctx context.Context, id uint) (model.User, error) {
 	var user model.User
-	err := d.DB.WithContext(ctx).Preload("Projects").Where("user_id = ?", userId).First(&user).Error
+	err := d.DB.WithContext(ctx).Preload("Projects").Where("user_id = ?", id).First(&user).Error
 	if err != nil {
-		return errors.New("未找到该用户")
+		return model.User{}, errors.New("未找到该用户")
 	}
-	user.UserRole = role
+	return user, nil
+}
+
+func (d *UserDAO) ChangeProjectRole(ctx context.Context, user model.User, projectPermit []model.ProjectPermit) error {
+
 	var userProject model.UserProject
 	for _, project := range projectPermit {
 		userProject.Role = project.ProjectRole
 		userProject.UserID = user.ID
 		userProject.ProjectID = project.ProjectID
-		d.DB.WithContext(ctx).Save(&userProject)
+		err := d.DB.WithContext(ctx).Save(&userProject).Error
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
-func (d *UserDAO) GetProjectList(ctx context.Context, logo string) ([]model.ProjectList, error) {
+func (d *UserDAO) GetProjectList(ctx context.Context, logo string) ([]model.Project, error) {
 	var projects []model.Project
 	if err := d.DB.WithContext(ctx).Where("logo = ?", logo).Find(&projects).Error; err != nil {
 		return nil, errors.New("查询数据库错误")
 	}
-	var projectlist []model.ProjectList
-	for _, project := range projects {
-		projectlist = append(projectlist, model.ProjectList{
-			ProjectId:   project.ID,
-			ProjectName: project.ProjectName,
-		})
-	}
-	return projectlist, nil
+
+	return projects, nil
 }
 func (d *UserDAO) CreateProject(ctx context.Context, project *model.Project) error {
 	if err := d.DB.WithContext(ctx).Create(project).Error; err != nil {
@@ -262,6 +263,14 @@ func (d *UserDAO) AuditItem(ctx context.Context, req request.AuditReq, id uint) 
 	}
 	return nil
 }
+func (d *UserDAO) SelectItemById(ctx context.Context, id uint) (model.Item, error) {
+	var item model.Item
+	err := d.DB.WithContext(ctx).First(&item, id).Error
+	if err != nil {
+		return model.Item{}, errors.New("获取item失败")
+	}
+	return item, nil
+}
 func (d *UserDAO) SearchHistory(ctx context.Context, items *[]model.Item, id uint) error {
 	var user model.User
 	err := d.DB.WithContext(ctx).Preload("History").Where("id = ?", id).First(&user).Error
@@ -296,6 +305,8 @@ func (d *UserDAO) Upload(ctx context.Context, req request.UploadReq, id uint, ti
 		Content:    req.Content.Topic.Content,
 		Title:      req.Content.Topic.Title,
 		Pictures:   req.Content.Topic.Pictures,
+		HookUrl:    req.HookUrl,
+		HookId:     req.Id,
 	}
 	err = d.DB.WithContext(ctx).Create(&item).Error
 	if err != nil {

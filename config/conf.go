@@ -58,6 +58,12 @@ type PrometheusConfig struct {
 type MiddlewareConf struct {
 	AllowedOrigins []string `yaml:"allowedOrigins"`
 }
+type QiNiuYunConfig struct {
+	AccessKey string `yaml:"access_key"`
+	SecretKey string `yaml:"secret_key"`
+	Bucket    string `yaml:"bucket"`
+	Domain    string `yaml:"domain"`
+}
 
 func NewAppConf(s *viperx.VipperSetting) *AppConf {
 	var appConf = &AppConf{}
@@ -129,4 +135,12 @@ func NewMiddleWareConf(s *viperx.VipperSetting) *MiddlewareConf {
 		return nil
 	}
 	return middlewareConf
+}
+func NewQiniuConf(s *viperx.VipperSetting) *QiNiuYunConfig {
+	var qiniuConf = &QiNiuYunConfig{}
+	err := s.ReadSection("QiNiuYun", qiniuConf)
+	if err != nil {
+		return nil
+	}
+	return qiniuConf
 }

@@ -18,12 +18,12 @@ type UpdateUserReq struct {
 	Avatar string `json:"avatar"`
 }
 type GetUserReq struct {
-	Role       int `json:"role"`
-	Project_id int `json:"project_id"`
+	Role       int  `json:"role"`
+	Project_id uint `json:"project_id"`
 }
 type UpdateUserRoleReq struct {
 	Role          int                   `json:"role"`
-	UserId        int                   `json:"user_id"`
+	UserId        uint                  `json:"user_id"`
 	ProjectPermit []model.ProjectPermit `json:"project_permit"`
 }
 type CreateProject struct {

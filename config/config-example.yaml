@@ -51,3 +51,8 @@ middleware:
   allowedOrigins:
     - "http://localhost:3000"  # 允许跨域访问的来源地址，例如前端开发服务器地址
     - "https://auditor.muxixyz.com"     # 生产环境中允许的域名
+QiNiuYun:
+  AccessKey: "access-key" #七牛云的公钥
+  SecretKey: "secret-key" #七牛云的私钥
+  Bucket : "muxi-mini" #所创建七牛云对象存储的名称
+  Domain : "http://127.0.0.1:8080" #对象存储所绑定的七牛云的域名

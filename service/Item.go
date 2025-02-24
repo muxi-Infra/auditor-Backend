@@ -25,6 +25,12 @@ type Data struct {
 	Msg    string
 }
 
+var M = map[int]string{
+	0: "未审核",
+	1: "通过",
+	2: "不通过",
+}
+
 func NewItemService(userDAO *dao.UserDAO, redisJwtHandler *jwt.RedisJWTHandler) *ItemService {
 	return &ItemService{userDAO: userDAO, redisJwtHandler: redisJwtHandler}
 }
@@ -48,7 +54,41 @@ func (s *ItemService) Audit(ctx context.Context, req request.AuditReq, id uint) 
 	if err != nil {
 		return err
 	}
+	item, err := s.userDAO.SelectItemById(ctx, req.ItemId)
+	if err != nil {
+		return err
+	}
+	reqBody := response.Response{
+		Code: 200,
+		Msg:  "请求成功",
+		Data: Data{
+			Id:     item.HookId,
+			Status: M[item.Status],
+			Msg:    "操作成功",
+		},
+	}
+	body, err := json.Marshal(reqBody)
+	if err != nil {
+		return err
+	}
+
+	reqs, err := http.NewRequest("POST", item.HookUrl, bytes.NewBuffer(body))
+	if err != nil {
+		return err
+	}
+	reqs.Header.Set("Content-Type", "application/json")
+	client := &http.Client{}
+	resp, err := client.Do(reqs)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return errors.New("回调HookUrl失败")
+	}
+
 	return nil
+
 }
 func (s *ItemService) SearchHistory(ctx context.Context, id uint) ([]model.Item, error) {
 	var items []model.Item
@@ -72,34 +112,6 @@ func (s *ItemService) Upload(ctx context.Context, req request.UploadReq) error {
 	err = s.userDAO.Upload(ctx, req, projectID, publicTime)
 	if err != nil {
 		return err
-	}
-	reqBody := response.Response{
-		Code: 200,
-		Msg:  "请求成功",
-		Data: Data{
-			Id:     req.Id,
-			Status: "未审核",
-			Msg:    "操作成功",
-		},
-	}
-	body, err := json.Marshal(reqBody)
-	if err != nil {
-		return err
-	}
-
-	reqs, err := http.NewRequest("POST", req.HookUrl, bytes.NewBuffer(body))
-	if err != nil {
-		return err
-	}
-	reqs.Header.Set("Content-Type", "application/json")
-	client := &http.Client{}
-	resp, err := client.Do(reqs)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return errors.New("回调HookUrl失败")
 	}
 	return nil
 }

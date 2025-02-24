@@ -28,6 +28,7 @@ func InitWebServer(confPath string) *App {
 		config.NewCacheConf,
 		config.NewPrometheusConf,
 		config.NewMiddleWareConf,
+		config.NewQiniuConf,
 		// 初始化基础依赖
 		ioc.InitDB,
 		ioc.InitLogger,

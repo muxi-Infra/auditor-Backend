@@ -12,6 +12,7 @@ type OAuthController interface {
 	Register(g *gin.Context, req request.RegisterReq) (response.Response, error)
 	Logout(g *gin.Context) (response.Response, error)
 	UpdateMyInfo(g *gin.Context, req request.UpdateUserReq) (response.Response, error)
+	GetQiToken(g *gin.Context) (response.Response, error)
 }
 
 func RegisterOAuthRoutes(
@@ -25,4 +26,5 @@ func RegisterOAuthRoutes(
 	authGroup.POST("/register", ginx.WrapReq(c.Register))
 	authGroup.GET("/logout", authMiddleware, ginx.Wrap(c.Logout))
 	authGroup.POST("/updateMyInfo", authMiddleware, ginx.WrapReq(c.UpdateMyInfo))
+	authGroup.GET("/GetQiToken",authMiddleware,ginx.Wrap(c.GetQiToken))
 }

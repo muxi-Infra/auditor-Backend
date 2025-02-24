@@ -57,6 +57,8 @@ type Item struct {
 	Auditor    string    `gorm:"column:auditor;not null"`
 	Reason     string    `gorm:"column:reason"`
 	Pictures   []string  `gorm:"type:json"`
+	HookUrl    string    `gorm:"column:hook_url;not null"`
+	HookId     int       `gorm:"column:hook_id;not null"`
 }
 
 type Comment struct {
