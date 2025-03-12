@@ -33,7 +33,7 @@ func (userService *UserService) UpdateUserRole(ctx context.Context, userId uint,
 		return err
 	}
 	user.UserRole = role
-	err = userService.userDAO.Update(ctx, &user)
+	err = userService.userDAO.Update(ctx, &user, userId)
 	if err != nil {
 		return err
 	}

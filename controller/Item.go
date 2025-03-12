@@ -1,3 +1,7 @@
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+
 package controller
 
 import (
@@ -26,6 +30,16 @@ func NewItemController(service *service.ItemService) *ItemController {
 		service: service,
 	}
 }
+
+// Select @Summary 获取项目列表
+// @Description 根据请求的条件获取项目和相关项目信息
+// @Tags Item
+// @Accept json
+// @Produce json
+// @Param selectReq body request.SelectReq true "查询条件"
+// @Success 200 {object} response.Response{data=[]response.SelectResp} "成功返回项目列表"
+// @Failure 400 {object} response.Response "查询失败"
+// @Router /api/v1/item/select [post]
 func (ic *ItemController) Select(c *gin.Context, cla jwt.UserClaims, req request.SelectReq) (response.Response, error) {
 	projects, err := ic.service.Select(c, req)
 	if err != nil {
@@ -83,6 +97,17 @@ func (ic *ItemController) Select(c *gin.Context, cla jwt.UserClaims, req request
 		Code: 200,
 	}, nil
 }
+
+// Audit @Summary 审核项目
+// @Description 审核项目并更新审核状态
+// @Tags Item
+// @Accept json
+// @Produce json
+// @Param auditReq body request.AuditReq true "审核请求体"
+// @Success 200 {object} response.Response "审核成功"
+// @Failure 400 {object} response.Response "审核失败"
+// @Security ApiKeyAuth
+// @Router /api/v1/item/audit [post]
 func (ic *ItemController) Audit(c *gin.Context, cla jwt.UserClaims, req request.AuditReq) (response.Response, error) {
 	err := ic.service.Audit(c, req, cla.Uid)
 	if err != nil {
@@ -98,6 +123,16 @@ func (ic *ItemController) Audit(c *gin.Context, cla jwt.UserClaims, req request.
 		Code: 200,
 	}, nil
 }
+
+// SearchHistory @Summary 获取历史记录
+// @Description 获取用户的历史记录（审核历史）
+// @Tags Item
+// @Accept json
+// @Produce json
+// @Success 200 {object} response.Response{data=[]response.Item} "成功返回历史记录"
+// @Failure 400 {object} response.Response "获取历史记录失败"
+// @Security ApiKeyAuth
+// @Router /api/v1/item/searchHistory [get]
 func (ic *ItemController) SearchHistory(g *gin.Context, cla jwt.UserClaims) (response.Response, error) {
 	items, err := ic.service.SearchHistory(g, cla.Uid)
 	if err != nil {
@@ -149,6 +184,17 @@ func (ic *ItemController) SearchHistory(g *gin.Context, cla jwt.UserClaims) (res
 	}, nil
 
 }
+
+// Upload @Summary 上传项目
+// @Description 上传新的项目或文件
+// @Tags Item
+// @Accept json
+// @Produce json
+// @Param uploadReq body request.UploadReq true "上传请求体"
+// @Success 200 {object} response.Response "上传成功"
+// @Failure 400 {object} response.Response "上传失败"
+// @Security ApiKeyAuth
+// @Router /api/v1/item/upload [post]
 func (ic *ItemController) Upload(g *gin.Context, cla jwt.UserClaims, req request.UploadReq) (response.Response, error) {
 	err := ic.service.Upload(g, req)
 	if err != nil {

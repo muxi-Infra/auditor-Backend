@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/qiniu/go-sdk/v7/storagev2/credentials"
 	"github.com/qiniu/go-sdk/v7/storagev2/uptoken"
-	"muxi_auditor/api/errors"
+	"math/rand"
 	"muxi_auditor/api/request"
 	"muxi_auditor/config"
 	"muxi_auditor/pkg/jwt"
@@ -15,6 +15,17 @@ import (
 	"time"
 )
 
+const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+var seededRand = rand.New(rand.NewSource(time.Now().UnixNano()))
+
+func RandomString(length int) string {
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = charset[seededRand.Intn(len(charset))]
+	}
+	return string(b)
+}
 func NewAuthService(userDAO *dao.UserDAO, redisJwtHandler *jwt.RedisJWTHandler, conf *config.QiNiuYunConfig) *AuthService {
 	return &AuthService{userDAO: userDAO, redisJwtHandler: redisJwtHandler, conf: conf}
 }
@@ -25,38 +36,34 @@ type AuthService struct {
 	conf            *config.QiNiuYunConfig
 }
 
-func (s *AuthService) Login(ctx context.Context, email string) (string, string, int, error) {
-	//随便写的逻辑,需要修改
+func (s *AuthService) Login(ctx context.Context, email string) (string, int, error) {
+
 	user, err := s.userDAO.FindByEmail(ctx, email)
 	if err != nil {
-		return "", "", 0, err
+		return "", 0, err
 	}
 	if user == nil {
-		return "", "", 0, nil
+		s.userDAO.Create(ctx, &model.User{
+			Email:    email,
+			Name:     RandomString(5),
+			UserRole: 0,
+		})
+		return "", 0, nil
 	}
 	token, err := s.redisJwtHandler.Jwt.SetJWTToken(user.ID, user.Name, user.UserRole)
 	if err != nil {
-		return "", "", 0, err
+		return "", 0, err
 	}
-	return user.Name, token, user.UserRole, nil
-	//执行注册的具体逻辑
+	err = s.redisJwtHandler.CheckLogin(ctx, email)
+	if err != nil {
+		return "", 0, err
+	}
+	err = s.redisJwtHandler.Login(ctx, email)
+	if err != nil {
+		return "", 0, err
+	}
+	return token, user.UserRole, nil
 
-}
-func (s *AuthService) Register(ctx context.Context, email string, username string) (string, error) {
-	user := model.User{
-		Email:    email,
-		Name:     username,
-		UserRole: 0,
-	}
-	err := s.userDAO.Create(ctx, &user)
-	if err != nil {
-		return "", errors.LOGIN_ERROR(err)
-	}
-	token, err := s.redisJwtHandler.Jwt.SetJWTToken(user.ID, user.Name, user.UserRole)
-	if err != nil {
-		return "", err
-	}
-	return token, nil
 }
 
 func (s *AuthService) Logout(ctx *gin.Context) error {
@@ -66,6 +73,7 @@ func (s *AuthService) Logout(ctx *gin.Context) error {
 	}
 	return nil
 }
+
 func (s *AuthService) UpdateMyInfo(ctx context.Context, req request.UpdateUserReq, id uint) error {
 	if req.Email == "" || req.Name == "" {
 		return merr.New("email and name are required")
@@ -102,4 +110,14 @@ func (s *AuthService) GetQiToken(ctx context.Context) (string, error) {
 		return upToken, err
 	}
 	return upToken, nil
+}
+func (s *AuthService) GetMyInfo(ctx context.Context, id uint) (*model.User, error) {
+	user, err := s.userDAO.Read(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, merr.New("user not found")
+	}
+	return user, nil
 }

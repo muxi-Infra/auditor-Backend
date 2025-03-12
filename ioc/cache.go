@@ -13,6 +13,7 @@ func InitCache(cfg *conf.CacheConfig) *redis.Client {
 	client := redis.NewClient(&redis.Options{
 		Addr:     cfg.Addr,     // Redis 地址
 		Password: cfg.Password, // Redis 密码，默认为空字符串
+		DB:       cfg.DB,
 	})
 
 	// 测试连接

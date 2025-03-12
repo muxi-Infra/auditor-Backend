@@ -20,6 +20,7 @@ type DBConfig struct {
 type CacheConfig struct {
 	Addr     string `yaml:"addr"`
 	Password string `yaml:"password"`
+	DB       int    `yaml:"db"`
 }
 
 type OAuthConfig struct {

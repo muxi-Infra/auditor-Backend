@@ -8,7 +8,7 @@ import (
 func main() {
 
 	//TODO,改为从环境变量读取
-	app := InitWebServer("./config/config.yaml")
+	app := InitWebServer("./config/config-example.yaml")
 	app.Run()
 
 }

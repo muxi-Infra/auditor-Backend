@@ -48,3 +48,9 @@ type Comment struct {
 	Content  string   `json:"content"`
 	Pictures []string `json:"pictures"`
 }
+type UserInfo struct {
+	Avatar string `json:"avatar"`
+	Name   string `json:"name"`
+	Role   int    `json:"role"`
+	Email  string `json:"email"`
+}

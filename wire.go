@@ -5,6 +5,7 @@ package main
 
 import (
 	"github.com/google/wire"
+	"gorm.io/gorm"
 	"muxi_auditor/client"
 	"muxi_auditor/config"
 	"muxi_auditor/controller"
@@ -16,6 +17,13 @@ import (
 	"muxi_auditor/router"
 	"muxi_auditor/service"
 )
+
+// wire.go
+
+// 提供 dao.UserDAO 的 provider
+func ProvideUserDAO(db *gorm.DB) dao.UserDAOInterface {
+	return &dao.UserDAO{DB: db}
+}
 
 func InitWebServer(confPath string) *App {
 	wire.Build(
@@ -39,6 +47,7 @@ func InitWebServer(confPath string) *App {
 		jwt.NewRedisJWTHandler,
 		service.NewAuthService,
 		service.NewUserService,
+		ProvideUserDAO,
 		service.NewProjectService,
 		service.NewItemService,
 		controller.NewOAuthController,

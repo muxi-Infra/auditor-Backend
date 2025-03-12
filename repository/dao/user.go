@@ -5,12 +5,34 @@ import (
 	"errors"
 	"gorm.io/gorm"
 	"muxi_auditor/api/request"
-	"muxi_auditor/api/response"
 	"muxi_auditor/pkg/apikey"
 	"muxi_auditor/repository/model"
 	"time"
 )
 
+type UserDAOInterface interface {
+	Create(ctx context.Context, user *model.User) error
+	Read(ctx context.Context, id uint) (*model.User, error)
+	Update(ctx context.Context, user *model.User, id uint) error
+	Delete(ctx context.Context, id uint) error
+	List(ctx context.Context) ([]model.User, error)
+	FindByEmail(ctx context.Context, email string) (*model.User, error)
+	FindByProjectID(ctx context.Context, id uint) ([]model.User, error)
+	FindByUserIDs(ctx context.Context, ids []uint) ([]model.User, error)
+	GetResponse(ctx context.Context, users []model.User) ([]model.UserResponse, error)
+	PPFUserByid(ctx context.Context, id uint) (model.User, error)
+	ChangeProjectRole(ctx context.Context, user model.User, projectPermit []model.ProjectPermit) error
+	GetProjectList(ctx context.Context, logo string) ([]model.Project, error)
+	CreateProject(ctx context.Context, project *model.Project) error
+	GetProjectDetails(ctx context.Context, id uint) (model.Project, error)
+	Select(ctx context.Context, req request.SelectReq) ([]model.Project, error)
+	AuditItem(ctx context.Context, req request.AuditReq, id uint) error
+	SelectItemById(ctx context.Context, id uint) (model.Item, error)
+	SearchHistory(ctx context.Context, items *[]model.Item, id uint) error
+	Upload(ctx context.Context, req request.UploadReq, id uint, time time.Time) error
+	GetProjectRole(ctx context.Context, uid uint, pid uint) (int, error)
+	DeleteProject(ctx context.Context, pid uint) error
+}
 type UserDAO struct {
 	DB *gorm.DB
 }
@@ -50,7 +72,12 @@ func (d *UserDAO) Delete(ctx context.Context, id uint) error {
 	}
 	return nil
 }
-
+func (d *UserDAO) DeleteProject(ctx context.Context, pid uint) error {
+	if err := d.DB.WithContext(ctx).Where("project_id=?", pid).Delete(&model.Project{}).Error; err != nil {
+		return err
+	}
+	return nil
+}
 func (d *UserDAO) List(ctx context.Context) ([]model.User, error) {
 	var users []model.User
 	if err := d.DB.WithContext(ctx).Find(&users).Error; err != nil {
@@ -159,37 +186,14 @@ func (d *UserDAO) CreateProject(ctx context.Context, project *model.Project) err
 	return nil
 
 }
-func (d *UserDAO) GetProjectDetails(ctx context.Context, id uint) (response.GetDetailResp, error) {
+func (d *UserDAO) GetProjectDetails(ctx context.Context, id uint) (model.Project, error) {
 	var project model.Project
 	err := d.DB.WithContext(ctx).Preload("Items").Preload("Users").First(&project, id).Error
 	if err != nil {
-		return response.GetDetailResp{}, err
+		return model.Project{}, err
 	}
-	countMap := map[int]int{
-		0: 0,
-		1: 0,
-		2: 0,
-	}
-	for _, item := range project.Items {
-		countMap[item.Status]++
-	}
-	var users []model.UserResponse
-	for _, user := range project.Users {
-		users = append(users, model.UserResponse{
-			Name:   user.Name,
-			UserID: user.ID,
-			Avatar: user.Avatar,
-		})
-	}
+	return project, nil
 
-	re := response.GetDetailResp{
-		TotleNumber:   countMap[0] + countMap[1] + countMap[2],
-		CurrentNumber: countMap[0],
-		Apikey:        project.Apikey,
-		AuditRule:     project.AudioRule,
-		Members:       users,
-	}
-	return re, nil
 }
 func (d *UserDAO) Select(ctx context.Context, req request.SelectReq) ([]model.Project, error) {
 	query := d.DB.WithContext(ctx).Model(&model.Project{})
@@ -331,4 +335,12 @@ func (d *UserDAO) Upload(ctx context.Context, req request.UploadReq, id uint, ti
 		return err
 	}
 	return nil
+}
+func (d *UserDAO) GetProjectRole(ctx context.Context, uid uint, pid uint) (int, error) {
+	var project model.UserProject
+	err := d.DB.WithContext(ctx).Where("user_id = ? AND project_id = ?", uid, pid).First(&project).Error
+	if err != nil {
+		return 1, err
+	}
+	return project.Role, nil
 }

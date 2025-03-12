@@ -1,6 +1,6 @@
 # 应用配置
 app:
-  addr: ":8080"  # 应用监听地址，格式为 IP:PORT，例如 ":8080"
+  addr: "0.0.0.0:8080"  # 应用监听地址，格式为 IP:PORT，例如 ":8080"
 
 # JWT 配置
 jwt:
@@ -9,18 +9,19 @@ jwt:
 
 # 数据库配置
 db:
-  dsn: "root:123456@tcp(localhost:3306)/muxiAuditor?charset=utf8mb4&parseTime=True&loc=Local"
+  dsn: "root:chenhaoqi318912-pw@tcp(60.205.12.92:3306)/muxiAuditor?charset=utf8mb4&parseTime=True&loc=Local"
 
 # 缓存配置
 cache:
-  addr: "127.0.0.1:6379"  # Redis 地址，格式为 IP:PORT，例如 "127.0.0.1:6379"
-  password: "" # Redis 密码（如果没有设置密码，可留空）
+  addr: "60.205.12.92:6379"  # Redis 地址，格式为 IP:PORT，例如 "127.0.0.1:6379"
+  password: "chenhaoqi318912" # Redis 密码（如果没有设置密码，可留空）
+  db: 0 #默认数据库
 
 # OAuth 配置
 oauth:
-  addr: "http://127.0.0.1:8081" # OAuth 服务地址
-  clientId: "your-client-id"   # OAuth Client ID
-  clientSecret: "your-client-secret" # OAuth Client Secret
+  addr: "http://pass.muxi-tech.xyz/auth/api" # OAuth 服务地址
+  clientId: "dc0c99b7-4e9e-4e61-8344-258141fd673d"   # OAuth Client ID
+  clientSecret: "a65b9f92-055c-40fb-a254-153da77ed142" # OAuth Client Secret
 
 # 日志配置
 log:
@@ -49,10 +50,10 @@ prometheus:
 # 中间件配置
 middleware:
   allowedOrigins:
-    - "http://localhost:3000"  # 允许跨域访问的来源地址，例如前端开发服务器地址
+    - "*"  # 允许跨域访问的来源地址，例如前端开发服务器地址
     - "https://auditor.muxixyz.com"     # 生产环境中允许的域名
 QiNiuYun:
-  AccessKey: "access-key" #七牛云的公钥
-  SecretKey: "secret-key" #七牛云的私钥
-  Bucket : "muxi-mini" #所创建七牛云对象存储的名称
-  Domain : "http://127.0.0.1:8080" #对象存储所绑定的七牛云的域名
+  AccessKey: "0bNiwJGpdwmvvuVAzLDjM6gnxj9MiwmSagVpIW81" #七牛云的公钥
+  SecretKey: "zHA9w8PoSfL6D4dvWNwU2GF4XHUn9MalynbANE3_" #七牛云的私钥
+  Bucket : "muxi-miniproject" #所创建七牛云对象存储的名称
+  Domain : "mini-project.muxixyz.com" #对象存储所绑定的七牛云的域名

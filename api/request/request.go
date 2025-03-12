@@ -62,3 +62,6 @@ type UploadReq struct {
 	Content    response.Contents `json:"content"`
 	Extra      interface{}       `json:"extra"`
 }
+type DeleteProject struct {
+	ProjectId uint `json:"project_id"`
+}

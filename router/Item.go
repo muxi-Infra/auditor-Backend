@@ -20,7 +20,7 @@ func ItemRoutes(
 	authMiddleware gin.HandlerFunc,
 	c ItemController,
 ) {
-	ItemGroup := s.Group("/Item")
+	ItemGroup := s.Group("/item")
 	ItemGroup.POST("/select", ginx.WrapClaimsAndReq(c.Select))
 	ItemGroup.POST("/audit", ginx.WrapClaimsAndReq(c.Audit))
 	ItemGroup.GET("/searchHistory", authMiddleware, ginx.WrapClaims(c.SearchHistory))
