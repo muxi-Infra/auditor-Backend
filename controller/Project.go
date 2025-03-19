@@ -9,16 +9,19 @@ import (
 	"muxi_auditor/pkg/jwt"
 	"muxi_auditor/repository/model"
 	"muxi_auditor/service"
+	"strconv"
 )
 
 type ProjectController struct {
 	service ProjectService
 }
 type ProjectService interface {
-	GetProjectList(ctx context.Context, logo string) ([]model.ProjectList, error)
-	Create(ctx context.Context, name string, logo string, audioRule string, ids []uint) error
+	GetProjectList(ctx context.Context) ([]model.ProjectList, error)
+	Create(ctx context.Context, name string, logo string, audioRule string, ids []uint) (uint, error)
 	Detail(ctx context.Context, id uint) (response.GetDetailResp, error)
-	Delete(ctx context.Context, cla jwt.UserClaims, req request.DeleteProject) error
+	Delete(ctx context.Context, cla jwt.UserClaims, p uint) error
+	Update(ctx context.Context, id uint, req request.UpdateProject) error
+	GetUsers(ctx context.Context, id uint) ([]model.UserResponse, error)
 }
 
 func NewProjectController(service *service.ProjectService) *ProjectController {
@@ -27,19 +30,19 @@ func NewProjectController(service *service.ProjectService) *ProjectController {
 	}
 }
 
-// GetProjectList @Summary 获取项目列表
+// GetProjectList 获取项目列表
+// @Summary 获取项目列表
 // @Description 获取所有项目列表，根据 logo 过滤
 // @Tags Project
 // @Accept json
 // @Produce json
-// @Param X-Header-Param header string true "Logo过滤字段"
 // @Success 200 {object} response.Response "成功返回项目列表"
 // @Failure 400 {object} response.Response "获取项目列表失败"
 // @Security ApiKeyAuth
 // @Router /api/v1/project/getProjectList [get]
 func (ctrl *ProjectController) GetProjectList(ctx *gin.Context) (response.Response, error) {
-	logo := ctx.GetHeader("X-Header-Param")
-	list, err := ctrl.service.GetProjectList(ctx, logo)
+
+	list, err := ctrl.service.GetProjectList(ctx)
 	if err != nil {
 		return response.Response{
 			Code: 400,
@@ -54,7 +57,8 @@ func (ctrl *ProjectController) GetProjectList(ctx *gin.Context) (response.Respon
 	}, nil
 }
 
-// Create @Summary 创建项目
+// Create 创建项目
+// @Summary 创建项目
 // @Description 根据请求体参数创建新的项目
 // @Tags Project
 // @Accept json
@@ -79,7 +83,7 @@ func (ctrl *ProjectController) Create(ctx *gin.Context, req request.CreateProjec
 			Msg:  "无权限",
 		}, nil
 	}
-	err = ctrl.service.Create(ctx, req.Name, req.Logo, req.AudioRule, req.UserIds)
+	k, err := ctrl.service.Create(ctx, req.Name, req.Logo, req.AudioRule, req.UserIds)
 	if err != nil {
 		return response.Response{
 			Code: 400,
@@ -89,22 +93,38 @@ func (ctrl *ProjectController) Create(ctx *gin.Context, req request.CreateProjec
 	return response.Response{
 		Code: 200,
 		Msg:  "创建成功",
-		Data: nil,
+		Data: k,
 	}, nil
 }
 
-// Detail @Summary 获取项目详细信息
+// Detail 获取项目详细信息
+// @Summary 获取项目详细信息
 // @Description 根据项目 ID 获取项目的详细信息
 // @Tags Project
 // @Accept json
 // @Produce json
-// @Param projectId query uint true "项目ID"
+// @Param project_id query uint true "项目ID"
 // @Success 200 {object} response.Response{data=response.GetDetailResp} "获取项目详细信息成功"
 // @Failure 400 {object} response.Response "获取项目详细信息失败"
 // @Security ApiKeyAuth
-// @Router /api/v1/project/detail [get]
-func (ctrl *ProjectController) Detail(ctx *gin.Context, req request.GetProjectDetail) (response.Response, error) {
-	_, err := ginx.GetClaims[jwt.UserClaims](ctx)
+// @Router /api/v1/project/{project_id}/detail [get]
+func (ctrl *ProjectController) Detail(ctx *gin.Context) (response.Response, error) {
+	projectID := ctx.Param("project_id")
+	if projectID == "" {
+		return response.Response{
+			Code: 400,
+			Msg:  "需要project_id",
+		}, nil
+	}
+	pid, err := strconv.ParseUint(projectID, 10, 64)
+	if err != nil {
+		return response.Response{
+			Code: 400,
+			Msg:  "获取project_id失败",
+		}, err
+	}
+	p := uint(pid)
+	_, err = ginx.GetClaims[jwt.UserClaims](ctx)
 	if err != nil {
 		return response.Response{
 			Msg:  "",
@@ -112,7 +132,8 @@ func (ctrl *ProjectController) Detail(ctx *gin.Context, req request.GetProjectDe
 			Data: nil,
 		}, err
 	}
-	detail, err := ctrl.service.Detail(ctx, req.ProjectId)
+
+	detail, err := ctrl.service.Detail(ctx, p)
 	if err != nil {
 		return response.Response{
 			Msg:  "",
@@ -129,20 +150,35 @@ func (ctrl *ProjectController) Detail(ctx *gin.Context, req request.GetProjectDe
 
 }
 
-// Delete
+// Delete 删除项目
 // @Summary 删除项目
 // @Description 通过项目 ID 删除指定的项目
 // @Tags Project
 // @Accept json
 // @Produce json
 // @Param Authorization header string true "Bearer Token"
-// @Param delete body request.DeleteProject true "删除项目请求参数"
+// @Param project_id path int true "项目ID"
 // @Success 200 {object} response.Response "删除成功"
 // @Failure 400 {object} response.Response "删除失败"
 // @Security ApiKeyAuth
-// @Router /api/v1/project/delete [delete]
-func (ctrl *ProjectController) Delete(ctx *gin.Context, cla jwt.UserClaims, req request.DeleteProject) (response.Response, error) {
-	err := ctrl.service.Delete(ctx, cla, req)
+// @Router /api/v1/project/{project_id}/delete [delete]
+func (ctrl *ProjectController) Delete(ctx *gin.Context, cla jwt.UserClaims) (response.Response, error) {
+	projectID := ctx.Param("project_id")
+	if projectID == "" {
+		return response.Response{
+			Code: 400,
+			Msg:  "需要project_id",
+		}, nil
+	}
+	pid, err := strconv.ParseUint(projectID, 10, 64)
+	if err != nil {
+		return response.Response{
+			Code: 400,
+			Msg:  "获取project_id失败",
+		}, err
+	}
+	p := uint(pid)
+	err = ctrl.service.Delete(ctx, cla, p)
 	if err != nil {
 		return response.Response{
 			Code: 400,
@@ -154,5 +190,96 @@ func (ctrl *ProjectController) Delete(ctx *gin.Context, cla jwt.UserClaims, req 
 		Code: 200,
 		Msg:  "删除项目成功",
 		Data: nil,
+	}, nil
+}
+
+// Update 更新项目信息
+// @Summary 更新项目
+// @Description 更新项目信息，只有用户权限为 2（管理员）时才能操作
+// @Tags Project
+// @Accept json
+// @Produce json
+// @Param project_id path int true "项目ID"
+// @Param request body request.UpdateProject true "更新项目信息"
+// @Security ApiKeyAuth
+// @Success 200 {object} response.Response "更新成功"
+// @Failure 400 {object} response.Response "请求错误（参数错误/无权限等）"
+// @Failure 500 {object} response.Response "服务器错误"
+// @Router /api/v1/project/{project_id}/update [post]
+func (ctrl *ProjectController) Update(ctx *gin.Context, req request.UpdateProject, cla jwt.UserClaims) (response.Response, error) {
+	projectID := ctx.Param("project_id")
+	if projectID == "" {
+		return response.Response{
+			Code: 400,
+			Msg:  "需要project_id",
+		}, nil
+	}
+	pid, err := strconv.ParseUint(projectID, 10, 64)
+	if err != nil {
+		return response.Response{
+			Code: 400,
+			Msg:  "获取project_id失败",
+		}, err
+	}
+	p := uint(pid)
+	uRole := cla.UserRule
+	if uRole != 2 {
+		return response.Response{
+			Code: 400,
+			Msg:  "无权限",
+			Data: nil,
+		}, nil
+	}
+	err = ctrl.service.Update(ctx, p, req)
+	if err != nil {
+		return response.Response{
+			Msg:  "更新失败",
+			Code: 400,
+			Data: nil,
+		}, err
+	}
+	return response.Response{
+		Code: 200,
+		Msg:  "更新成功",
+	}, nil
+}
+
+// GetUsers 获取项目成员列表
+// @Summary 获取项目成员
+// @Description 根据 project_id 获取该项目的用户列表
+// @Tags Project
+// @Accept json
+// @Produce json
+// @Param project_id path int true "项目ID"
+// @Security ApiKeyAuth
+// @Success 200 {object} response.Response "获取成功"
+// @Failure 400 {object} response.Response "请求错误（参数错误/无 project_id）"
+// @Failure 500 {object} response.Response "服务器错误"
+// @Router /api/v1/project/{project_id}/getUsers [get]
+func (ctrl *ProjectController) GetUsers(ctx *gin.Context, cla jwt.UserClaims) (response.Response, error) {
+	projectID := ctx.Param("project_id")
+	if projectID == "" {
+		return response.Response{
+			Code: 400,
+			Msg:  "需要project_id",
+		}, nil
+	}
+	pid, err := strconv.ParseUint(projectID, 10, 64)
+	if err != nil {
+		return response.Response{
+			Code: 400,
+			Msg:  "获取project_id失败",
+		}, err
+	}
+	p := uint(pid)
+	userResponse, err := ctrl.service.GetUsers(ctx, p)
+	if err != nil {
+		return response.Response{}, err
+	}
+
+	return response.Response{
+		Msg:  "获取成功",
+		Code: 200,
+		Data: userResponse,
 	}, nil
 }

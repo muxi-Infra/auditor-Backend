@@ -3,40 +3,24 @@ definitions:
     properties:
       project_id:
         type: integer
-      project_name:
-        type: string
       project_role:
-        type: integer
-    type: object
-  model.UserResponse:
-    properties:
-      avatar:
-        type: string
-      name:
-        type: string
-      project_permit:
-        items:
-          $ref: '#/definitions/model.ProjectPermit'
-        type: array
-      role:
-        type: integer
-      user_id:
+        description: ProjectName string `json:"project_name"`
         type: integer
     type: object
   request.AuditReq:
     properties:
       item_id:
         type: integer
-      project_id:
-        type: integer
       reason:
         type: string
       status:
+        description: 0未审核，1通过，2未通过
         type: integer
     type: object
   request.CreateProject:
     properties:
       audio_rule:
+        description: 审核规则
         type: string
       logo:
         type: string
@@ -47,18 +31,6 @@ definitions:
           type: integer
         type: array
     type: object
-  request.DeleteProject:
-    properties:
-      project_id:
-        type: integer
-    type: object
-  request.GetUserReq:
-    properties:
-      project_id:
-        type: integer
-      role:
-        type: integer
-    type: object
   request.LoginReq:
     properties:
       code:
@@ -66,8 +38,10 @@ definitions:
     type: object
   request.SelectReq:
     properties:
-      auditor:
-        type: string
+      auditors:
+        items:
+          type: integer
+        type: array
       page:
         type: integer
       page_size:
@@ -75,18 +49,35 @@ definitions:
       project_id:
         type: integer
       query:
+        description: 查询字段
         type: string
-      status:
+      round_time:
+        description: 日期
+        items:
+          items:
+            type: integer
+          type: array
+        type: array
+      statuses:
+        items:
+          type: integer
+        type: array
+      tags:
+        description: 标签
+        items:
+          type: string
+        type: array
+    type: object
+  request.UpdateProject:
+    properties:
+      audio_rule:
         type: string
-      tag:
-        description: RoundTime [][]int  `json:"round_time"`
+      logo:
         type: string
     type: object
   request.UpdateUserReq:
     properties:
       avatar:
-        type: string
-      email:
         type: string
       name:
         type: string
@@ -94,20 +85,20 @@ definitions:
   request.UpdateUserRoleReq:
     properties:
       project_permit:
+        description: 允许的项目列表
         items:
           $ref: '#/definitions/model.ProjectPermit'
         type: array
       role:
+        description: 用户权限
         type: integer
       user_id:
         type: integer
     type: object
   request.UploadReq:
     properties:
-      api_key:
-        type: string
       auditor:
-        type: string
+        type: integer
       author:
         type: string
       content:
@@ -118,7 +109,7 @@ definitions:
       id:
         type: integer
       public_time:
-        type: string
+        type: integer
       tags:
         items:
           type: string
@@ -145,30 +136,31 @@ definitions:
   response.GetDetailResp:
     properties:
       api_key:
+        description: 由project_id生成的key
         type: string
       audit_rule:
         type: string
       current_number:
+        description: 未审核的数目
         type: integer
-      members:
-        items:
-          $ref: '#/definitions/model.UserResponse'
-        type: array
       totle_number:
+        description: 项目中item总数
         type: integer
     type: object
   response.Item:
     properties:
       auditor:
-        type: string
+        type: integer
       author:
         type: string
       content:
-        $ref: '#/definitions/response.Contents'
+        allOf:
+        - $ref: '#/definitions/response.Contents'
+        description: item具体内容，包含题目内容和评论
       item_id:
         type: integer
       public_time:
-        type: string
+        type: integer
       status:
         type: integer
       tags:
@@ -190,8 +182,6 @@ definitions:
         items:
           $ref: '#/definitions/response.Item'
         type: array
-      project_id:
-        type: integer
     type: object
   response.Topics:
     properties:
@@ -213,330 +203,13 @@ definitions:
       name:
         type: string
       role:
+        description: 用户权限
         type: integer
     type: object
 info:
   contact: {}
 paths:
-  /api/v1/item/audit:
-    post:
-      consumes:
-      - application/json
-      description: 审核项目并更新审核状态
-      parameters:
-      - description: 审核请求体
-        in: body
-        name: auditReq
-        required: true
-        schema:
-          $ref: '#/definitions/request.AuditReq'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 审核成功
-          schema:
-            $ref: '#/definitions/response.Response'
-        "400":
-          description: 审核失败
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - ApiKeyAuth: []
-      tags:
-      - Item
-  /api/v1/item/searchHistory:
-    get:
-      consumes:
-      - application/json
-      description: 获取用户的历史记录（审核历史）
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 成功返回历史记录
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/response.Item'
-                  type: array
-              type: object
-        "400":
-          description: 获取历史记录失败
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - ApiKeyAuth: []
-      tags:
-      - Item
-  /api/v1/item/select:
-    post:
-      consumes:
-      - application/json
-      description: 根据请求的条件获取项目和相关项目信息
-      parameters:
-      - description: 查询条件
-        in: body
-        name: selectReq
-        required: true
-        schema:
-          $ref: '#/definitions/request.SelectReq'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 成功返回项目列表
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/response.SelectResp'
-                  type: array
-              type: object
-        "400":
-          description: 查询失败
-          schema:
-            $ref: '#/definitions/response.Response'
-      tags:
-      - Item
-  /api/v1/item/upload:
-    post:
-      consumes:
-      - application/json
-      description: 上传新的项目或文件
-      parameters:
-      - description: 上传请求体
-        in: body
-        name: uploadReq
-        required: true
-        schema:
-          $ref: '#/definitions/request.UploadReq'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 上传成功
-          schema:
-            $ref: '#/definitions/response.Response'
-        "400":
-          description: 上传失败
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - ApiKeyAuth: []
-      tags:
-      - Item
-  /api/v1/project/create:
-    post:
-      consumes:
-      - application/json
-      description: 根据请求体参数创建新的项目
-      parameters:
-      - description: 创建项目请求体
-        in: body
-        name: createProject
-        required: true
-        schema:
-          $ref: '#/definitions/request.CreateProject'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 项目创建成功
-          schema:
-            $ref: '#/definitions/response.Response'
-        "400":
-          description: 无权限或创建失败
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - ApiKeyAuth: []
-      tags:
-      - Project
-  /api/v1/project/delete:
-    delete:
-      consumes:
-      - application/json
-      description: 通过项目 ID 删除指定的项目
-      parameters:
-      - description: Bearer Token
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      - description: 删除项目请求参数
-        in: body
-        name: delete
-        required: true
-        schema:
-          $ref: '#/definitions/request.DeleteProject'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 删除成功
-          schema:
-            $ref: '#/definitions/response.Response'
-        "400":
-          description: 删除失败
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - ApiKeyAuth: []
-      summary: 删除项目
-      tags:
-      - Project
-  /api/v1/project/detail:
-    get:
-      consumes:
-      - application/json
-      description: 根据项目 ID 获取项目的详细信息
-      parameters:
-      - description: 项目ID
-        in: query
-        name: projectId
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 获取项目详细信息成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/response.GetDetailResp'
-              type: object
-        "400":
-          description: 获取项目详细信息失败
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - ApiKeyAuth: []
-      tags:
-      - Project
-  /api/v1/project/getProjectList:
-    get:
-      consumes:
-      - application/json
-      description: 获取所有项目列表，根据 logo 过滤
-      parameters:
-      - description: Logo过滤字段
-        in: header
-        name: X-Header-Param
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 成功返回项目列表
-          schema:
-            $ref: '#/definitions/response.Response'
-        "400":
-          description: 获取项目列表失败
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - ApiKeyAuth: []
-      tags:
-      - Project
-  /api/v1/user/GetMyInfo:
-    get:
-      consumes:
-      - application/json
-      description: 获取用户名，邮箱，权限
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 获取信息成功
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/response.UserInfo'
-              type: object
-        "400":
-          description: 失败
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  type: object
-              type: object
-      security:
-      - ApiKeyAuth: []
-      tags:
-      - Auth
-  /api/v1/user/GetQiToken:
-    get:
-      consumes:
-      - application/json
-      description: 获取用于上传文件的七牛云 Token
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 返回上传 Token
-          schema:
-            $ref: '#/definitions/response.Response'
-        "400":
-          description: 获取图床token失败
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - ApiKeyAuth: []
-      tags:
-      - Auth
-  /api/v1/user/getUsers:
-    post:
-      consumes:
-      - application/json
-      description: 根据项目 ID 获取用户列表，要求角色为 2 才有权限
-      parameters:
-      - description: 获取用户请求体
-        in: body
-        name: GetUserReq
-        required: true
-        schema:
-          $ref: '#/definitions/request.GetUserReq'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 成功获取用户列表
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  items:
-                    $ref: '#/definitions/model.UserResponse'
-                  type: array
-              type: object
-        "400":
-          description: 获取失败
-          schema:
-            $ref: '#/definitions/response.Response'
-        "40001":
-          description: 无权限
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - ApiKeyAuth: []
-      tags:
-      - User
-  /api/v1/user/login:
+  /api/v1/auth/login:
     post:
       consumes:
       - application/json
@@ -578,10 +251,11 @@ paths:
                 data:
                   type: string
               type: object
+      summary: 用户登录
       tags:
       - Auth
-  /api/v1/user/logout:
-    post:
+  /api/v1/auth/logout:
+    get:
       consumes:
       - application/json
       description: 清除用户 Token
@@ -598,8 +272,364 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - ApiKeyAuth: []
+      summary: 用户登出
       tags:
       - Auth
+  /api/v1/item/audit:
+    post:
+      consumes:
+      - application/json
+      description: 审核项目并更新审核状态
+      parameters:
+      - description: 审核请求体
+        in: body
+        name: auditReq
+        required: true
+        schema:
+          $ref: '#/definitions/request.AuditReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 审核成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 审核失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 审核项目
+      tags:
+      - Item
+  /api/v1/item/searchHistory:
+    get:
+      consumes:
+      - application/json
+      description: 获取用户的历史记录（审核历史）
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功返回历史记录
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/response.Item'
+                  type: array
+              type: object
+        "400":
+          description: 获取历史记录失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取历史记录
+      tags:
+      - Item
+  /api/v1/item/select:
+    post:
+      consumes:
+      - application/json
+      description: 根据请求的条件获取项目和相关项目信息
+      parameters:
+      - description: 查询条件
+        in: body
+        name: selectReq
+        required: true
+        schema:
+          $ref: '#/definitions/request.SelectReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功返回项目列表
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/response.SelectResp'
+                  type: array
+              type: object
+        "400":
+          description: 查询失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 获取项目列表
+      tags:
+      - Item
+  /api/v1/item/upload:
+    post:
+      consumes:
+      - application/json
+      description: 上传新的项目或文件
+      parameters:
+      - description: 上传请求体
+        in: body
+        name: uploadReq
+        required: true
+        schema:
+          $ref: '#/definitions/request.UploadReq'
+      - description: API 认证密钥(api_key)
+        in: header
+        name: api_key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 上传成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 上传失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 上传项目
+      tags:
+      - Item
+  /api/v1/project/{project_id}/delete:
+    delete:
+      consumes:
+      - application/json
+      description: 通过项目 ID 删除指定的项目
+      parameters:
+      - description: Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 项目ID
+        in: path
+        name: project_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 删除失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 删除项目
+      tags:
+      - Project
+  /api/v1/project/{project_id}/detail:
+    get:
+      consumes:
+      - application/json
+      description: 根据项目 ID 获取项目的详细信息
+      parameters:
+      - description: 项目ID
+        in: query
+        name: project_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取项目详细信息成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.GetDetailResp'
+              type: object
+        "400":
+          description: 获取项目详细信息失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取项目详细信息
+      tags:
+      - Project
+  /api/v1/project/{project_id}/getUsers:
+    get:
+      consumes:
+      - application/json
+      description: 根据 project_id 获取该项目的用户列表
+      parameters:
+      - description: 项目ID
+        in: path
+        name: project_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求错误（参数错误/无 project_id）
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取项目成员
+      tags:
+      - Project
+  /api/v1/project/{project_id}/update:
+    post:
+      consumes:
+      - application/json
+      description: 更新项目信息，只有用户权限为 2（管理员）时才能操作
+      parameters:
+      - description: 项目ID
+        in: path
+        name: project_id
+        required: true
+        type: integer
+      - description: 更新项目信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateProject'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求错误（参数错误/无权限等）
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 更新项目
+      tags:
+      - Project
+  /api/v1/project/create:
+    post:
+      consumes:
+      - application/json
+      description: 根据请求体参数创建新的项目
+      parameters:
+      - description: 创建项目请求体
+        in: body
+        name: createProject
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateProject'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 项目创建成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 无权限或创建失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 创建项目
+      tags:
+      - Project
+  /api/v1/project/getProjectList:
+    get:
+      consumes:
+      - application/json
+      description: 获取所有项目列表，根据 logo 过滤
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功返回项目列表
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 获取项目列表失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取项目列表
+      tags:
+      - Project
+  /api/v1/tube/GetQiToken:
+    get:
+      consumes:
+      - application/json
+      description: 获取用于上传文件的七牛云 Token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回上传 Token
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 获取图床token失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取七牛云上传 Token
+      tags:
+      - Tube
+  /api/v1/user/getMyInfo:
+    get:
+      consumes:
+      - application/json
+      description: 获取用户名，邮箱，权限
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取信息成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.UserInfo'
+              type: object
+        "400":
+          description: 失败
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: object
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取自己信息
+      tags:
+      - User
   /api/v1/user/updateMyInfo:
     post:
       consumes:
@@ -625,8 +655,9 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - ApiKeyAuth: []
+      summary: 更新用户信息
       tags:
-      - Auth
+      - User
   /api/v1/user/updateUser:
     post:
       consumes:
@@ -656,6 +687,7 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - ApiKeyAuth: []
+      summary: 更新用户角色
       tags:
       - User
 swagger: "2.0"

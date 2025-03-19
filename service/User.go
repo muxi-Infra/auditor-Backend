@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	merr "errors"
+	"muxi_auditor/api/request"
 	"muxi_auditor/pkg/jwt"
 	"muxi_auditor/repository/dao"
 	"muxi_auditor/repository/model"
@@ -16,31 +18,61 @@ func NewUserService(userDAO *dao.UserDAO, redisJwtHandler *jwt.RedisJWTHandler) 
 	return &UserService{userDAO: userDAO, redisJwtHandler: redisJwtHandler}
 }
 
-func (userService *UserService) GetUsers(ctx context.Context, id uint) ([]model.UserResponse, error) {
-	users, err := userService.userDAO.FindByProjectID(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	userResponse, err := userService.userDAO.GetResponse(ctx, users)
-	if err != nil {
-		return nil, err
-	}
-	return userResponse, nil
-}
-func (userService *UserService) UpdateUserRole(ctx context.Context, userId uint, projectPermit []model.ProjectPermit, role int) error {
-	user, err := userService.userDAO.PPFUserByid(ctx, userId)
+func (s *UserService) UpdateUserRole(ctx context.Context, userId uint, projectPermit []model.ProjectPermit, role int) error {
+	user, err := s.userDAO.PPFUserByid(ctx, userId)
 	if err != nil {
 		return err
 	}
 	user.UserRole = role
-	err = userService.userDAO.Update(ctx, &user, userId)
+	err = s.userDAO.Update(ctx, &user, userId)
 	if err != nil {
 		return err
 	}
-
-	err = userService.userDAO.ChangeProjectRole(ctx, user, projectPermit)
+	for _, v := range projectPermit {
+		_, err = s.userDAO.FindProjectByID(ctx, v.ProjectID)
+		if err != nil {
+			return err
+		}
+	}
+	err = s.userDAO.ChangeProjectRole(ctx, user, projectPermit)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+func (s *UserService) UpdateMyInfo(ctx context.Context, req request.UpdateUserReq, id uint) error {
+	if req.Name == "" && req.Avatar == "" {
+		return merr.New(" name or avatar are required")
+	}
+
+	existingUser, err := s.userDAO.Read(ctx, id)
+	if err != nil {
+		return err
+	}
+	if existingUser == nil {
+		return merr.New("user not found")
+	}
+	var user model.User
+	if req.Name != "" {
+		user.Name = req.Name
+	}
+
+	if req.Avatar != "" {
+		user.Avatar = req.Avatar
+	}
+	err = s.userDAO.Update(ctx, &user, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func (s *UserService) GetMyInfo(ctx context.Context, id uint) (*model.User, error) {
+	user, err := s.userDAO.Read(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, merr.New("user not found")
+	}
+	return user, nil
 }

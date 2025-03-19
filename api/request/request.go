@@ -14,54 +14,54 @@ type RegisterReq struct {
 }
 type UpdateUserReq struct {
 	Name   string `json:"name"`
-	Email  string `json:"email"`
 	Avatar string `json:"avatar"`
 }
 type GetUserReq struct {
-	Role       int  `json:"role"`
 	Project_id uint `json:"project_id"`
 }
 type UpdateUserRoleReq struct {
-	Role          int                   `json:"role"`
+	Role          int                   `json:"role"` //用户权限
 	UserId        uint                  `json:"user_id"`
-	ProjectPermit []model.ProjectPermit `json:"project_permit"`
+	ProjectPermit []model.ProjectPermit `json:"project_permit"` //允许的项目列表
 }
 type CreateProject struct {
 	Name      string `json:"name"`
 	Logo      string `json:"logo"`
-	AudioRule string `json:"audio_rule"`
+	AudioRule string `json:"audio_rule"` //审核规则
 	UserIds   []uint `json:"user_ids"`
 }
 type GetProjectDetail struct {
 	ProjectId uint `json:"project_id"`
 }
 type SelectReq struct {
-	ProjectID uint `json:"project_id"`
-	//RoundTime [][]int  `json:"round_time"`
-	Tag      string `json:"tag"`
-	Status   string `json:"status"`
-	Auditor  string `json:"auditor"`
-	Page     int    `json:"page"`
-	PageSize int    `json:"page_size"`
-	Query    string `json:"query"`
+	ProjectID uint     `json:"project_id"`
+	RoundTime [][]int  `json:"round_time"` //日期
+	Tags      []string `json:"tags"`       //标签
+	Statuses  []int    `json:"statuses"`
+	Auditors  []uint   `json:"auditors"`
+	Page      int      `json:"page"`
+	PageSize  int      `json:"page_size"`
+	Query     string   `json:"query"` //查询字段
 }
 type AuditReq struct {
-	ProjectID uint   `json:"project_id"`
-	Reason    string `json:"reason"`
-	Status    int    `json:"status"`
-	ItemId    uint   `json:"item_id"`
+	Reason string `json:"reason"`
+	Status int    `json:"status"` //0未审核，1通过，2未通过
+	ItemId uint   `json:"item_id"`
 }
 type UploadReq struct {
-	ApiKey     string            `json:"api_key"`
 	HookUrl    string            `json:"hook_url"`
 	Id         int               `json:"id"`
-	Auditor    string            `json:"auditor"`
+	Auditor    uint              `json:"auditor"`
 	Author     string            `json:"author"`
-	PublicTime string            `json:"public_time"`
+	PublicTime int               `json:"public_time"`
 	Tags       []string          `json:"tags"`
 	Content    response.Contents `json:"content"`
 	Extra      interface{}       `json:"extra"`
 }
 type DeleteProject struct {
 	ProjectId uint `json:"project_id"`
+}
+type UpdateProject struct {
+	Logo      string `json:"logo"`
+	AudioRule string `json:"audio_rule"`
 }

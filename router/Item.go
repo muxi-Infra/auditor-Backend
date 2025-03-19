@@ -9,10 +9,10 @@ import (
 )
 
 type ItemController interface {
-	Select(g *gin.Context, cla jwt.UserClaims, req request.SelectReq) (response.Response, error)
-	Audit(g *gin.Context, cla jwt.UserClaims, req request.AuditReq) (response.Response, error)
+	Select(g *gin.Context, req request.SelectReq) (response.Response, error)
+	Audit(g *gin.Context, req request.AuditReq, cla jwt.UserClaims) (response.Response, error)
 	SearchHistory(g *gin.Context, cla jwt.UserClaims) (response.Response, error)
-	Upload(g *gin.Context, cla jwt.UserClaims, req request.UploadReq) (response.Response, error)
+	Upload(g *gin.Context, req request.UploadReq, cla jwt.UserClaims) (response.Response, error)
 }
 
 func ItemRoutes(
@@ -21,8 +21,8 @@ func ItemRoutes(
 	c ItemController,
 ) {
 	ItemGroup := s.Group("/item")
-	ItemGroup.POST("/select", ginx.WrapClaimsAndReq(c.Select))
-	ItemGroup.POST("/audit", ginx.WrapClaimsAndReq(c.Audit))
+	ItemGroup.POST("/select", authMiddleware, ginx.WrapReq(c.Select))
+	ItemGroup.POST("/audit", authMiddleware, ginx.WrapClaimsAndReq(c.Audit))
 	ItemGroup.GET("/searchHistory", authMiddleware, ginx.WrapClaims(c.SearchHistory))
 	ItemGroup.POST("/upload", authMiddleware, ginx.WrapClaimsAndReq(c.Upload))
 }

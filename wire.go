@@ -50,10 +50,12 @@ func InitWebServer(confPath string) *App {
 		ProvideUserDAO,
 		service.NewProjectService,
 		service.NewItemService,
+		service.NewTubeService,
 		controller.NewOAuthController,
 		controller.NewUserController,
 		controller.NewProjectController,
 		controller.NewItemController,
+		controller.NewTuberController,
 		client.NewOAuthClient,
 		router.NewRouter,
 

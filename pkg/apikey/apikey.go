@@ -14,7 +14,7 @@ func GenerateAPIKey(projectID uint) (string, error) {
 	claims := jwt.MapClaims{
 		"sub": projectID,
 		"iat": time.Now().Unix(),
-		"exp": time.Now().Add(24 * time.Hour).Unix(),
+		"exp": time.Now().Add(1000 * time.Hour).Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

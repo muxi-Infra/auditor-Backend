@@ -2,6 +2,7 @@ package client
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	conf "muxi_auditor/config"
@@ -21,6 +22,16 @@ type OAuthToken struct {
 type userEmail struct {
 	Email string `json:"email"`
 }
+type Response1 struct {
+	Code int        `json:"code"`
+	Msg  string     `json:"msg"`
+	Data OAuthToken `json:"data"`
+}
+type Response2 struct {
+	Code int       `json:"code"`
+	Msg  string    `json:"msg"`
+	Data userEmail `json:"data"`
+}
 
 func NewOAuthClient(config *conf.OAuthConfig) *OAuthClient {
 	return &OAuthClient{
@@ -35,10 +46,15 @@ func NewOAuthClient(config *conf.OAuthConfig) *OAuthClient {
 // 待完善
 func (c *OAuthClient) GetOAuth(code string) (string, error) {
 	formData := url.Values{}
-	formData.Set("client_id", c.clientID)
 	formData.Set("client_secret", c.clientSecret)
+
 	formData.Set("code", code)
-	req, err := http.NewRequest("POST", c.addr+"/OAuth", strings.NewReader(formData.Encode()))
+	params := url.Values{}
+	params.Set("client_id", c.clientID)
+	params.Set("grant_type", "authorization_code")
+	params.Set("response_type", "token")
+
+	req, err := http.NewRequest("POST", c.addr+"/oauth/token"+"?"+params.Encode(), strings.NewReader(formData.Encode()))
 	if err != nil {
 		return "", fmt.Errorf("获取token的请求失败: %w", err)
 	}
@@ -50,22 +66,25 @@ func (c *OAuthClient) GetOAuth(code string) (string, error) {
 	}
 	defer resp.Body.Close()
 	body, err := io.ReadAll(resp.Body)
+
 	if err != nil {
 		return "", err
 	}
-	var oAuthToken OAuthToken
-	err = json.Unmarshal(body, &oAuthToken)
-	if err != nil {
-		return "", err
+
+	var re Response1
+	err = json.Unmarshal(body, &re)
+	if err != nil || re.Data.AccessToken == "" {
+		return "", errors.New("未能获取accessToken")
 	}
-	return oAuthToken.AccessToken, nil
+
+	return re.Data.AccessToken, nil
 }
 func (c *OAuthClient) GetEmail(accessToken string) (string, error) {
 	req, err := http.NewRequest("GET", c.addr+"/user", nil)
 	if err != nil {
 		return "", err
 	}
-	req.Header.Set("Authorization", "Bearer "+accessToken)
+	req.Header.Set("token", accessToken)
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -76,10 +95,10 @@ func (c *OAuthClient) GetEmail(accessToken string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	var userEmail userEmail
+	var userEmail Response2
 	err = json.Unmarshal(body, &userEmail)
 	if err != nil {
 		return "", err
 	}
-	return userEmail.Email, nil
+	return userEmail.Data.Email, nil
 }

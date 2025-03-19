@@ -15,544 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/v1/item/audit": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "审核项目并更新审核状态",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Item"
-                ],
-                "parameters": [
-                    {
-                        "description": "审核请求体",
-                        "name": "auditReq",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/request.AuditReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "审核成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "审核失败",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/item/searchHistory": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "获取用户的历史记录（审核历史）",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Item"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "成功返回历史记录",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/response.Item"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "获取历史记录失败",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/item/select": {
-            "post": {
-                "description": "根据请求的条件获取项目和相关项目信息",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Item"
-                ],
-                "parameters": [
-                    {
-                        "description": "查询条件",
-                        "name": "selectReq",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/request.SelectReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "成功返回项目列表",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/response.SelectResp"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "查询失败",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/item/upload": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "上传新的项目或文件",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Item"
-                ],
-                "parameters": [
-                    {
-                        "description": "上传请求体",
-                        "name": "uploadReq",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/request.UploadReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "上传成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "上传失败",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/project/create": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "根据请求体参数创建新的项目",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Project"
-                ],
-                "parameters": [
-                    {
-                        "description": "创建项目请求体",
-                        "name": "createProject",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/request.CreateProject"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "项目创建成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "无权限或创建失败",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/project/delete": {
-            "delete": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "通过项目 ID 删除指定的项目",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Project"
-                ],
-                "summary": "删除项目",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Bearer Token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "description": "删除项目请求参数",
-                        "name": "delete",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/request.DeleteProject"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "删除成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "删除失败",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/project/detail": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "根据项目 ID 获取项目的详细信息",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Project"
-                ],
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "项目ID",
-                        "name": "projectId",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "获取项目详细信息成功",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/response.GetDetailResp"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "获取项目详细信息失败",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/project/getProjectList": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "获取所有项目列表，根据 logo 过滤",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Project"
-                ],
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Logo过滤字段",
-                        "name": "X-Header-Param",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "成功返回项目列表",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "获取项目列表失败",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/user/GetMyInfo": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "获取用户名，邮箱，权限",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Auth"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "获取信息成功",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/response.UserInfo"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "失败",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "object"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/user/GetQiToken": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "获取用于上传文件的七牛云 Token",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Auth"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "返回上传 Token",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "获取图床token失败",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/user/getUsers": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "根据项目 ID 获取用户列表，要求角色为 2 才有权限",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "User"
-                ],
-                "parameters": [
-                    {
-                        "description": "获取用户请求体",
-                        "name": "GetUserReq",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/request.GetUserReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "成功获取用户列表",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/model.UserResponse"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "获取失败",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "40001": {
-                        "description": "无权限",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/user/login": {
+        "/api/v1/auth/login": {
             "post": {
                 "description": "通过邮箱登录，返回用户的 Token",
                 "consumes": [
@@ -564,6 +27,7 @@ const docTemplate = `{
                 "tags": [
                     "Auth"
                 ],
+                "summary": "用户登录",
                 "parameters": [
                     {
                         "description": "登录请求体",
@@ -633,8 +97,8 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/user/logout": {
-            "post": {
+        "/api/v1/auth/logout": {
+            "get": {
                 "security": [
                     {
                         "ApiKeyAuth": []
@@ -650,6 +114,7 @@ const docTemplate = `{
                 "tags": [
                     "Auth"
                 ],
+                "summary": "用户登出",
                 "responses": {
                     "200": {
                         "description": "成功登出",
@@ -661,6 +126,590 @@ const docTemplate = `{
                         "description": "错误信息",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/item/audit": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "审核项目并更新审核状态",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Item"
+                ],
+                "summary": "审核项目",
+                "parameters": [
+                    {
+                        "description": "审核请求体",
+                        "name": "auditReq",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.AuditReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "审核成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "审核失败",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/item/searchHistory": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "获取用户的历史记录（审核历史）",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Item"
+                ],
+                "summary": "获取历史记录",
+                "responses": {
+                    "200": {
+                        "description": "成功返回历史记录",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/response.Item"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "获取历史记录失败",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/item/select": {
+            "post": {
+                "description": "根据请求的条件获取项目和相关项目信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Item"
+                ],
+                "summary": "获取项目列表",
+                "parameters": [
+                    {
+                        "description": "查询条件",
+                        "name": "selectReq",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.SelectReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功返回项目列表",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/response.SelectResp"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "查询失败",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/item/upload": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "上传新的项目或文件",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Item"
+                ],
+                "summary": "上传项目",
+                "parameters": [
+                    {
+                        "description": "上传请求体",
+                        "name": "uploadReq",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.UploadReq"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "API 认证密钥(api_key)",
+                        "name": "api_key",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "上传成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "上传失败",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/project/create": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "根据请求体参数创建新的项目",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "创建项目",
+                "parameters": [
+                    {
+                        "description": "创建项目请求体",
+                        "name": "createProject",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.CreateProject"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "项目创建成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "无权限或创建失败",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/project/getProjectList": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "获取所有项目列表，根据 logo 过滤",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "获取项目列表",
+                "responses": {
+                    "200": {
+                        "description": "成功返回项目列表",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "获取项目列表失败",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/project/{project_id}/delete": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "通过项目 ID 删除指定的项目",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "删除项目",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bearer Token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "项目ID",
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "删除失败",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/project/{project_id}/detail": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "根据项目 ID 获取项目的详细信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "获取项目详细信息",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "项目ID",
+                        "name": "project_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取项目详细信息成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/response.GetDetailResp"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "获取项目详细信息失败",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/project/{project_id}/getUsers": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "根据 project_id 获取该项目的用户列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "获取项目成员",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "项目ID",
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "请求错误（参数错误/无 project_id）",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/project/{project_id}/update": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "更新项目信息，只有用户权限为 2（管理员）时才能操作",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "更新项目",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "项目ID",
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新项目信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.UpdateProject"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "请求错误（参数错误/无权限等）",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/tube/GetQiToken": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "获取用于上传文件的七牛云 Token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Tube"
+                ],
+                "summary": "获取七牛云上传 Token",
+                "responses": {
+                    "200": {
+                        "description": "返回上传 Token",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "获取图床token失败",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/user/getMyInfo": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "获取用户名，邮箱，权限",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "获取自己信息",
+                "responses": {
+                    "200": {
+                        "description": "获取信息成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/response.UserInfo"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "失败",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     }
                 }
@@ -681,8 +730,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Auth"
+                    "User"
                 ],
+                "summary": "更新用户信息",
                 "parameters": [
                     {
                         "description": "更新用户信息请求体",
@@ -727,6 +777,7 @@ const docTemplate = `{
                 "tags": [
                     "User"
                 ],
+                "summary": "更新用户角色",
                 "parameters": [
                     {
                         "description": "更新用户角色请求体",
@@ -768,33 +819,8 @@ const docTemplate = `{
                 "project_id": {
                     "type": "integer"
                 },
-                "project_name": {
-                    "type": "string"
-                },
                 "project_role": {
-                    "type": "integer"
-                }
-            }
-        },
-        "model.UserResponse": {
-            "type": "object",
-            "properties": {
-                "avatar": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "project_permit": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/model.ProjectPermit"
-                    }
-                },
-                "role": {
-                    "type": "integer"
-                },
-                "user_id": {
+                    "description": "ProjectName string ` + "`" + `json:\"project_name\"` + "`" + `",
                     "type": "integer"
                 }
             }
@@ -805,13 +831,11 @@ const docTemplate = `{
                 "item_id": {
                     "type": "integer"
                 },
-                "project_id": {
-                    "type": "integer"
-                },
                 "reason": {
                     "type": "string"
                 },
                 "status": {
+                    "description": "0未审核，1通过，2未通过",
                     "type": "integer"
                 }
             }
@@ -820,6 +844,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "audio_rule": {
+                    "description": "审核规则",
                     "type": "string"
                 },
                 "logo": {
@@ -836,25 +861,6 @@ const docTemplate = `{
                 }
             }
         },
-        "request.DeleteProject": {
-            "type": "object",
-            "properties": {
-                "project_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "request.GetUserReq": {
-            "type": "object",
-            "properties": {
-                "project_id": {
-                    "type": "integer"
-                },
-                "role": {
-                    "type": "integer"
-                }
-            }
-        },
         "request.LoginReq": {
             "type": "object",
             "properties": {
@@ -866,8 +872,11 @@ const docTemplate = `{
         "request.SelectReq": {
             "type": "object",
             "properties": {
-                "auditor": {
-                    "type": "string"
+                "auditors": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 },
                 "page": {
                     "type": "integer"
@@ -879,13 +888,41 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "query": {
+                    "description": "查询字段",
                     "type": "string"
                 },
-                "status": {
+                "round_time": {
+                    "description": "日期",
+                    "type": "array",
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "statuses": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "tags": {
+                    "description": "标签",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "request.UpdateProject": {
+            "type": "object",
+            "properties": {
+                "audio_rule": {
                     "type": "string"
                 },
-                "tag": {
-                    "description": "RoundTime [][]int  ` + "`" + `json:\"round_time\"` + "`" + `",
+                "logo": {
                     "type": "string"
                 }
             }
@@ -894,9 +931,6 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "avatar": {
-                    "type": "string"
-                },
-                "email": {
                     "type": "string"
                 },
                 "name": {
@@ -908,12 +942,14 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "project_permit": {
+                    "description": "允许的项目列表",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/model.ProjectPermit"
                     }
                 },
                 "role": {
+                    "description": "用户权限",
                     "type": "integer"
                 },
                 "user_id": {
@@ -924,11 +960,8 @@ const docTemplate = `{
         "request.UploadReq": {
             "type": "object",
             "properties": {
-                "api_key": {
-                    "type": "string"
-                },
                 "auditor": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "author": {
                     "type": "string"
@@ -944,7 +977,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "public_time": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "tags": {
                     "type": "array",
@@ -986,21 +1019,18 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "api_key": {
+                    "description": "由project_id生成的key",
                     "type": "string"
                 },
                 "audit_rule": {
                     "type": "string"
                 },
                 "current_number": {
+                    "description": "未审核的数目",
                     "type": "integer"
                 },
-                "members": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/model.UserResponse"
-                    }
-                },
                 "totle_number": {
+                    "description": "项目中item总数",
                     "type": "integer"
                 }
             }
@@ -1009,19 +1039,24 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "auditor": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "author": {
                     "type": "string"
                 },
                 "content": {
-                    "$ref": "#/definitions/response.Contents"
+                    "description": "item具体内容，包含题目内容和评论",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/response.Contents"
+                        }
+                    ]
                 },
                 "item_id": {
                     "type": "integer"
                 },
                 "public_time": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "status": {
                     "type": "integer"
@@ -1054,9 +1089,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/response.Item"
                     }
-                },
-                "project_id": {
-                    "type": "integer"
                 }
             }
         },
@@ -1090,6 +1122,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "role": {
+                    "description": "用户权限",
                     "type": "integer"
                 }
             }

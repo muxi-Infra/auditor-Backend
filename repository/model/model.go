@@ -1,6 +1,8 @@
 package model
 
 import (
+	"database/sql/driver"
+	"encoding/json"
 	"gorm.io/gorm"
 	"time"
 )
@@ -29,9 +31,9 @@ type UserProject struct {
 	Role      int  `gorm:"column:role"`
 }
 type ProjectPermit struct {
-	ProjectID   uint   `json:"project_id"`
-	ProjectName string `json:"project_name"`
-	ProjectRole int    `json:"project_role"`
+	ProjectID uint `json:"project_id"`
+	//ProjectName string `json:"project_name"`
+	ProjectRole int `json:"project_role"`
 }
 type UserResponse struct {
 	Name          string          `json:"name"`
@@ -46,29 +48,38 @@ type ProjectList struct {
 }
 type Item struct {
 	gorm.Model
-	Status     int       `gorm:"column:status;not null"`
-	ProjectId  uint      `gorm:"column:project_id;not null"`
-	Author     string    `gorm:"column:author;not null"`
-	Tags       []string  `gorm:"type:json"`
-	PublicTime time.Time `gorm:"column:public_time;not null"`
-	Content    string    `gorm:"column:content;not null"`
-	Title      string    `gorm:"column:title;not null"`
-	Comments   []Comment `gorm:"foreignKey:ItemId"`
-	Auditor    string    `gorm:"column:auditor;not null"`
-	Reason     string    `gorm:"column:reason"`
-	Pictures   []string  `gorm:"type:json"`
-	HookUrl    string    `gorm:"column:hook_url;not null"`
-	HookId     int       `gorm:"column:hook_id;not null"`
+	Status     int             `gorm:"column:status;not null"`
+	ProjectId  uint            `gorm:"column:project_id;not null"`
+	Author     string          `gorm:"column:author;not null"`
+	Tags       GormStringSlice `gorm:"type:json"`
+	PublicTime time.Time       `gorm:"column:public_time;not null"`
+	Content    string          `gorm:"column:content;not null"`
+	Title      string          `gorm:"column:title;not null"`
+	Comments   []Comment       `gorm:"foreignKey:ItemId"`
+	Auditor    uint            `gorm:"column:auditor;not null"`
+	Reason     string          `gorm:"column:reason"`
+	Pictures   GormStringSlice `gorm:"type:json"`
+	HookUrl    string          `gorm:"column:hook_url;not null"`
+	HookId     int             `gorm:"column:hook_id;not null"`
 }
 
 type Comment struct {
 	gorm.Model
-	Content  string   `gorm:"column:content;not null"`
-	Pictures []string `gorm:"type:json"`
-	ItemId   uint     `gorm:"not null;index"`
+	Content  string          `gorm:"column:content;not null"`
+	Pictures GormStringSlice `gorm:"type:json"`
+	ItemId   uint            `gorm:"not null;index"`
 }
 type History struct {
 	gorm.Model
 	UserID uint `gorm:"index"`
 	ItemId uint `gorm:"index"`
+}
+type GormStringSlice []string
+
+func (g GormStringSlice) Value() (driver.Value, error) {
+	return json.Marshal(g)
+}
+
+func (g *GormStringSlice) Scan(value interface{}) error {
+	return json.Unmarshal(value.([]byte), g)
 }

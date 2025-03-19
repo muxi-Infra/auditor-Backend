@@ -18,9 +18,11 @@ func WrapClaimsAndReq[Req any, UserClaims any, Resp any](fn func(*gin.Context, R
 		if len(ctx.Errors) > 0 {
 			return
 		}
-		//解析请求
+
 		var req Req
+
 		err := bind(ctx, &req)
+
 		if err != nil {
 			ctx.Error(err)
 			return
@@ -28,6 +30,7 @@ func WrapClaimsAndReq[Req any, UserClaims any, Resp any](fn func(*gin.Context, R
 
 		//获取uc参数
 		uc, err := GetClaims[UserClaims](ctx)
+
 		if err != nil {
 			ctx.Error(err)
 			return
@@ -49,12 +52,15 @@ func WrapClaimsAndReq[Req any, UserClaims any, Resp any](fn func(*gin.Context, R
 func WrapReq[Req any, Resp any](fn func(*gin.Context, Req) (Resp, error)) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		//检查前置中间件是否存在错误,如果存在应当直接返回
+
 		if len(ctx.Errors) > 0 {
 			return
 		}
 		//解析参数
+
 		var req Req
 		err := bind(ctx, &req)
+
 		if err != nil {
 			ctx.Error(err)
 			return
@@ -74,6 +80,7 @@ func WrapReq[Req any, Resp any](fn func(*gin.Context, Req) (Resp, error)) gin.Ha
 // Wrap 。用于处理没有请求体的请求
 // ctx表示上下文,Resp表示响应结构体(这里全部填response.Response)
 func Wrap[Resp any](fn func(*gin.Context) (Resp, error)) gin.HandlerFunc {
+
 	return func(ctx *gin.Context) {
 		//检查前置中间件是否存在错误,如果存在应当直接返回
 		if len(ctx.Errors) > 0 {
@@ -93,16 +100,20 @@ func Wrap[Resp any](fn func(*gin.Context) (Resp, error)) gin.HandlerFunc {
 // ctx表示上下文,Resp表示响应结构体(这里全部填response.Response),UserClaims表示用户信息
 func WrapClaims[UserClaims any, Resp any](fn func(*gin.Context, UserClaims) (Resp, error)) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+
 		//检查前置中间件是否存在错误,如果存在应当直接返回
 		if len(ctx.Errors) > 0 {
 			return
 		}
 		//获取uc参数
+
 		uc, err := GetClaims[UserClaims](ctx)
+
 		if err != nil {
 			ctx.Error(err)
 			return
 		}
+
 		//执行函数
 		res, err := fn(ctx, uc)
 		if err != nil {
@@ -134,12 +145,14 @@ func bind(ctx *gin.Context, req any) error {
 // 获取Claims通用函数
 func GetClaims[UserClaims any](ctx *gin.Context) (claims UserClaims, err error) {
 	rawVal, ok := ctx.Get(UC_CTX)
+
 	if !ok {
 		return claims, api_errors.BAD_ENTITY_ERROR(errors.New("从上下文获取userClaims失败"))
 	}
 
 	// 注意，这里要求放进去 ctx 的不能是*UserClaims，这是常见的一个错误
 	claims, ok = rawVal.(UserClaims)
+
 	if !ok {
 		return claims, api_errors.BAD_ENTITY_ERROR(errors.New("userClaims类型断言失败了"))
 	}
@@ -150,6 +163,7 @@ func GetClaims[UserClaims any](ctx *gin.Context) (claims UserClaims, err error) 
 // 设置Claims通用函数
 func SetClaims[UserClaims any](ctx *gin.Context, claims UserClaims) {
 	ctx.Set(UC_CTX, claims)
+
 }
 
 func GetResp[Resp any](ctx *gin.Context) Resp {

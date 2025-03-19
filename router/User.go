@@ -9,8 +9,9 @@ import (
 )
 
 type UserController interface {
-	GetUsers(g *gin.Context, req request.GetUserReq) (response.Response, error)
 	UpdateUsers(g *gin.Context, req request.UpdateUserRoleReq, cla jwt.UserClaims) (response.Response, error)
+	GetMyInfo(g *gin.Context, cla jwt.UserClaims) (response.Response, error)
+	UpdateMyInfo(g *gin.Context, req request.UpdateUserReq, cla jwt.UserClaims) (response.Response, error)
 }
 
 func UserRoutes(
@@ -20,6 +21,8 @@ func UserRoutes(
 ) {
 	//认证服务
 	UserGroup := s.Group("/user")
-	UserGroup.POST("/getUsers", authMiddleware, ginx.WrapReq(c.GetUsers))
+
 	UserGroup.POST("/updateUser", authMiddleware, ginx.WrapClaimsAndReq(c.UpdateUsers))
+	UserGroup.GET("/getMyInfo", authMiddleware, ginx.WrapClaims(c.GetMyInfo))
+	UserGroup.POST("/updateMyInfo", authMiddleware, ginx.WrapClaimsAndReq(c.UpdateMyInfo))
 }

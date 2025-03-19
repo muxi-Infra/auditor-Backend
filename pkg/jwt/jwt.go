@@ -16,6 +16,7 @@ type JWT struct {
 
 // NewRedisJWTHandler 创建并返回一个新的 JWT 实例
 func NewJWT(expiration time.Duration, secretKey string) *JWT {
+
 	return &JWT{
 		signingMethod: jwt.SigningMethodHS256, //签名的加密方式
 		rcExpiration:  expiration,
@@ -31,6 +32,10 @@ func (j *JWT) ParseToken(tokenStr string) (UserClaims, error) {
 		// 可以根据具体情况给出不同的key
 		return j.jwtKey, nil
 	})
+
+	if j.jwtKey == nil {
+		return UserClaims{}, errors.New("jwtKey 为空，无法解析 token")
+	}
 	if err != nil {
 		return UserClaims{}, err
 	}
@@ -45,6 +50,7 @@ func (j *JWT) ParseToken(tokenStr string) (UserClaims, error) {
 
 // SetJWTToken 生成并设置用户的 JWT
 func (j *JWT) SetJWTToken(uid uint, email string, userRole int) (string, error) {
+
 	uc := UserClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(j.rcExpiration)),
@@ -54,6 +60,7 @@ func (j *JWT) SetJWTToken(uid uint, email string, userRole int) (string, error) 
 		Email:    email,
 		UserRule: userRole,
 	}
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, uc)
 	tokenStr, err := token.SignedString(j.jwtKey)
 	if err != nil {
