@@ -52,8 +52,8 @@ func (s *ProjectService) GetProjectList(ctx context.Context) ([]model.ProjectLis
 	var list []model.ProjectList
 	for _, project := range projects {
 		list = append(list, model.ProjectList{
-			ProjectId:   project.ID,
-			ProjectName: project.ProjectName,
+			Id:   project.ID,
+			Name: project.ProjectName,
 		})
 	}
 
@@ -90,7 +90,7 @@ func (s *ProjectService) Detail(ctx context.Context, id uint) (response.GetDetai
 	//}
 
 	re := response.GetDetailResp{
-		TotleNumber:   countMap[0] + countMap[1] + countMap[2],
+		TotalNumber:   countMap[0] + countMap[1] + countMap[2],
 		CurrentNumber: countMap[0],
 		Apikey:        project.Apikey,
 		AuditRule:     project.AudioRule,
@@ -143,7 +143,7 @@ func (s *ProjectService) GetUsers(ctx context.Context, id uint) ([]model.UserRes
 	if err != nil {
 		return nil, err
 	}
-	userResponse, err := s.userDAO.GetResponse(ctx, users)
+	userResponse, err := s.userDAO.GetResponse(ctx, users, id)
 	if err != nil {
 		return nil, err
 	}

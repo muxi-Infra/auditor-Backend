@@ -163,6 +163,7 @@ func (ctrl *ProjectController) Detail(ctx *gin.Context) (response.Response, erro
 // @Security ApiKeyAuth
 // @Router /api/v1/project/{project_id}/delete [delete]
 func (ctrl *ProjectController) Delete(ctx *gin.Context, cla jwt.UserClaims) (response.Response, error) {
+	
 	projectID := ctx.Param("project_id")
 	if projectID == "" {
 		return response.Response{

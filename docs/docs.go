@@ -148,7 +148,7 @@ const docTemplate = `{
                 "tags": [
                     "Item"
                 ],
-                "summary": "审核项目",
+                "summary": "审核条目",
                 "parameters": [
                     {
                         "description": "审核请求体",
@@ -237,7 +237,7 @@ const docTemplate = `{
                 "tags": [
                     "Item"
                 ],
-                "summary": "获取项目列表",
+                "summary": "获取条目列表",
                 "parameters": [
                     {
                         "description": "查询条件",
@@ -263,7 +263,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/definitions/response.SelectResp"
+                                                "$ref": "#/definitions/response.Item"
                                             }
                                         }
                                     }
@@ -281,7 +281,7 @@ const docTemplate = `{
             }
         },
         "/api/v1/item/upload": {
-            "post": {
+            "put": {
                 "security": [
                     {
                         "ApiKeyAuth": []
@@ -297,7 +297,7 @@ const docTemplate = `{
                 "tags": [
                     "Item"
                 ],
-                "summary": "上传项目",
+                "summary": "上传条目",
                 "parameters": [
                     {
                         "description": "上传请求体",
@@ -325,6 +325,52 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "上传失败",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/item/{item_id}/detail": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "通过id获取条目具体信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Item"
+                ],
+                "summary": "通过id获取条目具体信息",
+                "responses": {
+                    "200": {
+                        "description": "成功返回条目",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/response.Item"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "获取条目失败",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -715,6 +761,60 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/user/getUsers": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "获取或查询所有用户信息包括权限等",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "获取或查询所有用户信息",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "查询关键字",
+                        "name": "the_query",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码 (默认: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页数量 (默认: 10)",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功获取用户信息",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid or expired token",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/user/updateMyInfo": {
             "post": {
                 "security": [
@@ -810,6 +910,56 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/v1/user/{id}/getUserInfo": {
+            "get": {
+                "description": "通过用户 ID 获取详细信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "获取用户信息",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用户 ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/response.UserInfo"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -820,7 +970,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "project_role": {
-                    "description": "ProjectName string ` + "`" + `json:\"project_name\"` + "`" + `",
                     "type": "integer"
                 }
             }
@@ -1029,7 +1178,7 @@ const docTemplate = `{
                     "description": "未审核的数目",
                     "type": "integer"
                 },
-                "totle_number": {
+                "total_number": {
                     "description": "项目中item总数",
                     "type": "integer"
                 }
@@ -1052,13 +1201,14 @@ const docTemplate = `{
                         }
                     ]
                 },
-                "item_id": {
+                "id": {
                     "type": "integer"
                 },
                 "public_time": {
                     "type": "integer"
                 },
                 "status": {
+                    "description": "0未审核1通过2不通过",
                     "type": "integer"
                 },
                 "tags": {
@@ -1078,17 +1228,6 @@ const docTemplate = `{
                 "data": {},
                 "msg": {
                     "type": "string"
-                }
-            }
-        },
-        "response.SelectResp": {
-            "type": "object",
-            "properties": {
-                "items": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/response.Item"
-                    }
                 }
             }
         },
@@ -1117,6 +1256,9 @@ const docTemplate = `{
                 },
                 "email": {
                     "type": "string"
+                },
+                "id": {
+                    "type": "integer"
                 },
                 "name": {
                     "type": "string"

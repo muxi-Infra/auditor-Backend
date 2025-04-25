@@ -31,21 +31,21 @@ type UserProject struct {
 	Role      int  `gorm:"column:role"`
 }
 type ProjectPermit struct {
-	ProjectID uint `json:"project_id"`
-	//ProjectName string `json:"project_name"`
-	ProjectRole int `json:"project_role"`
+	ProjectID   uint `json:"project_id"`
+	ProjectRole int  `json:"project_role"`
 }
 type UserResponse struct {
-	Name          string          `json:"name"`
-	UserID        uint            `json:"user_id"`
-	Avatar        string          `json:"avatar"`
-	ProjectPermit []ProjectPermit `json:"project_permit"`
-	Role          int             `json:"role"`
+	Name        string `json:"name"`
+	ID          uint   `json:"id"` //user_id
+	Avatar      string `json:"avatar"`
+	ProjectRole int    `json:"project_role"`
+	Role        int    `json:"role"`
 }
 type ProjectList struct {
-	ProjectId   uint   `json:"project_id"`
-	ProjectName string `json:"project_name"`
+	Id   uint   `json:"id"`
+	Name string `json:"name"`
 }
+
 type Item struct {
 	gorm.Model
 	Status     int             `gorm:"column:status;not null"`
@@ -73,6 +73,13 @@ type History struct {
 	gorm.Model
 	UserID uint `gorm:"index"`
 	ItemId uint `gorm:"index"`
+}
+type UserInfos struct {
+	Name          string          `json:"name"`
+	Avatar        string          `json:"avatar"`
+	Email         string          `json:"email"`
+	UserRole      int             `json:"user_role"`
+	ProjectPermit []ProjectPermit `json:"project_permit"`
 }
 type GormStringSlice []string
 
