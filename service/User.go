@@ -4,6 +4,7 @@ import (
 	"context"
 	merr "errors"
 	"muxi_auditor/api/request"
+	"muxi_auditor/api/response"
 	"muxi_auditor/pkg/jwt"
 	"muxi_auditor/repository/dao"
 	"muxi_auditor/repository/model"
@@ -75,4 +76,29 @@ func (s *UserService) GetMyInfo(ctx context.Context, id uint) (*model.User, erro
 		return nil, merr.New("user not found")
 	}
 	return user, nil
+}
+func (s *UserService) GetUsers(ctx context.Context, req request.GetUsers) ([]response.UserAllInfo, error) {
+
+	users, err := s.userDAO.GetUsers(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	projects, err := s.userDAO.GetProjectList(ctx)
+	if err != nil {
+		return nil, err
+	}
+	re, err := s.userDAO.GetUserProjectRoles(ctx, users, projects)
+	if err != nil {
+		return nil, err
+	}
+	return re, nil
+
+}
+func (s *UserService) GetUserInfo(ctx context.Context, id uint) (*model.User, error) {
+	user, err := s.userDAO.Read(ctx, id)
+	if err != nil {
+		return &model.User{}, err
+	}
+	return user, nil
+
 }

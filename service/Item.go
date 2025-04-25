@@ -69,7 +69,7 @@ func (s *ItemService) Audit(ctx context.Context, req request.AuditReq, id uint) 
 	reqBody := Data{
 		Id:     item.HookId,
 		Status: M[item.Status],
-		Msg:    "操作成功",
+		Msg:    req.Reason,
 	}
 
 	return reqBody, item, nil
@@ -114,10 +114,10 @@ func (s *ItemService) SearchHistory(ctx context.Context, id uint) ([]model.Item,
 	}
 	return items, nil
 }
-func (s *ItemService) Upload(ctx context.Context, req request.UploadReq, key string) error {
+func (s *ItemService) Upload(ctx context.Context, req request.UploadReq, key string) (uint, error) {
 	claims, err := apikey.ParseAPIKey(key)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	unixTimestamp1 := int64(req.PublicTime)
 	if unixTimestamp1 > 1e10 {
@@ -126,9 +126,33 @@ func (s *ItemService) Upload(ctx context.Context, req request.UploadReq, key str
 	publicTime := time.Unix(unixTimestamp1, 0)
 
 	projectID := uint(claims["sub"].(float64))
-	err = s.userDAO.Upload(ctx, req, projectID, publicTime)
+	id, err := s.userDAO.Upload(ctx, req, projectID, publicTime)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	return nil
+	return id, nil
+}
+func (s *ItemService) GetDetail(ctx context.Context, id uint) (model.Item, error) {
+	item, err := s.userDAO.GetItemDetail(ctx, id)
+	if err != nil {
+		return model.Item{}, errors.New("获取条目失败")
+	}
+	return item, nil
+}
+func (s *ItemService) GetTags(ctx context.Context, id uint) ([]string, error) {
+	items, err := s.userDAO.GetItems(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	m := make(map[string]string)
+	tags := make([]string, 0)
+	for _, item := range items {
+		for _, tag := range item.Tags {
+			m[tag] = tag
+		}
+	}
+	for tag, _ := range m {
+		tags = append(tags, tag)
+	}
+	return tags, nil
 }

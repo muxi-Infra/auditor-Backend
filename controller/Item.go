@@ -13,6 +13,7 @@ import (
 	"muxi_auditor/pkg/jwt"
 	"muxi_auditor/repository/model"
 	"muxi_auditor/service"
+	"strconv"
 )
 
 type ItemController struct {
@@ -22,9 +23,11 @@ type ItemService interface {
 	Select(ctx context.Context, req request.SelectReq) ([]model.Item, error)
 	Audit(g context.Context, req request.AuditReq, id uint) (service.Data, model.Item, error)
 	SearchHistory(g context.Context, id uint) ([]model.Item, error)
-	Upload(g context.Context, req request.UploadReq, key string) error
+	Upload(g context.Context, req request.UploadReq, key string) (uint, error)
 	Hook(service.Data, model.Item) error
 	RoleBack(item model.Item) error
+	GetDetail(ctx context.Context, id uint) (model.Item, error)
+	GetTags(ctx context.Context, id uint) ([]string, error)
 }
 
 func NewItemController(service *service.ItemService) *ItemController {
@@ -34,17 +37,24 @@ func NewItemController(service *service.ItemService) *ItemController {
 }
 
 // Select 集成查询item
-// @Summary 获取项目列表
+// @Summary 获取条目列表
 // @Description 根据请求的条件获取项目和相关项目信息
 // @Tags Item
 // @Accept json
 // @Produce json
 // @Param selectReq body request.SelectReq true "查询条件"
-// @Success 200 {object} response.Response{data=[]response.SelectResp} "成功返回项目列表"
+// @Success 200 {object} response.Response{data=response.SelectResponse} "成功返回项目列表"
 // @Failure 400 {object} response.Response "查询失败"
 // @Router /api/v1/item/select [post]
 func (ic *ItemController) Select(c *gin.Context, req request.SelectReq) (response.Response, error) {
-
+	var result response.SelectResponse
+	if req.ProjectID != 0 {
+		tags, err := ic.service.GetTags(c, req.ProjectID)
+		if err != nil {
+			result.AllTags = nil
+		}
+		result.AllTags = tags
+	}
 	it, err := ic.service.Select(c, req)
 	if err != nil {
 		return response.Response{
@@ -53,7 +63,6 @@ func (ic *ItemController) Select(c *gin.Context, req request.SelectReq) (respons
 			Msg:  "搜索失败",
 		}, err
 	}
-	var re []response.SelectResp
 	var items []response.Item
 
 	for _, item := range it {
@@ -74,7 +83,7 @@ func (ic *ItemController) Select(c *gin.Context, req request.SelectReq) (respons
 		}
 
 		items = append(items, response.Item{
-			ItemId:     item.ID,
+			Id:         item.ID,
 			Author:     item.Author,
 			Tags:       item.Tags,
 			Status:     item.Status,
@@ -91,19 +100,16 @@ func (ic *ItemController) Select(c *gin.Context, req request.SelectReq) (respons
 			},
 		})
 	}
-	re = append(re, response.SelectResp{
-		Items: items,
-	})
-
+	result.Items = items
 	return response.Response{
 		Msg:  "success",
-		Data: re,
+		Data: result,
 		Code: 200,
 	}, nil
 }
 
 // Audit 审核item
-// @Summary 审核项目
+// @Summary 审核条目
 // @Description 审核项目并更新审核状态
 // @Tags Item
 // @Accept json
@@ -180,7 +186,7 @@ func (ic *ItemController) SearchHistory(g *gin.Context, cla jwt.UserClaims) (res
 		}
 
 		it = append(it, response.Item{
-			ItemId:     item.ID,
+			Id:         item.ID,
 			Author:     item.Author,
 			Tags:       item.Tags,
 			Status:     item.Status,
@@ -206,7 +212,7 @@ func (ic *ItemController) SearchHistory(g *gin.Context, cla jwt.UserClaims) (res
 }
 
 // Upload 上传item
-// @Summary 上传项目
+// @Summary 上传条目
 // @Description 上传新的项目或文件
 // @Tags Item
 // @Accept json
@@ -216,10 +222,10 @@ func (ic *ItemController) SearchHistory(g *gin.Context, cla jwt.UserClaims) (res
 // @Success 200 {object} response.Response "上传成功"
 // @Failure 400 {object} response.Response "上传失败"
 // @Security ApiKeyAuth
-// @Router /api/v1/item/upload [post]
+// @Router /api/v1/item/upload [put]
 func (ic *ItemController) Upload(g *gin.Context, req request.UploadReq, cla jwt.UserClaims) (response.Response, error) {
 	key := g.GetHeader("api_key")
-	err := ic.service.Upload(g, req, key)
+	id, err := ic.service.Upload(g, req, key)
 	if err != nil {
 		return response.Response{
 			Msg:  "上传失败",
@@ -229,7 +235,116 @@ func (ic *ItemController) Upload(g *gin.Context, req request.UploadReq, cla jwt.
 	}
 	return response.Response{
 		Msg:  "success",
-		Data: nil,
+		Data: id,
 		Code: 200,
 	}, nil
+}
+
+// Detail 获取单个条目信息
+// @Summary 通过id获取条目具体信息
+// @Description 通过id获取条目具体信息
+// @Tags Item
+// @Accept json
+// @Produce json
+// @Success 200 {object} response.Response{data=response.Item} "成功返回条目"
+// @Failure 400 {object} response.Response "获取条目失败"
+// @Security ApiKeyAuth
+// @Router /api/v1/item/{item_id}/detail [get]
+func (ic *ItemController) Detail(ctx *gin.Context) (response.Response, error) {
+	ItemID := ctx.Param("item_id")
+	if ItemID == "" {
+		return response.Response{
+			Code: 400,
+			Msg:  "需要item_id",
+		}, nil
+	}
+	itemId, err := strconv.ParseUint(ItemID, 10, 64)
+	if err != nil {
+		return response.Response{
+			Code: 400,
+			Msg:  "获取item_id失败",
+		}, err
+	}
+	id := uint(itemId)
+	item, err := ic.service.GetDetail(ctx, id)
+	if err != nil {
+		return response.Response{
+			Code: 400,
+			Msg:  "获取条目失败",
+		}, err
+	}
+	if len(item.Comments) == 0 {
+		re := response.Item{
+			Id:         item.ID,
+			Author:     item.Author,
+			Tags:       item.Tags,
+			Status:     item.Status,
+			PublicTime: item.CreatedAt.UnixMilli(),
+			Content: response.Contents{
+				Topic: response.Topics{
+					Title:    item.Title,
+					Content:  item.Content,
+					Pictures: item.Pictures,
+				},
+			},
+		}
+		return response.Response{
+			Code: 200,
+			Msg:  "获取条目成功",
+			Data: re,
+		}, nil
+	} else if len(item.Comments) == 1 {
+		re := response.Item{
+			Id:         item.ID,
+			Author:     item.Author,
+			Tags:       item.Tags,
+			Status:     item.Status,
+			PublicTime: item.CreatedAt.UnixMilli(),
+			Content: response.Contents{
+				Topic: response.Topics{
+					Title:    item.Title,
+					Content:  item.Content,
+					Pictures: item.Pictures,
+				},
+				LastComment: response.Comment{
+					Content:  item.Comments[0].Content,
+					Pictures: item.Comments[0].Pictures,
+				},
+			},
+		}
+		return response.Response{
+			Code: 200,
+			Msg:  "获取条目成功",
+			Data: re,
+		}, nil
+	} else {
+		re := response.Item{
+			Id:         item.ID,
+			Author:     item.Author,
+			Tags:       item.Tags,
+			Status:     item.Status,
+			PublicTime: item.CreatedAt.UnixMilli(),
+			Content: response.Contents{
+				Topic: response.Topics{
+					Title:    item.Title,
+					Content:  item.Content,
+					Pictures: item.Pictures,
+				},
+				LastComment: response.Comment{
+					Content:  item.Comments[0].Content,
+					Pictures: item.Comments[0].Pictures,
+				},
+				NextComment: response.Comment{
+					Content:  item.Comments[1].Content,
+					Pictures: item.Comments[1].Pictures,
+				},
+			},
+		}
+		return response.Response{
+			Code: 200,
+			Msg:  "获取条目成功",
+			Data: re,
+		}, nil
+	}
+
 }

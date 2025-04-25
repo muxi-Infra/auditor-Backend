@@ -9,7 +9,7 @@ type Response struct {
 	Data interface{} `json:"data"`
 }
 type GetDetailResp struct {
-	TotleNumber   int    `json:"totle_number"`   //项目中item总数
+	TotalNumber   int    `json:"total_number"`   //项目中item总数
 	CurrentNumber int    `json:"current_number"` //未审核的数目
 	Apikey        string `json:"api_key"`        //由project_id生成的key
 	AuditRule     string `json:"audit_rule"`
@@ -19,10 +19,10 @@ type SelectResp struct {
 }
 
 type Item struct {
-	ItemId     uint     `json:"item_id"`
+	Id         uint     `json:"id"`
 	Author     string   `json:"author"`
 	Tags       []string `json:"tags"`
-	Status     int      `json:"status"`
+	Status     int      `json:"status"` //0未审核1通过2不通过
 	PublicTime int64    `json:"public_time"`
 	Auditor    uint     `json:"auditor"`
 	Content    Contents `json:"content"` //item具体内容，包含题目内容和评论
@@ -43,7 +43,25 @@ type Comment struct {
 }
 type UserInfo struct {
 	Avatar string `json:"avatar"`
+	Id     uint   `json:"id"`
 	Name   string `json:"name"`
 	Role   int    `json:"role"` //用户权限
 	Email  string `json:"email"`
+}
+type ProjectRole struct {
+	Id   uint   `json:"id"`   //project_id
+	Name string `json:"name"` //project_name
+	Role int    `json:"role"` //project_role,0未参与，1普通，2管理
+}
+type UserAllInfo struct {
+	ID           uint          `json:"id"`
+	Avatar       string        `json:"avatar"`
+	Name         string        `json:"name"`
+	Role         int           `json:"role"`
+	Email        string        `json:"email"`
+	ProjectsRole []ProjectRole `json:"projects_role"`
+}
+type SelectResponse struct {
+	AllTags []string `json:"all_tags"`
+	Items   []Item   `json:"items"`
 }

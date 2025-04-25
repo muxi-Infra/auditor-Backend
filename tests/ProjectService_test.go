@@ -73,7 +73,7 @@ func TestGetProjectList(t *testing.T) {
 	projectService := service.NewProjectService(mockUserDAO, nil)
 	l, err := projectService.GetProjectList(context.Background(), "logo")
 	assert.NoError(t, err, "Expected no error during project list")
-	assert.Equal(t, []model.ProjectList{{ProjectId: 1, ProjectName: "Project A"}, {ProjectId: 2, ProjectName: "Project B"}}, l, "Expected project list to be equal")
+	assert.Equal(t, []model.ProjectList{{ProjectId: 1, Name: "Project A"}, {ProjectId: 2, Name: "Project B"}}, l, "Expected project list to be equal")
 	mockUserDAO.AssertExpectations(t)
 }
 func TestDetail(t *testing.T) {

@@ -98,7 +98,7 @@ func TestJcGetProjectList(t *testing.T) {
 	projectService := service.NewProjectService(d, nil)
 	l, err := projectService.GetProjectList(context.Background(), "logo")
 	assert.NoError(t, err, "Expected no error during project list")
-	assert.Equal(t, []model.ProjectList{{ProjectId: 1, ProjectName: "Project A"}, {ProjectId: 2, ProjectName: "Project B"}}, l)
+	assert.Equal(t, []model.ProjectList{{ProjectId: 1, Name: "Project A"}, {ProjectId: 2, Name: "Project B"}}, l)
 
 }
 func TestJcDetail(t *testing.T) {

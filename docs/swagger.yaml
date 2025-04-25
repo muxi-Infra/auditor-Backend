@@ -4,7 +4,6 @@ definitions:
       project_id:
         type: integer
       project_role:
-        description: ProjectName string `json:"project_name"`
         type: integer
     type: object
   request.AuditReq:
@@ -143,7 +142,7 @@ definitions:
       current_number:
         description: 未审核的数目
         type: integer
-      totle_number:
+      total_number:
         description: 项目中item总数
         type: integer
     type: object
@@ -157,11 +156,12 @@ definitions:
         allOf:
         - $ref: '#/definitions/response.Contents'
         description: item具体内容，包含题目内容和评论
-      item_id:
+      id:
         type: integer
       public_time:
         type: integer
       status:
+        description: 0未审核1通过2不通过
         type: integer
       tags:
         items:
@@ -175,13 +175,6 @@ definitions:
       data: {}
       msg:
         type: string
-    type: object
-  response.SelectResp:
-    properties:
-      items:
-        items:
-          $ref: '#/definitions/response.Item'
-        type: array
     type: object
   response.Topics:
     properties:
@@ -200,6 +193,8 @@ definitions:
         type: string
       email:
         type: string
+      id:
+        type: integer
       name:
         type: string
       role:
@@ -275,6 +270,32 @@ paths:
       summary: 用户登出
       tags:
       - Auth
+  /api/v1/item/{item_id}/detail:
+    get:
+      consumes:
+      - application/json
+      description: 通过id获取条目具体信息
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功返回条目
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.Item'
+              type: object
+        "400":
+          description: 获取条目失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 通过id获取条目具体信息
+      tags:
+      - Item
   /api/v1/item/audit:
     post:
       consumes:
@@ -300,7 +321,7 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - ApiKeyAuth: []
-      summary: 审核项目
+      summary: 审核条目
       tags:
       - Item
   /api/v1/item/searchHistory:
@@ -354,18 +375,18 @@ paths:
             - properties:
                 data:
                   items:
-                    $ref: '#/definitions/response.SelectResp'
+                    $ref: '#/definitions/response.Item'
                   type: array
               type: object
         "400":
           description: 查询失败
           schema:
             $ref: '#/definitions/response.Response'
-      summary: 获取项目列表
+      summary: 获取条目列表
       tags:
       - Item
   /api/v1/item/upload:
-    post:
+    put:
       consumes:
       - application/json
       description: 上传新的项目或文件
@@ -394,7 +415,7 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - ApiKeyAuth: []
-      summary: 上传项目
+      summary: 上传条目
       tags:
       - Item
   /api/v1/project/{project_id}/delete:
@@ -599,6 +620,36 @@ paths:
       summary: 获取七牛云上传 Token
       tags:
       - Tube
+  /api/v1/user/{id}/getUserInfo:
+    get:
+      consumes:
+      - application/json
+      description: 通过用户 ID 获取详细信息
+      parameters:
+      - description: 用户 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.UserInfo'
+              type: object
+        "400":
+          description: 请求错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 获取用户信息
+      tags:
+      - User
   /api/v1/user/getMyInfo:
     get:
       consumes:
@@ -628,6 +679,40 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 获取自己信息
+      tags:
+      - User
+  /api/v1/user/getUsers:
+    get:
+      consumes:
+      - application/json
+      description: 获取或查询所有用户信息包括权限等
+      parameters:
+      - description: 查询关键字
+        in: query
+        name: the_query
+        type: string
+      - description: '页码 (默认: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: '每页数量 (默认: 10)'
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功获取用户信息
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Invalid or expired token
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取或查询所有用户信息
       tags:
       - User
   /api/v1/user/updateMyInfo:

@@ -65,3 +65,9 @@ type UpdateProject struct {
 	Logo      string `json:"logo"`
 	AudioRule string `json:"audio_rule"`
 }
+
+type GetUsers struct {
+	Query    string `json:"query"`
+	Page     int    `json:"page"`
+	PageSize int    `json:"size"`
+}

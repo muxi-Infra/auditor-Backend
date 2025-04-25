@@ -13,6 +13,7 @@ type ItemController interface {
 	Audit(g *gin.Context, req request.AuditReq, cla jwt.UserClaims) (response.Response, error)
 	SearchHistory(g *gin.Context, cla jwt.UserClaims) (response.Response, error)
 	Upload(g *gin.Context, req request.UploadReq, cla jwt.UserClaims) (response.Response, error)
+	Detail(g *gin.Context) (response.Response, error)
 }
 
 func ItemRoutes(
@@ -24,5 +25,6 @@ func ItemRoutes(
 	ItemGroup.POST("/select", authMiddleware, ginx.WrapReq(c.Select))
 	ItemGroup.POST("/audit", authMiddleware, ginx.WrapClaimsAndReq(c.Audit))
 	ItemGroup.GET("/searchHistory", authMiddleware, ginx.WrapClaims(c.SearchHistory))
-	ItemGroup.POST("/upload", authMiddleware, ginx.WrapClaimsAndReq(c.Upload))
+	ItemGroup.PUT("/upload", authMiddleware, ginx.WrapClaimsAndReq(c.Upload))
+	ItemGroup.GET("/:item_id/detail", authMiddleware, ginx.Wrap(c.Detail))
 }
