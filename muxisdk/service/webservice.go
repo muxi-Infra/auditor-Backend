@@ -3,8 +3,9 @@ package service
 import (
 	"encoding/json"
 	"github.com/IBM/sarama"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/muxisdk/model"
 	"github.com/gin-gonic/gin"
-	"muxisdk/model"
+
 	"net/http"
 )
 

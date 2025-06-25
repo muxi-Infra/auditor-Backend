@@ -1,4 +1,4 @@
-module muxisdk
+module github.com/cqhasy/2025-Muxi-Team-auditor-Backend/muxisdk
 
 go 1.24.4
 
