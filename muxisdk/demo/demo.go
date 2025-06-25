@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/muxisdk/dao"
 	"gorm.io/gorm"
-	"muxisdk/dao"
 )
 
 type User struct {
