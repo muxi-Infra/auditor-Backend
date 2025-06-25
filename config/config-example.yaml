@@ -9,7 +9,7 @@ jwt:
 
 # 数据库配置
 db:
-  dsn: "root:chenhaoqi318912-pw@tcp(60.205.12.92:3306)/muxiAuditor?charset=utf8mb4&parseTime=True&loc=Local"
+  dsn: "root:chenhaoqi318912@tcp(60.205.12.92:3306)/muxiAuditor?charset=utf8mb4&parseTime=True&loc=Local"
 
 # 缓存配置
 cache:
@@ -57,3 +57,6 @@ QiNiuYun:
   SecretKey: "zHA9w8PoSfL6D4dvWNwU2GF4XHUn9MalynbANE3_" #七牛云的私钥
   Bucket : "muxi-miniproject" #所创建七牛云对象存储的名称
   Domain : "mini-project.muxixyz.com" #对象存储所绑定的七牛云的域名
+OpenAi:
+  ApiKey:
+  
