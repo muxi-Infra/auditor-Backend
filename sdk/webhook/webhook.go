@@ -14,25 +14,25 @@ import (
 type HandlerFunc func(event string, data interface{})
 
 type Listener struct {
-	engine  *gin.Engine
-	addr    string
-	path    string
-	handler HandlerFunc
+	Engine  *gin.Engine
+	Addr    string
+	Path    string
+	Handler HandlerFunc
 }
 
 func NewListener(engine *gin.Engine, addr string, path string, handler HandlerFunc) *Listener {
 	l := &Listener{
-		engine:  engine,
-		addr:    addr,
-		path:    path,
-		handler: handler,
+		Engine:  engine,
+		Addr:    addr,
+		Path:    path,
+		Handler: handler,
 	}
 	l.registerRoutes()
 	return l
 }
 
 func (l *Listener) registerRoutes() {
-	l.engine.POST(l.path, func(c *gin.Context) {
+	l.Engine.POST(l.Path, func(c *gin.Context) {
 		var payload request.HookPayload
 		if err := c.ShouldBindJSON(&payload); err != nil {
 			c.JSON(http.StatusBadRequest, response.Response{
@@ -43,7 +43,7 @@ func (l *Listener) registerRoutes() {
 			return
 		}
 
-		l.handler(payload.Event, payload.Data)
+		l.Handler(payload.Event, payload.Data)
 
 		c.JSON(http.StatusOK, response.Response{
 			Code: 200,
@@ -55,10 +55,10 @@ func (l *Listener) registerRoutes() {
 
 // 启动监听器
 func (l *Listener) Start() error {
-	return l.engine.Run(l.addr)
+	return l.Engine.Run(l.Addr)
 }
 func (l *Listener) RegisterRouteWithKa(kafkaProducer sarama.SyncProducer, topic string) {
-	l.engine.POST(l.path, func(c *gin.Context) {
+	l.Engine.POST(l.Path, func(c *gin.Context) {
 		var payload request.HookPayload
 		if err := c.ShouldBindJSON(&payload); err != nil {
 			c.JSON(http.StatusBadRequest, response.Response{
