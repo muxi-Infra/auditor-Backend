@@ -1,11 +1,11 @@
 package ioc
 
 import (
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/config"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/logger"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
-	"muxi_auditor/config"
-	"muxi_auditor/pkg/logger"
 )
 
 func InitLogger(logConfig *config.LogConfig) logger.Logger {

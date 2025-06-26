@@ -2,14 +2,14 @@ package tests
 
 import (
 	"context"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/dao"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/model"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/service"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
-	"muxi_auditor/api/response"
-	"muxi_auditor/repository/dao"
-	"muxi_auditor/repository/model"
-	"muxi_auditor/service"
 	"testing"
 )
 

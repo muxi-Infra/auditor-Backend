@@ -7,9 +7,9 @@ import (
 
 	mock "github.com/stretchr/testify/mock"
 
-	model "muxi_auditor/repository/model"
+	model "github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/model"
 
-	request "muxi_auditor/api/request"
+	request "github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
 
 	time "time"
 )

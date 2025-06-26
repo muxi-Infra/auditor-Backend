@@ -1,7 +1,7 @@
 package config
 
 import (
-	"muxi_auditor/pkg/viperx"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/viperx"
 )
 
 type AppConf struct {

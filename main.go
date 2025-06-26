@@ -1,8 +1,8 @@
 package main
 
 import (
+	conf "github.com/cqhasy/2025-Muxi-Team-auditor-Backend/config"
 	"github.com/gin-gonic/gin"
-	conf "muxi_auditor/config"
 )
 
 func main() {

@@ -2,11 +2,11 @@ package service
 
 import (
 	"context"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/config"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/jwt"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/dao"
 	"github.com/qiniu/go-sdk/v7/storagev2/credentials"
 	"github.com/qiniu/go-sdk/v7/storagev2/uptoken"
-	"muxi_auditor/config"
-	"muxi_auditor/pkg/jwt"
-	"muxi_auditor/repository/dao"
 	"time"
 )
 

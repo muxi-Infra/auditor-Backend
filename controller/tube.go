@@ -2,10 +2,10 @@ package controller
 
 import (
 	"context"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/config"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/service"
 	"github.com/gin-gonic/gin"
-	"muxi_auditor/api/response"
-	"muxi_auditor/config"
-	"muxi_auditor/service"
 )
 
 type TubeController struct {

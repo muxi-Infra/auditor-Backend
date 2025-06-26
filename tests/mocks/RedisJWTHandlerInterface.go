@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	jwt "muxi_auditor/pkg/jwt"
+	jwt "github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/jwt"
 
 	gin "github.com/gin-gonic/gin"
 

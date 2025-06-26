@@ -1,9 +1,9 @@
 package ioc
 
 import (
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/config"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/prometheusx"
 	"github.com/prometheus/client_golang/prometheus"
-	"muxi_auditor/config"
-	"muxi_auditor/pkg/prometheusx"
 )
 
 type Prometheus struct {

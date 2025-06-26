@@ -2,8 +2,8 @@ package ginx
 
 import (
 	"errors"
+	api_errors "github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/errors"
 	"github.com/gin-gonic/gin"
-	api_errors "muxi_auditor/api/errors"
 	"net/http"
 )
 
