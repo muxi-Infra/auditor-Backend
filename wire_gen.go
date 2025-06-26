@@ -8,16 +8,16 @@ package main
 
 import (
 	"gorm.io/gorm"
-	"muxi_auditor/client"
-	"muxi_auditor/config"
-	"muxi_auditor/controller"
-	"muxi_auditor/ioc"
-	"muxi_auditor/middleware"
-	"muxi_auditor/pkg/jwt"
-	"muxi_auditor/pkg/viperx"
-	"muxi_auditor/repository/dao"
-	"muxi_auditor/router"
-	"muxi_auditor/service"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/client"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/config"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/controller"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/ioc"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/middleware"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/jwt"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/viperx"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/dao"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/router"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/service"
 )
 
 // Injectors from wire.go:

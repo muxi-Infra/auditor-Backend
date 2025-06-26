@@ -1,9 +1,10 @@
-package service
+package webhook
 
 import (
 	"encoding/json"
 	"github.com/IBM/sarama"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/muxisdk/model"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
 	"github.com/gin-gonic/gin"
 
 	"net/http"
@@ -32,9 +33,9 @@ func NewListener(engine *gin.Engine, addr string, path string, handler HandlerFu
 
 func (l *Listener) registerRoutes() {
 	l.engine.POST(l.path, func(c *gin.Context) {
-		var payload HookPayload
+		var payload request.HookPayload
 		if err := c.ShouldBindJSON(&payload); err != nil {
-			c.JSON(http.StatusBadRequest, model.Response{
+			c.JSON(http.StatusBadRequest, response.Response{
 				Code: 400,
 				Msg:  "invalid payload",
 				Data: nil,
@@ -44,7 +45,7 @@ func (l *Listener) registerRoutes() {
 
 		l.handler(payload.Event, payload.Data)
 
-		c.JSON(http.StatusOK, model.Response{
+		c.JSON(http.StatusOK, response.Response{
 			Code: 200,
 			Msg:  "success",
 			Data: payload,
@@ -58,9 +59,9 @@ func (l *Listener) Start() error {
 }
 func (l *Listener) RegisterRouteWithKa(kafkaProducer sarama.SyncProducer, topic string) {
 	l.engine.POST(l.path, func(c *gin.Context) {
-		var payload HookPayload
+		var payload request.HookPayload
 		if err := c.ShouldBindJSON(&payload); err != nil {
-			c.JSON(http.StatusBadRequest, model.Response{
+			c.JSON(http.StatusBadRequest, response.Response{
 				Code: 400,
 				Msg:  "invalid payload",
 				Data: nil,
@@ -70,7 +71,7 @@ func (l *Listener) RegisterRouteWithKa(kafkaProducer sarama.SyncProducer, topic 
 		// 序列化为 JSON
 		bytes, err := json.Marshal(payload)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, model.Response{
+			c.JSON(http.StatusInternalServerError, response.Response{
 				Code: 500,
 				Msg:  "序列化失败",
 				Data: err,
@@ -85,7 +86,7 @@ func (l *Listener) RegisterRouteWithKa(kafkaProducer sarama.SyncProducer, topic 
 		// 发送到 Kafka
 		_, _, err = kafkaProducer.SendMessage(msg)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, model.Response{
+			c.JSON(http.StatusInternalServerError, response.Response{
 				Code: 500,
 				Msg:  "fail to send message to kafka",
 				Data: err,
@@ -93,7 +94,7 @@ func (l *Listener) RegisterRouteWithKa(kafkaProducer sarama.SyncProducer, topic 
 			return
 		}
 
-		c.JSON(http.StatusOK, model.Response{
+		c.JSON(http.StatusOK, response.Response{
 			Code: 200,
 			Msg:  "success to send message to kafka",
 		})

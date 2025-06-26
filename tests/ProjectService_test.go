@@ -2,13 +2,13 @@ package tests
 
 import (
 	"context"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/model"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/service"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/tests/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"gorm.io/gorm"
-	"muxi_auditor/api/response"
-	"muxi_auditor/repository/model"
-	"muxi_auditor/service"
-	"muxi_auditor/tests/mocks"
 	"testing"
 )
 

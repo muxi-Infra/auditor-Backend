@@ -1,8 +1,8 @@
 package dao
 
 import (
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/model"
 	"gorm.io/gorm"
-	"muxi_auditor/repository/model"
 )
 
 func InitTables(db *gorm.DB) error {

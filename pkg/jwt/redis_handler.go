@@ -3,9 +3,9 @@ package jwt
 import (
 	"context"
 	"errors"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/config"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
-	"muxi_auditor/config"
 	"strings"
 	"time"
 )

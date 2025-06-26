@@ -5,12 +5,16 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"muxi_auditor/api/request"
-	"muxi_auditor/pkg/apikey"
-	"muxi_auditor/pkg/jwt"
-	"muxi_auditor/repository/dao"
-	"muxi_auditor/repository/model"
+	"fmt"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/apikey"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/jwt"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/dao"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/model"
+	"io"
 	"net/http"
+	"os"
+	"strconv"
 	"time"
 )
 
@@ -75,29 +79,88 @@ func (s *ItemService) Audit(ctx context.Context, req request.AuditReq, id uint) 
 	return reqBody, item, nil
 }
 func (s *ItemService) Hook(reqbody Data, item model.Item) error {
-	body, err := json.Marshal(reqbody)
+	try := os.Getenv("HOOK_TRY_MAX")
+	num, err := strconv.Atoi(try) // 将 string 转成 int
+	if err != nil {
+		return errors.New("回调次数环境变量需要为整数")
+	}
+	if num > 10 {
+		return errors.New("too many hooks")
+	}
+	var req = request.HookPayload{
+		Event: "audit result back",
+		Data:  reqbody,
+		Try:   num,
+	}
+	_, err = s.HookBack(item.HookUrl, req, "")
 	if err != nil {
 		return err
-	}
-
-	reqs, err := http.NewRequest("POST", item.HookUrl, bytes.NewBuffer(body))
-
-	if err != nil {
-
-		return err
-	}
-	reqs.Header.Set("Content-Type", "application/json")
-	client := &http.Client{}
-	resp, err := client.Do(reqs)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-
-		return errors.New("回调HookUrl失败")
 	}
 	return nil
+	//body, err := json.Marshal(req)
+	//if err != nil {
+	//	return err
+	//}
+	//
+	//reqs, err := http.NewRequest("POST", item.HookUrl, bytes.NewBuffer(body))
+	//
+	//if err != nil {
+	//
+	//	return err
+	//}
+	//reqs.Header.Set("Content-Type", "application/json")
+	//client := &http.Client{}
+	//resp, err := client.Do(reqs)
+	//if err != nil {
+	//	return err
+	//}
+	//defer resp.Body.Close()
+	//if resp.StatusCode != http.StatusOK {
+	//
+	//	return errors.New("回调HookUrl失败")
+	//}
+	//return nil
+}
+func (s *ItemService) HookBack(t string, data request.HookPayload, authorization string) ([]byte, error) {
+	if data.Try > 10 {
+		return nil, errors.New("too many hooks")
+	}
+	jsonBytes, err := json.Marshal(data)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal hook payload: %w", err)
+	}
+	var lasterr error
+	for i := 0; i < data.Try; i++ {
+		reqs, err := http.NewRequest("POST", t, bytes.NewBuffer(jsonBytes))
+		if err != nil {
+			lasterr = err
+			time.Sleep(time.Second)
+			continue
+		}
+		reqs.Header.Set("Content-Type", "application/json")
+		if authorization != "" {
+			reqs.Header.Set("Authorization", authorization)
+		}
+		client := &http.Client{}
+		resp, err := client.Do(reqs)
+		if err != nil {
+			lasterr = err
+			time.Sleep(time.Second)
+			continue
+		}
+
+		body, readErr := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		if readErr != nil {
+			lasterr = readErr
+			break
+		}
+		if resp.StatusCode == http.StatusOK {
+			return body, nil
+		}
+	}
+
+	return nil, lasterr
 }
 func (s *ItemService) RoleBack(item model.Item) error {
 	err := s.userDAO.RollBack(item.ID, 0, item.Reason)

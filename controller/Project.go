@@ -2,13 +2,13 @@ package controller
 
 import (
 	"context"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/ginx"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/jwt"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/model"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/service"
 	"github.com/gin-gonic/gin"
-	"muxi_auditor/api/request"
-	"muxi_auditor/api/response"
-	"muxi_auditor/pkg/ginx"
-	"muxi_auditor/pkg/jwt"
-	"muxi_auditor/repository/model"
-	"muxi_auditor/service"
 	"strconv"
 )
 
@@ -163,7 +163,7 @@ func (ctrl *ProjectController) Detail(ctx *gin.Context) (response.Response, erro
 // @Security ApiKeyAuth
 // @Router /api/v1/project/{project_id}/delete [delete]
 func (ctrl *ProjectController) Delete(ctx *gin.Context, cla jwt.UserClaims) (response.Response, error) {
-	
+
 	projectID := ctx.Param("project_id")
 	if projectID == "" {
 		return response.Response{

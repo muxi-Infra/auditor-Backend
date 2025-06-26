@@ -3,12 +3,12 @@ package controller
 import (
 	"context"
 	"fmt"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/jwt"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/model"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/service"
 	"github.com/gin-gonic/gin"
-	"muxi_auditor/api/request"
-	"muxi_auditor/api/response"
-	"muxi_auditor/pkg/jwt"
-	"muxi_auditor/repository/model"
-	"muxi_auditor/service"
 	"strconv"
 )
 

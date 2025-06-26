@@ -1,8 +1,8 @@
 package request
 
 import (
-	"muxi_auditor/api/response"
-	"muxi_auditor/repository/model"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/model"
 )
 
 type LoginReq struct {
@@ -70,4 +70,9 @@ type GetUsers struct {
 	Query    string `json:"query"`
 	Page     int    `json:"page"`
 	PageSize int    `json:"size"`
+}
+type HookPayload struct {
+	Event string `json:"event"`
+	Data  any    `json:"data,omitempty"`
+	Try   int    `json:"try"` // 重试次数，最大不超过五
 }

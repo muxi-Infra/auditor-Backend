@@ -1,10 +1,10 @@
 package router
 
 import (
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/ginx"
 	"github.com/gin-gonic/gin"
-	"muxi_auditor/api/request"
-	"muxi_auditor/api/response"
-	"muxi_auditor/pkg/ginx"
 )
 
 type OAuthController interface {

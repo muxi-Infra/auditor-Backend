@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"muxi_auditor/api/request"
-	"muxi_auditor/api/response"
-	"muxi_auditor/pkg/jwt"
-	"muxi_auditor/repository/dao"
-	"muxi_auditor/repository/model"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/jwt"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/dao"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/model"
 	"strconv"
 )
 

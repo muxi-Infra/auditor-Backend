@@ -1,7 +1,7 @@
 package errors
 
 import (
-	"muxi_auditor/pkg/errorx"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/errorx"
 	"net/http"
 )
 
