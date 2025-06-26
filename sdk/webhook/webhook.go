@@ -11,7 +11,7 @@ import (
 )
 
 // HandlerFunc 用户定义的回调处理函数
-type HandlerFunc func(event string, data interface{})
+type HandlerFunc func(event string, data request.HookPayload)
 
 type Listener struct {
 	Engine  *gin.Engine
@@ -43,7 +43,7 @@ func (l *Listener) registerRoutes() {
 			return
 		}
 
-		l.Handler(payload.Event, payload.Data)
+		l.Handler(payload.Event, payload)
 
 		c.JSON(http.StatusOK, response.Response{
 			Code: 200,
