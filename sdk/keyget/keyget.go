@@ -1,0 +1,58 @@
+package keyget
+
+import (
+	"fmt"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
+	"github.com/gin-gonic/gin"
+	"net/http"
+	"os"
+)
+
+type KeyGet struct {
+	Engine  *gin.Engine
+	Addr    string
+	Path    string
+	Handler gin.HandlerFunc
+}
+
+func NewKeyGet(engine *gin.Engine, addr string, path string, handler gin.HandlerFunc) *KeyGet {
+	return &KeyGet{
+		Engine:  engine,
+		Addr:    addr,
+		Path:    path,
+		Handler: handler,
+	}
+}
+func (k *KeyGet) Serve() *KeyGet {
+	k.Engine.POST(k.Path, k.Handler)
+	return k
+}
+func (k *KeyGet) Run() error {
+	return k.Engine.Run(k.Addr)
+}
+func DefaultServe(engine *gin.Engine, addr string, path string) {
+	handler := func(c *gin.Context) {
+		var data request.ReturnSecret
+		err := c.ShouldBind(&data)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		filename := "./key.txt"
+		file, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+		if err != nil {
+			fmt.Println("打开文件失败:", err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "secret_key": data.SecretKey, "access_key": data.AccessKey})
+			return
+		}
+		defer file.Close()
+		_, err = file.WriteString(fmt.Sprintf("secret_key:%s\n,access_key:%s\n", data.SecretKey, data.AccessKey))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "secret_key": data.SecretKey, "access_key": data.AccessKey})
+			return
+		}
+
+	}
+	k := NewKeyGet(engine, addr, path, handler)
+	k.Serve()
+}

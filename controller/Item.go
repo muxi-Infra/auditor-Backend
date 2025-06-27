@@ -1,4 +1,4 @@
-// @securityDefinitions.apikey ApiKeyAuth
+// @securityDefinitions.keyget ApiKeyAuth
 // @in header
 // @name Authorization
 

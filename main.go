@@ -3,6 +3,7 @@ package main
 import (
 	conf "github.com/cqhasy/2025-Muxi-Team-auditor-Backend/config"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -27,7 +28,9 @@ func NewApp(r *gin.Engine, c *conf.AppConf) *App {
 
 // 启动
 func (a *App) Run() {
+	godotenv.Load(".env")
 	err := a.r.Run(a.c.Addr)
+
 	if err != nil {
 		panic(err)
 	}
