@@ -1,8 +1,12 @@
 package apikey
 
 import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
+	"math/rand"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -14,7 +18,6 @@ func GenerateAPIKey(projectID uint) (string, error) {
 	claims := jwt.MapClaims{
 		"sub": projectID,
 		"iat": time.Now().Unix(),
-		"exp": time.Now().Add(1000 * time.Hour).Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -42,4 +45,25 @@ func ParseAPIKey(apiKey string) (jwt.MapClaims, error) {
 		return nil, errors.New("invalid token")
 	}
 
+}
+
+const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+
+func randomString(length int) string {
+	seededRand := rand.New(rand.NewSource(time.Now().UnixNano()))
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = charset[seededRand.Intn(len(charset))]
+	}
+	return string(b)
+}
+func GenerateKeyPair() (accessKey, secretKey string) {
+	accessKey = "cli_" + randomString(16)
+	secretKey = randomString(32) // 只返回给调用方一次
+	return
+}
+func SignRequest(secret, body, timestamp string) string {
+	mac := hmac.New(sha256.New, []byte(secret))
+	mac.Write([]byte(body + timestamp))
+	return hex.EncodeToString(mac.Sum(nil))
 }

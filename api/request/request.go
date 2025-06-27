@@ -29,6 +29,7 @@ type CreateProject struct {
 	Logo      string `json:"logo"`
 	AudioRule string `json:"audio_rule"` //审核规则
 	UserIds   []uint `json:"user_ids"`
+	HookUrl   string `json:"hook_url"`
 }
 type GetProjectDetail struct {
 	ProjectId uint `json:"project_id"`
@@ -75,4 +76,9 @@ type HookPayload struct {
 	Event string `json:"event"`
 	Data  any    `json:"data,omitempty"`
 	Try   int    `json:"try"` // 重试次数，最大不超过五
+}
+type ReturnSecret struct {
+	AccessKey string `json:"access_key"`
+	SecretKey string `json:"secret_key"`
+	Message   string `json:"message"`
 }
