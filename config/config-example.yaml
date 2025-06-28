@@ -9,7 +9,7 @@ jwt:
 
 # 数据库配置
 db:
-  dsn: "root:chenhaoqi318912@tcp(60.205.12.92:3306)/muxiAuditor?charset=utf8mb4&parseTime=True&loc=Local"
+  dsn: "root:chenhaoqi318912@tcp(xxxxxxxxx:3306)/muxiAuditor?charset=utf8mb4&parseTime=True&loc=Local"
 
 # 缓存配置
 cache:
