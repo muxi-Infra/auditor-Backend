@@ -12,7 +12,7 @@ func NewRouter(
 	User *controller.UserController,
 	Item *controller.ItemController,
 	Tube *controller.TubeController,
-	Remove RemoveController,
+	Remove *controller.RemoveController,
 	AuthMiddleware *middleware.AuthMiddleware,
 	corsMiddleware *middleware.CorsMiddleware,
 	loggerMiddleware *middleware.LoggerMiddleware,
@@ -20,7 +20,7 @@ func NewRouter(
 
 ) *gin.Engine {
 
-	r := gin.New()
+	r := gin.Default()
 	//使用gin的Panic捕获中间件
 	r.Use(gin.Recovery())
 	r.GET("/metrics", gin.WrapH(promhttp.Handler()))

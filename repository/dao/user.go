@@ -307,8 +307,9 @@ func (d *UserDAO) AuditItem(ctx context.Context, ItemId uint, Status int, Reason
 		Model(&model.Item{}).
 		Where(" id = ?", ItemId).
 		Updates(map[string]interface{}{
-			"status": Status,
-			"reason": Reason,
+			"status":  Status,
+			"reason":  Reason,
+			"auditor": id,
 		}).Error
 
 	if err != nil {
@@ -387,30 +388,40 @@ func (d *UserDAO) Upload(ctx context.Context, req request.UploadReq, id uint, ti
 				HookUrl:    req.HookUrl,
 				HookId:     req.Id,
 			}
+			var comment = []model.Comment{model.Comment{
+				Content:  req.Content.LastComment.Content,
+				Pictures: req.Content.LastComment.Pictures,
+				ItemId:   item.ID,
+			}, model.Comment{
+				Content:  req.Content.NextComment.Content,
+				Pictures: req.Content.NextComment.Pictures,
+				ItemId:   item.ID,
+			}}
+			item.Comments = comment
 			err = d.DB.WithContext(ctx).Create(&item).Error
 
 			if err != nil {
 				return 0, err
 			}
 
-			var comment1 = model.Comment{
-				Content:  req.Content.LastComment.Content,
-				Pictures: req.Content.LastComment.Pictures,
-				ItemId:   item.ID,
-			}
-			var comment2 = model.Comment{
-				Content:  req.Content.NextComment.Content,
-				Pictures: req.Content.NextComment.Pictures,
-				ItemId:   item.ID,
-			}
-			err = d.DB.WithContext(ctx).Create(&comment1).Error
-			if err != nil {
-				return 0, err
-			}
-			err = d.DB.WithContext(ctx).Create(&comment2).Error
-			if err != nil {
-				return 0, err
-			}
+			//var comment1 = model.Comment{
+			//	Content:  req.Content.LastComment.Content,
+			//	Pictures: req.Content.LastComment.Pictures,
+			//	ItemId:   item.ID,
+			//}
+			//var comment2 = model.Comment{
+			//	Content:  req.Content.NextComment.Content,
+			//	Pictures: req.Content.NextComment.Pictures,
+			//	ItemId:   item.ID,
+			//}
+			//err = d.DB.WithContext(ctx).Create(&comment1).Error
+			//if err != nil {
+			//	return 0, err
+			//}
+			//err = d.DB.WithContext(ctx).Create(&comment2).Error
+			//if err != nil {
+			//	return 0, err
+			//}
 			return item.ID, nil
 		}
 		return 0, err
@@ -456,6 +467,10 @@ func (d *UserDAO) Upload(ctx context.Context, req request.UploadReq, id uint, ti
 
 func (d *UserDAO) UpdateItem(ctx context.Context, req request.UploadReq, id uint, time time.Time) (uint, error) {
 	var it model.Item
+	err := d.DB.WithContext(ctx).Where("hook_id=?", req.Id).First(&it).Error
+	if err != nil {
+		return 0, err
+	}
 	it.Status = 0
 	it.ProjectId = id
 	it.Auditor = req.Auditor
@@ -467,30 +482,32 @@ func (d *UserDAO) UpdateItem(ctx context.Context, req request.UploadReq, id uint
 	it.Pictures = req.Content.Topic.Pictures
 	it.HookUrl = req.HookUrl
 	it.HookId = req.Id
-	err := d.DB.WithContext(ctx).Where("id=?", it.ID).Updates(&it).Error
 
+	var comment = []model.Comment{
+		model.Comment{Content: req.Content.LastComment.Content,
+			Pictures: req.Content.LastComment.Pictures,
+			ItemId:   it.ID},
+		model.Comment{
+			Content:  req.Content.NextComment.Content,
+			Pictures: req.Content.NextComment.Pictures,
+			ItemId:   it.ID},
+	}
+	//var comment2 =
+	//}
+	it.Comments = comment
+	err = d.DB.WithContext(ctx).Updates(&it).Error
 	if err != nil {
 		return 0, err
 	}
 
-	var comment1 = model.Comment{
-		Content:  req.Content.LastComment.Content,
-		Pictures: req.Content.LastComment.Pictures,
-		ItemId:   it.ID,
-	}
-	var comment2 = model.Comment{
-		Content:  req.Content.NextComment.Content,
-		Pictures: req.Content.NextComment.Pictures,
-		ItemId:   it.ID,
-	}
-	err = d.DB.WithContext(ctx).Where("item_id =?", it.ID).Updates(&comment1).Error
-	if err != nil {
-		return 0, err
-	}
-	err = d.DB.WithContext(ctx).Where("item_id =?", it.ID).Updates(&comment2).Error
-	if err != nil {
-		return 0, err
-	}
+	//err = d.DB.WithContext(ctx).Where("item_id =?", it.ID).Updates(&comment1).Error
+	//if err != nil {
+	//	return 0, err
+	//}
+	//err = d.DB.WithContext(ctx).Where("item_id =?", it.ID).Updates(&comment2).Error
+	//if err != nil {
+	//	return 0, err
+	//}
 	return it.ID, nil
 }
 func (d *UserDAO) GetProjectRole(ctx context.Context, uid uint, pid uint) (int, error) {

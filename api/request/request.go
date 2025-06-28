@@ -54,7 +54,7 @@ type UploadReq struct {
 	Id         uint              `json:"id"` //hook_id
 	Auditor    uint              `json:"auditor"`
 	Author     string            `json:"author"`
-	PublicTime int               `json:"public_time"`
+	PublicTime int64             `json:"public_time"`
 	Tags       []string          `json:"tags"`
 	Content    response.Contents `json:"content"`
 	Extra      interface{}       `json:"extra"`

@@ -28,7 +28,7 @@ type MuxiAuditClient struct {
 func NewMuxiAuditClient(c *http.Client, ul string) *MuxiAuditClient {
 	return &MuxiAuditClient{
 		c:   c,
-		url: ul, //精确到端口即可
+		url: ul, //精确到版本即可
 	}
 }
 
@@ -57,6 +57,7 @@ func (mc *MuxiAuditClient) httpServe(ac string, se string, data []byte, path str
 	if err != nil {
 		return response.Response{}, err
 	}
+	fmt.Println(string(data))
 	var resp response.Response
 	err = json.Unmarshal(data, &resp)
 	if err != nil {

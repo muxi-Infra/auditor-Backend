@@ -63,7 +63,7 @@ type Item struct {
 	Reason     string          `gorm:"column:reason"`
 	Pictures   GormStringSlice `gorm:"type:json"`
 	HookUrl    string          `gorm:"column:hook_url;not null"`
-	HookId     uint            `gorm:"column:hook_id;not null;uniqueIndex"` //调用方该项目的id
+	HookId     uint            `gorm:"column:hook_id;not null;index"` //调用方该项目的id
 }
 
 type Comment struct {

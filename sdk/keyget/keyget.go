@@ -35,7 +35,7 @@ func (k *KeyGet) Run() error {
 
 //提供的默认处理函数，写入到当前文件夹
 
-func DefaultServe(engine *gin.Engine, addr string, path string) {
+func DefaultServe(engine *gin.Engine, addr string, path string) *KeyGet {
 	handler := func(c *gin.Context) {
 		var data request.ReturnSecret
 		err := c.ShouldBind(&data)
@@ -51,7 +51,7 @@ func DefaultServe(engine *gin.Engine, addr string, path string) {
 			return
 		}
 		defer file.Close()
-		_, err = file.WriteString(fmt.Sprintf("secret_key:%s\n,access_key:%s\n", data.SecretKey, data.AccessKey))
+		_, err = file.WriteString(fmt.Sprintf("secret_key: %s\naccess_key: %s\n", data.SecretKey, data.AccessKey))
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "secret_key": data.SecretKey, "access_key": data.AccessKey})
 			return
@@ -60,4 +60,5 @@ func DefaultServe(engine *gin.Engine, addr string, path string) {
 	}
 	k := NewKeyGet(engine, addr, path, handler)
 	k.Serve()
+	return k
 }

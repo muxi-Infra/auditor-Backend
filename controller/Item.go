@@ -212,7 +212,7 @@ func (ic *ItemController) SearchHistory(g *gin.Context, cla jwt.UserClaims) (res
 }
 
 // Upload 上传item
-// @Summary 上传条目
+// @Summary 上传条目,这个似乎不用接
 // @Description 上传新的项目或文件
 // @Tags Item
 // @Accept json
