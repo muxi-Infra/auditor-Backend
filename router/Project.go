@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// ProjectController 项目方面接口(即外接应用)
 type ProjectController interface {
 	GetProjectList(ctx *gin.Context) (response.Response, error)
 	Create(ctx *gin.Context, req request.CreateProject) (response.Response, error)

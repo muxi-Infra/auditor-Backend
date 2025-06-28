@@ -62,8 +62,8 @@ func GenerateKeyPair() (accessKey, secretKey string) {
 	secretKey = randomString(32) // 只返回给调用方一次
 	return
 }
-func SignRequest(secret, body, timestamp string) string {
+func SignRequest(secret, timestamp string) string {
 	mac := hmac.New(sha256.New, []byte(secret))
-	mac.Write([]byte(body + timestamp))
+	mac.Write([]byte(timestamp))
 	return hex.EncodeToString(mac.Sum(nil))
 }

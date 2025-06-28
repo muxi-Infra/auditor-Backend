@@ -8,6 +8,8 @@ import (
 	"os"
 )
 
+//负责获取密钥
+
 type KeyGet struct {
 	Engine  *gin.Engine
 	Addr    string
@@ -30,6 +32,9 @@ func (k *KeyGet) Serve() *KeyGet {
 func (k *KeyGet) Run() error {
 	return k.Engine.Run(k.Addr)
 }
+
+//提供的默认处理函数，写入到当前文件夹
+
 func DefaultServe(engine *gin.Engine, addr string, path string) {
 	handler := func(c *gin.Context) {
 		var data request.ReturnSecret

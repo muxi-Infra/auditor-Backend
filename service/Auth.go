@@ -14,6 +14,7 @@ const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 var seededRand = rand.New(rand.NewSource(time.Now().UnixNano()))
 
+// RandomString 用来生成用户名
 func RandomString(length int) string {
 	b := make([]byte, length)
 	for i := range b {

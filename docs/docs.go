@@ -261,10 +261,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/response.Item"
-                                            }
+                                            "$ref": "#/definitions/response.SelectResponse"
                                         }
                                     }
                                 }
@@ -996,6 +993,9 @@ const docTemplate = `{
                     "description": "审核规则",
                     "type": "string"
                 },
+                "hook_url": {
+                    "type": "string"
+                },
                 "logo": {
                     "type": "string"
                 },
@@ -1228,6 +1228,23 @@ const docTemplate = `{
                 "data": {},
                 "msg": {
                     "type": "string"
+                }
+            }
+        },
+        "response.SelectResponse": {
+            "type": "object",
+            "properties": {
+                "all_tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.Item"
+                    }
                 }
             }
         },

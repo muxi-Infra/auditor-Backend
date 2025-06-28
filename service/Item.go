@@ -23,7 +23,7 @@ type ItemService struct {
 	redisJwtHandler *jwt.RedisJWTHandler
 }
 type Data struct {
-	Id     int
+	Id     uint
 	Status string
 	Msg    string
 }

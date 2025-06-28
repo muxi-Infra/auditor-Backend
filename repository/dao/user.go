@@ -13,6 +13,7 @@ import (
 	"time"
 )
 
+// UserDAOInterface 应该拆分文件的，太懒了😆
 type UserDAOInterface interface {
 	Create(ctx context.Context, user *model.User) error
 	Read(ctx context.Context, id uint) (*model.User, error)
@@ -33,6 +34,7 @@ type UserDAOInterface interface {
 	SelectItemById(ctx context.Context, id uint) (model.Item, error)
 	SearchHistory(ctx context.Context, items *[]model.Item, id uint) error
 	Upload(ctx context.Context, req request.UploadReq, id uint, time time.Time) (uint, error)
+	UpdateItem(ctx context.Context, req request.UploadReq, id uint, time time.Time) (uint, error)
 	GetProjectRole(ctx context.Context, uid uint, pid uint) (int, error)
 	DeleteProject(ctx context.Context, pid uint) error
 	DeleteUserProject(ctx context.Context, pid uint) error
@@ -40,6 +42,10 @@ type UserDAOInterface interface {
 	UpdateProject(ctx context.Context, id uint, req request.UpdateProject) error
 	GetUserProjectRoles(ctx context.Context, users []model.User, projects []model.Project) ([]response.UserAllInfo, error)
 	GetItems(ctx context.Context, pid uint) ([]model.Item, error)
+	GetItemDetail(ctx context.Context, itemId uint) (model.Item, error)
+	GetSecretKey(ctx context.Context, ac string) (string, uint, error)
+	GetItemByHookId(ctx context.Context, hookId uint) (model.Item, error)
+	DeleteItemByHookId(ctx context.Context, hookId uint, projectId uint) error
 }
 type UserDAO struct {
 	DB *gorm.DB
@@ -184,7 +190,7 @@ func (d *UserDAO) GetProjectList(ctx context.Context) ([]model.Project, error) {
 }
 func (d *UserDAO) CreateProject(ctx context.Context, project *model.Project) (uint, error) {
 	if err := d.DB.WithContext(ctx).Create(project).Error; err != nil {
-		return project.ID, errors.New("创建项目失败")
+		return project.ID, err
 	}
 	key, err := apikey.GenerateAPIKey(project.ID)
 	if err != nil {
@@ -214,6 +220,8 @@ func (d *UserDAO) FindProjectByID(ctx context.Context, id uint) (model.Project, 
 	}
 	return project, nil
 }
+
+//item的模糊查询
 
 func (d *UserDAO) Select(ctx context.Context, req request.SelectReq) ([]model.Item, error) {
 
@@ -317,6 +325,9 @@ func (d *UserDAO) AuditItem(ctx context.Context, ItemId uint, Status int, Reason
 
 	return nil
 }
+
+//这里是在audit后回调失败的情况下回滚
+
 func (d *UserDAO) RollBack(ItemId uint, Status int, Reason string) error {
 	err := d.DB.
 		Model(&model.Item{}).
@@ -404,6 +415,47 @@ func (d *UserDAO) Upload(ctx context.Context, req request.UploadReq, id uint, ti
 		}
 		return 0, err
 	}
+	return it.ID, errors.New("该条目已被创建")
+	//it.Status = 0
+	//it.ProjectId = id
+	//it.Auditor = req.Auditor
+	//it.Author = req.Author
+	//it.Tags = req.Tags
+	//it.PublicTime = time
+	//it.Content = req.Content.Topic.Content
+	//it.Title = req.Content.Topic.Title
+	//it.Pictures = req.Content.Topic.Pictures
+	//it.HookUrl = req.HookUrl
+	//it.HookId = req.Id
+	//err = d.DB.WithContext(ctx).Where("id=?", it.ID).Updates(&it).Error
+	//
+	//if err != nil {
+	//	return 0, err
+	//}
+	//
+	//var comment1 = model.Comment{
+	//	Content:  req.Content.LastComment.Content,
+	//	Pictures: req.Content.LastComment.Pictures,
+	//	ItemId:   it.ID,
+	//}
+	//var comment2 = model.Comment{
+	//	Content:  req.Content.NextComment.Content,
+	//	Pictures: req.Content.NextComment.Pictures,
+	//	ItemId:   it.ID,
+	//}
+	//err = d.DB.WithContext(ctx).Where("item_id =?", it.ID).Updates(&comment1).Error
+	//if err != nil {
+	//	return 0, err
+	//}
+	//err = d.DB.WithContext(ctx).Where("item_id =?", it.ID).Updates(&comment2).Error
+	//if err != nil {
+	//	return 0, err
+	//}
+	//return it.ID, nil
+}
+
+func (d *UserDAO) UpdateItem(ctx context.Context, req request.UploadReq, id uint, time time.Time) (uint, error) {
+	var it model.Item
 	it.Status = 0
 	it.ProjectId = id
 	it.Auditor = req.Auditor
@@ -415,7 +467,7 @@ func (d *UserDAO) Upload(ctx context.Context, req request.UploadReq, id uint, ti
 	it.Pictures = req.Content.Topic.Pictures
 	it.HookUrl = req.HookUrl
 	it.HookId = req.Id
-	err = d.DB.WithContext(ctx).Where("id=?", it.ID).Updates(&it).Error
+	err := d.DB.WithContext(ctx).Where("id=?", it.ID).Updates(&it).Error
 
 	if err != nil {
 		return 0, err
@@ -536,4 +588,26 @@ func (d *UserDAO) GetItems(ctx context.Context, pid uint) ([]model.Item, error) 
 		return nil, err
 	}
 	return items, nil
+}
+func (d *UserDAO) GetSecretKey(ctx context.Context, ac string) (string, uint, error) {
+	var p model.Project
+	if err := d.DB.WithContext(ctx).Model(&model.Project{}).Where("access_key = ?", ac).First(&p).Error; err != nil {
+		return "", 0, err
+	}
+	return p.SecretKey, p.ID, nil
+}
+func (d *UserDAO) GetItemByHookId(ctx context.Context, hookId uint) (model.Item, error) {
+	var item model.Item
+	err := d.DB.WithContext(ctx).Where("hook_id = ?", hookId).First(&item).Error
+	if err != nil {
+		return item, err
+	}
+	return item, nil
+}
+func (d *UserDAO) DeleteItemByHookId(ctx context.Context, hookId uint, projectId uint) error {
+	err := d.DB.WithContext(ctx).Delete(&model.Item{}, "hook_id = ? AND project_id = ?", hookId, projectId).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }
