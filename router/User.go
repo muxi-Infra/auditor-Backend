@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// UserController 用户方面接口
 type UserController interface {
 	UpdateUsers(g *gin.Context, req request.UpdateUserRoleReq, cla jwt.UserClaims) (response.Response, error)
 	GetMyInfo(g *gin.Context, cla jwt.UserClaims) (response.Response, error)

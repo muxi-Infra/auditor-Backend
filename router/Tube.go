@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// TubeController 获取图床token的接口
 type TubeController interface {
 	GetQiToken(g *gin.Context) (response.Response, error)
 }

@@ -23,8 +23,8 @@ type Project struct {
 	AudioRule   string `gorm:"column:audio_rule;not null"`
 	Users       []User `gorm:"many2many:user_projects;"`
 	Items       []Item `gorm:"foreignKey:ProjectId"`
-	Apikey      string `gorm:"column:keyget;not null"`
-	AccessKey   string `gorm:"column:access_key;not null;uniqueIndex"`
+	Apikey      string `gorm:"column:apikey"`
+	AccessKey   string `gorm:"column:access_key;not null;uniqueIndex,size:64"`
 	SecretKey   string `gorm:"column:secret_key;not null"`
 	HookUrl     string `gorm:"column:hook_url;not null"`
 }
@@ -63,7 +63,7 @@ type Item struct {
 	Reason     string          `gorm:"column:reason"`
 	Pictures   GormStringSlice `gorm:"type:json"`
 	HookUrl    string          `gorm:"column:hook_url;not null"`
-	HookId     int             `gorm:"column:hook_id;not null;uniqueIndex"`
+	HookId     uint            `gorm:"column:hook_id;not null;uniqueIndex"` //调用方该项目的id
 }
 
 type Comment struct {

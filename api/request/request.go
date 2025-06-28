@@ -51,7 +51,7 @@ type AuditReq struct {
 }
 type UploadReq struct {
 	HookUrl    string            `json:"hook_url"`
-	Id         int               `json:"id"`
+	Id         uint              `json:"id"` //hook_id
 	Auditor    uint              `json:"auditor"`
 	Author     string            `json:"author"`
 	PublicTime int               `json:"public_time"`

@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// OAuthController 登录登出接口
 type OAuthController interface {
 	Login(g *gin.Context, req request.LoginReq) (response.Response, error)
 

@@ -21,6 +21,8 @@ definitions:
       audio_rule:
         description: 审核规则
         type: string
+      hook_url:
+        type: string
       logo:
         type: string
       name:
@@ -175,6 +177,17 @@ definitions:
       data: {}
       msg:
         type: string
+    type: object
+  response.SelectResponse:
+    properties:
+      all_tags:
+        items:
+          type: string
+        type: array
+      items:
+        items:
+          $ref: '#/definitions/response.Item'
+        type: array
     type: object
   response.Topics:
     properties:
@@ -374,9 +387,7 @@ paths:
             - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  items:
-                    $ref: '#/definitions/response.Item'
-                  type: array
+                  $ref: '#/definitions/response.SelectResponse'
               type: object
         "400":
           description: 查询失败

@@ -40,6 +40,7 @@ func (s *ProjectService) Create(ctx context.Context, name string, url string, lo
 		return 0, err
 	}
 	ac, se := apikey.GenerateKeyPair()
+
 	project := model.Project{
 		ProjectName: name,
 		Logo:        logo,
@@ -51,6 +52,7 @@ func (s *ProjectService) Create(ctx context.Context, name string, url string, lo
 	}
 	key, err := s.userDAO.CreateProject(ctx, &project)
 	if err != nil {
+		
 		return key, err
 	}
 	go func() {

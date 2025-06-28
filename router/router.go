@@ -12,6 +12,7 @@ func NewRouter(
 	User *controller.UserController,
 	Item *controller.ItemController,
 	Tube *controller.TubeController,
+	Remove RemoveController,
 	AuthMiddleware *middleware.AuthMiddleware,
 	corsMiddleware *middleware.CorsMiddleware,
 	loggerMiddleware *middleware.LoggerMiddleware,
@@ -35,5 +36,6 @@ func NewRouter(
 	RegisterProjectRoutes(g, AuthMiddleware.MiddlewareFunc(), Project)
 	ItemRoutes(g, AuthMiddleware.MiddlewareFunc(), Item)
 	TubeRoutes(g, AuthMiddleware.MiddlewareFunc(), Tube)
+	RemoveRoutes(g, Remove)
 	return r
 }

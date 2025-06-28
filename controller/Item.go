@@ -223,7 +223,7 @@ func (ic *ItemController) SearchHistory(g *gin.Context, cla jwt.UserClaims) (res
 // @Failure 400 {object} response.Response "上传失败"
 // @Security ApiKeyAuth
 // @Router /api/v1/item/upload [put]
-func (ic *ItemController) Upload(g *gin.Context, req request.UploadReq, cla jwt.UserClaims) (response.Response, error) {
+func (ic *ItemController) Upload(g *gin.Context, req request.UploadReq) (response.Response, error) {
 	key := g.GetHeader("api_key")
 	id, err := ic.service.Upload(g, req, key)
 	if err != nil {
