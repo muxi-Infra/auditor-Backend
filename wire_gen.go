@@ -7,7 +7,6 @@
 package main
 
 import (
-	"gorm.io/gorm"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/client"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/config"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/controller"
@@ -18,6 +17,7 @@ import (
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/dao"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/router"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/service"
+	"gorm.io/gorm"
 )
 
 // Injectors from wire.go:
@@ -44,16 +44,18 @@ func InitWebServer(confPath string) *App {
 	qiNiuYunConfig := config.NewQiniuConf(vipperSetting)
 	tubeService := service.NewTubeService(userDAO, redisJWTHandler, qiNiuYunConfig)
 	tubeController := controller.NewTuberController(tubeService)
+	userDAOInterface := ProvideUserDAO(db)
+	removeService := service.NewRemoveService(userDAOInterface)
+	removeController := controller.NewRemoveController(removeService)
 	authMiddleware := middleware.NewAuthMiddleware(redisJWTHandler)
 	middlewareConf := config.NewMiddleWareConf(vipperSetting)
 	corsMiddleware := middleware.NewCorsMiddleware(middlewareConf)
 	prometheusConfig := config.NewPrometheusConf(vipperSetting)
 	prometheus := ioc.InitPrometheus(prometheusConfig)
 	loggerMiddleware := middleware.NewLoggerMiddleware(logger, prometheus)
-	userDAOInterface := ProvideUserDAO(db)
 	projectService := service.NewProjectService(userDAOInterface, redisJWTHandler)
 	projectController := controller.NewProjectController(projectService)
-	engine := router.NewRouter(authController, userController, itemController, tubeController, authMiddleware, corsMiddleware, loggerMiddleware, projectController)
+	engine := router.NewRouter(authController, userController, itemController, tubeController, removeController, authMiddleware, corsMiddleware, loggerMiddleware, projectController)
 	appConf := config.NewAppConf(vipperSetting)
 	app := NewApp(engine, appConf)
 	return app

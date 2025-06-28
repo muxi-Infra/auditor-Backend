@@ -108,6 +108,7 @@ definitions:
       hook_url:
         type: string
       id:
+        description: hook_id
         type: integer
       public_time:
         type: integer
@@ -610,6 +611,168 @@ paths:
       summary: 获取项目列表
       tags:
       - Project
+  /api/v1/remove/delete:
+    delete:
+      consumes:
+      - application/json
+      description: 通过使用提供的sdk供调用方快速删除项目
+      parameters:
+      - description: 访问凭证 AccessKey
+        in: header
+        name: AccessKey
+        required: true
+        type: string
+      - description: 时间戳 Timestamp（单位秒或毫秒）
+        in: header
+        name: Timestamp
+        required: true
+        type: string
+      - description: 签名 Signature
+        in: header
+        name: Signature
+        required: true
+        type: string
+      - description: 要删除的项目ID（Itemid）
+        in: path
+        name: Itemid
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功返回删除的项目id
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 删除项目失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: sdk删除项目，无需对接
+      tags:
+      - Remove
+  /api/v1/remove/get:
+    get:
+      consumes:
+      - application/json
+      description: 通过使用提供的sdk供调用方快速获取项目信息，如果只传一个0表示获取全部
+      parameters:
+      - description: 访问凭证 AccessKey
+        in: header
+        name: AccessKey
+        required: true
+        type: string
+      - description: 时间戳 Timestamp（单位秒或毫秒）
+        in: header
+        name: Timestamp
+        required: true
+        type: string
+      - description: 签名 Signature
+        in: header
+        name: Signature
+        required: true
+        type: string
+      - description: '项目ID列表，多个ID用英文逗号分隔，如: 1,2,3'
+        in: query
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功返回项目信息
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 获取项目失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: sdk获取项目信息，无需对接
+      tags:
+      - Remove
+  /api/v1/remove/update:
+    put:
+      consumes:
+      - application/json
+      description: 通过使用提供的sdk供调用方快速更改项目信息
+      parameters:
+      - description: 访问凭证 AccessKey
+        in: header
+        name: AccessKey
+        required: true
+        type: string
+      - description: 时间戳 Timestamp（单位秒或毫秒）
+        in: header
+        name: Timestamp
+        required: true
+        type: string
+      - description: 签名 Signature
+        in: header
+        name: Signature
+        required: true
+        type: string
+      - description: 上传请求体
+        in: body
+        name: UploadReq
+        required: true
+        schema:
+          $ref: '#/definitions/request.UploadReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功返回项目id
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 修改失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: sdk更新项目，无需对接
+      tags:
+      - Remove
+  /api/v1/remove/upload:
+    post:
+      consumes:
+      - application/json
+      description: 通过使用提供的sdk供调用方快速上传项目
+      parameters:
+      - description: 访问凭证 AccessKey
+        in: header
+        name: AccessKey
+        required: true
+        type: string
+      - description: 时间戳 Timestamp（单位秒或毫秒）
+        in: header
+        name: Timestamp
+        required: true
+        type: string
+      - description: 签名 Signature
+        in: header
+        name: Signature
+        required: true
+        type: string
+      - description: 上传请求体
+        in: body
+        name: UploadReq
+        required: true
+        schema:
+          $ref: '#/definitions/request.UploadReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功返回项目id
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 获取项目列表失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: sdk上传项目，无需对接
+      tags:
+      - Remove
   /api/v1/tube/GetQiToken:
     get:
       consumes:

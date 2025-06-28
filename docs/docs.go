@@ -666,6 +666,246 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/remove/delete": {
+            "delete": {
+                "description": "通过使用提供的sdk供调用方快速删除项目",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Remove"
+                ],
+                "summary": "sdk删除项目，无需对接",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "访问凭证 AccessKey",
+                        "name": "AccessKey",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "时间戳 Timestamp（单位秒或毫秒）",
+                        "name": "Timestamp",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "签名 Signature",
+                        "name": "Signature",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "要删除的项目ID（Itemid）",
+                        "name": "Itemid",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功返回删除的项目id",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "删除项目失败",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/remove/get": {
+            "get": {
+                "description": "通过使用提供的sdk供调用方快速获取项目信息，如果只传一个0表示获取全部",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Remove"
+                ],
+                "summary": "sdk获取项目信息，无需对接",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "访问凭证 AccessKey",
+                        "name": "AccessKey",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "时间戳 Timestamp（单位秒或毫秒）",
+                        "name": "Timestamp",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "签名 Signature",
+                        "name": "Signature",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "项目ID列表，多个ID用英文逗号分隔，如: 1,2,3",
+                        "name": "ids",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功返回项目信息",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "获取项目失败",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/remove/update": {
+            "put": {
+                "description": "通过使用提供的sdk供调用方快速更改项目信息",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Remove"
+                ],
+                "summary": "sdk更新项目，无需对接",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "访问凭证 AccessKey",
+                        "name": "AccessKey",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "时间戳 Timestamp（单位秒或毫秒）",
+                        "name": "Timestamp",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "签名 Signature",
+                        "name": "Signature",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "上传请求体",
+                        "name": "UploadReq",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.UploadReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功返回项目id",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "修改失败",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/remove/upload": {
+            "post": {
+                "description": "通过使用提供的sdk供调用方快速上传项目",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Remove"
+                ],
+                "summary": "sdk上传项目，无需对接",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "访问凭证 AccessKey",
+                        "name": "AccessKey",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "时间戳 Timestamp（单位秒或毫秒）",
+                        "name": "Timestamp",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "签名 Signature",
+                        "name": "Signature",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "上传请求体",
+                        "name": "UploadReq",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.UploadReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功返回项目id",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "获取项目列表失败",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/tube/GetQiToken": {
             "get": {
                 "security": [
@@ -1123,6 +1363,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
+                    "description": "hook_id",
                     "type": "integer"
                 },
                 "public_time": {
