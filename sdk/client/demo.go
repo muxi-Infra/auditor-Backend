@@ -8,8 +8,8 @@ import (
 )
 
 func main() {
-	ac := "cli_26JsjTlJcDdcmWKs"
-	sc := "26JsjTlJcDdcmWKsUz6mIrWHm9UTHYcb"
+	ac := "xxxxxx"
+	sc := "xxxxxxxx"
 	c := NewMuxiAuditClient(&http.Client{}, "http://localhost:8080/api/v1")
 	var req = request.UploadReq{
 		HookUrl:    "http://localhost:8081",
