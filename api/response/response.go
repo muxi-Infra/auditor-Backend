@@ -18,6 +18,7 @@ type SelectResp struct {
 	Items []Item `json:"items"`
 }
 
+// Item todo 枚举优化状态码
 type Item struct {
 	Id         uint     `json:"id"`
 	Author     string   `json:"author"`

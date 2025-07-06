@@ -146,7 +146,7 @@ func (lm *LoggerMiddleware) logUnexpectedError(err error, ctx *gin.Context) {
 	)
 }
 func (lm *LoggerMiddleware) commonInfo(ctx *gin.Context) {
-	lm.log.Info("意外错误类型",
+	lm.log.Info("常规日志",
 		logger.String("timestamp", time.Now().Format(time.RFC3339)),
 		logger.String("ip", ctx.ClientIP()),
 		logger.String("path", ctx.Request.URL.Path),

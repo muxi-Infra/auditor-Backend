@@ -52,7 +52,7 @@ func (s *ProjectService) Create(ctx context.Context, name string, url string, lo
 	}
 	key, err := s.userDAO.CreateProject(ctx, &project)
 	if err != nil {
-		
+
 		return key, err
 	}
 	go func() {
@@ -88,6 +88,28 @@ func (s *ProjectService) ReturnSecretKey(ac string, se string, to string) error 
 	defer resp.Body.Close()
 	return nil
 
+}
+func (s *ProjectService) ReturnApiKey(apiKey string, hookUrl string) error {
+	var b = request.ReturnApiKey{
+		ApiKey:  apiKey,
+		Message: "私钥只生成一次，请妥善保管，如遗失请联系管理员重置",
+	}
+	data, err := json.Marshal(b)
+	if err != nil {
+		return err
+	}
+	req, err := http.NewRequest(http.MethodPost, hookUrl, bytes.NewBuffer(data))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	return nil
 }
 
 func (s *ProjectService) GetProjectList(ctx context.Context) ([]model.ProjectList, error) {

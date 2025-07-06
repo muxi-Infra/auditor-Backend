@@ -22,6 +22,7 @@ type ProjectService interface {
 	Delete(ctx context.Context, cla jwt.UserClaims, p uint) error
 	Update(ctx context.Context, id uint, req request.UpdateProject) error
 	GetUsers(ctx context.Context, id uint) ([]model.UserResponse, error)
+	ReturnApiKey(apiKey string, hookUrl string) error
 }
 
 func NewProjectController(service *service.ProjectService) *ProjectController {
@@ -108,7 +109,7 @@ func (ctrl *ProjectController) Create(ctx *gin.Context, req request.CreateProjec
 // @Failure 400 {object} response.Response "获取项目详细信息失败"
 // @Security ApiKeyAuth
 // @Router /api/v1/project/{project_id}/detail [get]
-func (ctrl *ProjectController) Detail(ctx *gin.Context) (response.Response, error) {
+func (ctrl *ProjectController) Detail(ctx *gin.Context, cla jwt.UserClaims) (response.Response, error) {
 	projectID := ctx.Param("project_id")
 	if projectID == "" {
 		return response.Response{
@@ -124,14 +125,6 @@ func (ctrl *ProjectController) Detail(ctx *gin.Context) (response.Response, erro
 		}, err
 	}
 	p := uint(pid)
-	_, err = ginx.GetClaims[jwt.UserClaims](ctx)
-	if err != nil {
-		return response.Response{
-			Msg:  "",
-			Code: 40001,
-			Data: nil,
-		}, err
-	}
 
 	detail, err := ctrl.service.Detail(ctx, p)
 	if err != nil {
@@ -141,7 +134,9 @@ func (ctrl *ProjectController) Detail(ctx *gin.Context) (response.Response, erro
 			Data: nil,
 		}, err
 	}
-
+	if cla.UserRule != 2 {
+		detail.Apikey = "*********"
+	}
 	return response.Response{
 		Code: 200,
 		Msg:  "获取成功",
