@@ -82,3 +82,7 @@ type ReturnSecret struct {
 	SecretKey string `json:"secret_key"`
 	Message   string `json:"message"`
 }
+type ReturnApiKey struct {
+	ApiKey  string `json:"api_key"`
+	Message string `json:"message"`
+}
