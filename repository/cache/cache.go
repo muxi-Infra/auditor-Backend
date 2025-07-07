@@ -1,8 +1,11 @@
 package cache
 
-type Cache struct {
-}
+import (
+	"context"
+	"time"
+)
 
-func NewCache() *Cache {
-	return &Cache{}
+type Cache interface {
+	Set(ctx context.Context, key string, value interface{}, expiration time.Duration) error
+	Get(ctx context.Context, key string) (string, error)
 }

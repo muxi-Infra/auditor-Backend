@@ -23,6 +23,7 @@ type ProjectService interface {
 	Update(ctx context.Context, id uint, req request.UpdateProject) error
 	GetUsers(ctx context.Context, id uint) ([]model.UserResponse, error)
 	ReturnApiKey(apiKey string, hookUrl string) error
+	GetAllTags()
 }
 
 func NewProjectController(service *service.ProjectService) *ProjectController {
@@ -278,4 +279,14 @@ func (ctrl *ProjectController) GetUsers(ctx *gin.Context, cla jwt.UserClaims) (r
 		Code: 200,
 		Data: userResponse,
 	}, nil
+}
+func (ctrl *ProjectController) GetAllTags(ctx *gin.Context, cla jwt.UserClaims) (response.Response, error) {
+	role := cla.UserRule
+	if role == 0 {
+		return response.Response{
+			Code: 403,
+			Msg:  "无权限",
+		}, nil
+	}
+
 }
