@@ -56,7 +56,7 @@ func (s *ProjectService) Create(ctx context.Context, name string, url string, lo
 		return key, err
 	}
 	go func() {
-		if err := s.ReturnSecretKey(ac, se, url); err != nil {
+		if err := s.ReturnApiKey("", url); err != nil {
 			log.Println(err)
 		}
 	}()
@@ -217,4 +217,9 @@ func (s *ProjectService) GetUsers(ctx context.Context, id uint) ([]model.UserRes
 		return nil, err
 	}
 	return userResponse, nil
+}
+
+// GetAllTags 获取某个项目中所有的Tags
+func (s *ProjectService) GetAllTags(ctx context.Context, pid uint) error {
+
 }

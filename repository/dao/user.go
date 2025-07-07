@@ -287,6 +287,7 @@ func (d *UserDAO) Select(ctx context.Context, req request.SelectReq) ([]model.It
 
 	if req.Query != "" {
 		query = query.Where("title LIKE ?", "%"+req.Query+"%")
+		query = query.Where("author LIKE ?", "%"+req.Query+"%")
 	}
 
 	var items []model.Item

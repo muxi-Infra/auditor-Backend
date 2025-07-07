@@ -7,7 +7,7 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func InitCache(cfg *conf.CacheConfig) *redis.Client {
+func InitRedis(cfg *conf.CacheConfig) *redis.Client {
 
 	// 初始化 Redis 客户端
 	client := redis.NewClient(&redis.Options{

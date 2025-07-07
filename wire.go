@@ -40,7 +40,8 @@ func InitWebServer(confPath string) *App {
 		// 初始化基础依赖
 		ioc.InitDB,
 		ioc.InitLogger,
-		ioc.InitCache,
+		ioc.InitRedis,
+		ioc.NewRedisCache,
 		ioc.InitPrometheus,
 		// 初始化具体模块
 		dao.NewUserDAO,
