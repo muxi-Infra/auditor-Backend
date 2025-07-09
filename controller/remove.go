@@ -56,7 +56,7 @@ func (c *RemoveController) Upload(g *gin.Context, req request.UploadReq) (respon
 	//		Data: nil,
 	//	}
 	//
-	//	return re, errors.New("http header parameters required")
+	//	return re, errorxs.New("http header parameters required")
 	//}
 	////鉴权
 	//ok, id, err := c.service.CheckPower(g, ac, temp, signature)

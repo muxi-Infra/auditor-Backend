@@ -2,6 +2,10 @@ package ioc
 
 import (
 	"context"
+	"encoding/json"
+	errrs "errors"
+	"fmt"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/cache/errorxs"
 	"github.com/redis/go-redis/v9"
 	"time"
 )
@@ -18,4 +22,35 @@ func (rc *RedisCache) Set(ctx context.Context, key string, value interface{}, ex
 }
 func (rc *RedisCache) Get(ctx context.Context, key string) (interface{}, error) {
 	return rc.Client.Get(ctx, key).Result()
+}
+
+// GetStringSlice 获取tag
+func (rc *RedisCache) GetStringSlice(ctx context.Context, key string) ([]string, error) {
+	val, err := rc.Client.Get(ctx, key).Result()
+	if err != nil {
+		if errrs.Is(err, redis.Nil) {
+			return nil, errorxs.ToCacheNotFoundError(err)
+		}
+		return nil, fmt.Errorf("redis get error: %w", err)
+	}
+
+	var result []string
+	if err := json.Unmarshal([]byte(val), &result); err != nil {
+		return nil, fmt.Errorf("unmarshal error: %w", err)
+	}
+	return result, nil
+}
+
+//	func (rc *RedisCache) SetAllTags(ctx context.Context, pid uint, val []string) error {
+//		key := TAGSKEY + strconv.FormatUint(uint64(pid), 10)
+//		return fmt.Errorf("%w", rc.Client.Set(ctx, key, val, 0).Err())
+//	}
+
+// SetStringSlice 设置tag
+func (rc *RedisCache) SetStringSlice(ctx context.Context, key string, val []string, expiration time.Duration) error {
+	bytes, err := json.Marshal(val)
+	if err != nil {
+		return fmt.Errorf("marshal error: %w", err)
+	}
+	return rc.Client.Set(ctx, key, bytes, expiration).Err()
 }

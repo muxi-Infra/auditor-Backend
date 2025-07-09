@@ -10,6 +10,8 @@ import (
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/apikey"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/jwt"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/cache"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/cache/errorxs"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/dao"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/model"
 	"log"
@@ -20,14 +22,15 @@ import (
 type ProjectService struct {
 	userDAO         dao.UserDAOInterface
 	redisJwtHandler *jwt.RedisJWTHandler
+	cache           *cache.ProjectCache
 }
 type Count struct {
 	AllCount     int
 	CurrentCount int
 }
 
-func NewProjectService(userDAO dao.UserDAOInterface, redisJwtHandler *jwt.RedisJWTHandler) *ProjectService {
-	return &ProjectService{userDAO: userDAO, redisJwtHandler: redisJwtHandler}
+func NewProjectService(userDAO dao.UserDAOInterface, redisJwtHandler *jwt.RedisJWTHandler, ca *cache.ProjectCache) *ProjectService {
+	return &ProjectService{userDAO: userDAO, redisJwtHandler: redisJwtHandler, cache: ca}
 }
 
 //这里的逻辑有点神秘了，但已经写成这样了，懒得改了，目前大概是有两个鉴权机制，一个是用来获取project_id,区分project的
@@ -220,6 +223,33 @@ func (s *ProjectService) GetUsers(ctx context.Context, id uint) ([]model.UserRes
 }
 
 // GetAllTags 获取某个项目中所有的Tags
-func (s *ProjectService) GetAllTags(ctx context.Context, pid uint) error {
-
+// todo:会出现缓存数据落后的情况,需要优化,目前只是设置了个较短的过期时间
+func (s *ProjectService) GetAllTags(ctx context.Context, pid uint) ([]string, error) {
+	re, err := s.cache.GetAllTags(ctx, pid)
+	if err != nil {
+		ok := errorxs.IsCacheNotFoundError(err)
+		if ok {
+			it, err := s.userDAO.GetItems(ctx, pid)
+			if err != nil {
+				return nil, err
+			}
+			var tags []string
+			m := make(map[string]int)
+			for _, item := range it {
+				for _, tag := range item.Tags {
+					m[tag] = m[tag] + 1
+				}
+			}
+			for tag, _ := range m {
+				tags = append(tags, tag)
+			}
+			err = s.cache.SetAllTags(ctx, pid, tags)
+			if err != nil {
+				return tags, err
+			}
+			return tags, nil
+		}
+		return nil, err
+	}
+	return re, nil
 }

@@ -62,7 +62,3 @@ type UserAllInfo struct {
 	Email        string        `json:"email"`
 	ProjectsRole []ProjectRole `json:"projects_role"`
 }
-type SelectResponse struct {
-	AllTags []string `json:"all_tags"`
-	Items   []Item   `json:"items"`
-}

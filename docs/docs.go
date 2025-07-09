@@ -261,7 +261,10 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/response.SelectResponse"
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/response.Item"
+                                            }
                                         }
                                     }
                                 }
@@ -294,7 +297,7 @@ const docTemplate = `{
                 "tags": [
                     "Item"
                 ],
-                "summary": "上传条目",
+                "summary": "上传条目,这个似乎不用接",
                 "parameters": [
                     {
                         "description": "上传请求体",
@@ -552,6 +555,55 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "获取项目详细信息失败",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/project/{project_id}/getAllTags": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "根据 project_id 获取该项目的所有标签",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "获取某个项目中所有的标签",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "项目ID",
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "请求错误（参数错误/无 project_id）",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -1469,23 +1521,6 @@ const docTemplate = `{
                 "data": {},
                 "msg": {
                     "type": "string"
-                }
-            }
-        },
-        "response.SelectResponse": {
-            "type": "object",
-            "properties": {
-                "all_tags": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "items": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/response.Item"
-                    }
                 }
             }
         },
