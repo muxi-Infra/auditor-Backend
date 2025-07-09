@@ -99,7 +99,7 @@ func (r *RedisJWTHandler) CheckSession(ctx *gin.Context, ssid string) (bool, err
 //			return err
 //		}
 //		if exists > 0 {
-//			return errors.New("已有用户登录")
+//			return errorxs.New("已有用户登录")
 //		}
 //		return nil
 //	}

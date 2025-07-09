@@ -14,6 +14,7 @@ import (
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/middleware"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/jwt"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/viperx"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/cache"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/dao"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/router"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/service"
@@ -32,7 +33,7 @@ func InitWebServer(confPath string) *App {
 	db := ioc.InitDB(dbConfig, logger)
 	userDAO := dao.NewUserDAO(db)
 	cacheConfig := config.NewCacheConf(vipperSetting)
-	redisClient := ioc.InitCache(cacheConfig)
+	redisClient := ioc.InitRedis(cacheConfig)
 	jwtConfig := config.NewJWTConf(vipperSetting)
 	redisJWTHandler := jwt.NewRedisJWTHandler(redisClient, jwtConfig)
 	authService := service.NewAuthService(userDAO, redisJWTHandler)
@@ -53,7 +54,10 @@ func InitWebServer(confPath string) *App {
 	prometheusConfig := config.NewPrometheusConf(vipperSetting)
 	prometheus := ioc.InitPrometheus(prometheusConfig)
 	loggerMiddleware := middleware.NewLoggerMiddleware(logger, prometheus)
-	projectService := service.NewProjectService(userDAOInterface, redisJWTHandler)
+	redisCache := ioc.NewRedisCache(redisClient)
+	projectCacheInterface := ProvideRedisCache(redisCache)
+	projectCache := cache.NewProjectCache(projectCacheInterface)
+	projectService := service.NewProjectService(userDAOInterface, redisJWTHandler, projectCache)
 	projectController := controller.NewProjectController(projectService)
 	engine := router.NewRouter(authController, userController, itemController, tubeController, removeController, authMiddleware, corsMiddleware, loggerMiddleware, projectController)
 	appConf := config.NewAppConf(vipperSetting)
@@ -66,4 +70,8 @@ func InitWebServer(confPath string) *App {
 // 提供 dao.UserDAO 的 provider
 func ProvideUserDAO(db *gorm.DB) dao.UserDAOInterface {
 	return &dao.UserDAO{DB: db}
+}
+
+func ProvideRedisCache(c *ioc.RedisCache) cache.ProjectCacheInterface {
+	return c
 }

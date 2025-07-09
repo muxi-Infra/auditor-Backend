@@ -23,7 +23,7 @@ type ProjectService interface {
 	Update(ctx context.Context, id uint, req request.UpdateProject) error
 	GetUsers(ctx context.Context, id uint) ([]model.UserResponse, error)
 	ReturnApiKey(apiKey string, hookUrl string) error
-	GetAllTags()
+	GetAllTags(ctx context.Context, pid uint) ([]string, error)
 }
 
 func NewProjectController(service *service.ProjectService) *ProjectController {
@@ -280,6 +280,19 @@ func (ctrl *ProjectController) GetUsers(ctx *gin.Context, cla jwt.UserClaims) (r
 		Data: userResponse,
 	}, nil
 }
+
+// GetAllTags 获取tags
+// @Summary 获取某个项目中所有的标签
+// @Description 根据 project_id 获取该项目的所有标签
+// @Tags Project
+// @Accept json
+// @Produce json
+// @Param project_id path int true "项目ID"
+// @Security ApiKeyAuth
+// @Success 200 {object} response.Response "获取成功"
+// @Failure 400 {object} response.Response "请求错误（参数错误/无 project_id）"
+// @Failure 500 {object} response.Response "服务器错误"
+// @Router /api/v1/project/{project_id}/getAllTags [get]
 func (ctrl *ProjectController) GetAllTags(ctx *gin.Context, cla jwt.UserClaims) (response.Response, error) {
 	role := cla.UserRule
 	if role == 0 {
@@ -288,5 +301,30 @@ func (ctrl *ProjectController) GetAllTags(ctx *gin.Context, cla jwt.UserClaims) 
 			Msg:  "无权限",
 		}, nil
 	}
-
+	projectID := ctx.Param("project_id")
+	if projectID == "" {
+		return response.Response{
+			Code: 400,
+			Msg:  "需要project_id",
+		}, nil
+	}
+	pid, err := strconv.ParseUint(projectID, 10, 64)
+	if err != nil {
+		return response.Response{
+			Code: 400,
+			Msg:  "获取project_id失败",
+		}, err
+	}
+	p := uint(pid)
+	re, err := ctrl.service.GetAllTags(ctx, p)
+	if err != nil {
+		return response.Response{
+			Code: 400,
+		}, err
+	}
+	return response.Response{
+		Code: 200,
+		Data: re,
+		Msg:  "获取tags成功",
+	}, nil
 }

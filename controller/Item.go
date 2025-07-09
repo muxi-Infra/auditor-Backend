@@ -27,7 +27,6 @@ type ItemService interface {
 	Hook(service.Data, model.Item) error
 	RoleBack(item model.Item) error
 	GetDetail(ctx context.Context, id uint) (model.Item, error)
-	GetTags(ctx context.Context, id uint) ([]string, error)
 }
 
 func NewItemController(service *service.ItemService) *ItemController {
@@ -43,17 +42,16 @@ func NewItemController(service *service.ItemService) *ItemController {
 // @Accept json
 // @Produce json
 // @Param selectReq body request.SelectReq true "查询条件"
-// @Success 200 {object} response.Response{data=response.SelectResponse} "成功返回项目列表"
+// @Success 200 {object} response.Response{data=[]response.Item} "成功返回项目列表"
 // @Failure 400 {object} response.Response "查询失败"
 // @Router /api/v1/item/select [post]
 func (ic *ItemController) Select(c *gin.Context, req request.SelectReq) (response.Response, error) {
-	var result response.SelectResponse
-	if req.ProjectID != 0 {
-		tags, err := ic.service.GetTags(c, req.ProjectID)
-		if err != nil {
-			result.AllTags = nil
-		}
-		result.AllTags = tags
+	if req.ProjectID == 0 {
+		return response.Response{
+			Data: nil,
+			Msg:  "需要project_id",
+			Code: 400,
+		}, nil
 	}
 	it, err := ic.service.Select(c, req)
 	if err != nil {
@@ -100,10 +98,10 @@ func (ic *ItemController) Select(c *gin.Context, req request.SelectReq) (respons
 			},
 		})
 	}
-	result.Items = items
+
 	return response.Response{
 		Msg:  "success",
-		Data: result,
+		Data: items,
 		Code: 200,
 	}, nil
 }

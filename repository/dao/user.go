@@ -249,11 +249,9 @@ func (d *UserDAO) Select(ctx context.Context, req request.SelectReq) ([]model.It
 	if len(req.Statuses) > 0 {
 		query = query.Where("status IN (?)", req.Statuses)
 	}
-
 	if len(req.Auditors) > 0 {
 		query = query.Where("auditor IN (?)", req.Auditors)
 	}
-
 	if len(req.RoundTime) > 0 {
 		var conditions []string
 		var values []interface{}
@@ -284,7 +282,7 @@ func (d *UserDAO) Select(ctx context.Context, req request.SelectReq) ([]model.It
 			query = query.Where(queryStr, values...)
 		}
 	}
-
+	//query对title和author的模糊查询
 	if req.Query != "" {
 		query = query.Where("title LIKE ?", "%"+req.Query+"%")
 		query = query.Where("author LIKE ?", "%"+req.Query+"%")

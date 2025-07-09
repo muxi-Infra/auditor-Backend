@@ -117,7 +117,7 @@ func (s *ItemService) Hook(reqbody Data, item model.Item) error {
 	//defer resp.Body.Close()
 	//if resp.StatusCode != http.StatusOK {
 	//
-	//	return errors.New("回调HookUrl失败")
+	//	return errorxs.New("回调HookUrl失败")
 	//}
 	//return nil
 }
@@ -202,20 +202,21 @@ func (s *ItemService) GetDetail(ctx context.Context, id uint) (model.Item, error
 	}
 	return item, nil
 }
-func (s *ItemService) GetTags(ctx context.Context, id uint) ([]string, error) {
-	items, err := s.userDAO.GetItems(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	m := make(map[string]string)
-	tags := make([]string, 0)
-	for _, item := range items {
-		for _, tag := range item.Tags {
-			m[tag] = tag
-		}
-	}
-	for tag, _ := range m {
-		tags = append(tags, tag)
-	}
-	return tags, nil
-}
+
+//func (s *ItemService) GetTags(ctx context.Context, id uint) ([]string, error) {
+//	items, err := s.userDAO.GetItems(ctx, id)
+//	if err != nil {
+//		return nil, err
+//	}
+//	m := make(map[string]string)
+//	tags := make([]string, 0)
+//	for _, item := range items {
+//		for _, tag := range item.Tags {
+//			m[tag] = tag
+//		}
+//	}
+//	for tag, _ := range m {
+//		tags = append(tags, tag)
+//	}
+//	return tags, nil
+//}

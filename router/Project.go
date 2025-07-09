@@ -16,6 +16,7 @@ type ProjectController interface {
 	Delete(ctx *gin.Context, cla jwt.UserClaims) (response.Response, error)
 	Update(ctx *gin.Context, req request.UpdateProject, cla jwt.UserClaims) (response.Response, error)
 	GetUsers(g *gin.Context, cla jwt.UserClaims) (response.Response, error)
+	GetAllTags(ctx *gin.Context, cla jwt.UserClaims) (response.Response, error)
 }
 
 func RegisterProjectRoutes(
@@ -31,4 +32,5 @@ func RegisterProjectRoutes(
 	authGroup.GET("/:project_id/detail", authMiddleware, ginx.WrapClaims(c.Detail))
 	authGroup.POST("/:project_id/update", authMiddleware, ginx.WrapClaimsAndReq(c.Update))
 	authGroup.GET("/:project_id/getUsers", authMiddleware, ginx.WrapClaims(c.GetUsers))
+	authGroup.GET("/:project_id/getAllTags", authMiddleware, ginx.WrapClaims(c.GetAllTags))
 }

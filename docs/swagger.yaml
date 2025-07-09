@@ -179,17 +179,6 @@ definitions:
       msg:
         type: string
     type: object
-  response.SelectResponse:
-    properties:
-      all_tags:
-        items:
-          type: string
-        type: array
-      items:
-        items:
-          $ref: '#/definitions/response.Item'
-        type: array
-    type: object
   response.Topics:
     properties:
       content:
@@ -388,7 +377,9 @@ paths:
             - $ref: '#/definitions/response.Response'
             - properties:
                 data:
-                  $ref: '#/definitions/response.SelectResponse'
+                  items:
+                    $ref: '#/definitions/response.Item'
+                  type: array
               type: object
         "400":
           description: 查询失败
@@ -427,7 +418,7 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - ApiKeyAuth: []
-      summary: 上传条目
+      summary: 上传条目,这个似乎不用接
       tags:
       - Item
   /api/v1/project/{project_id}/delete:
@@ -492,6 +483,37 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 获取项目详细信息
+      tags:
+      - Project
+  /api/v1/project/{project_id}/getAllTags:
+    get:
+      consumes:
+      - application/json
+      description: 根据 project_id 获取该项目的所有标签
+      parameters:
+      - description: 项目ID
+        in: path
+        name: project_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求错误（参数错误/无 project_id）
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取某个项目中所有的标签
       tags:
       - Project
   /api/v1/project/{project_id}/getUsers:
