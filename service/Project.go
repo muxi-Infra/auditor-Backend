@@ -49,11 +49,12 @@ func (s *ProjectService) Create(ctx context.Context, name string, url string, lo
 		HookUrl:     url,
 	}
 	id, key, err := s.userDAO.CreateProject(ctx, &project)
+	fmt.Println(key)
 	if err != nil {
 		return id, key, err
 	}
 	go func() {
-		if err := s.ReturnApiKey("", url); err != nil {
+		if err := s.ReturnApiKey(key, url); err != nil {
 			log.Println(err)
 		}
 	}()
@@ -242,8 +243,10 @@ func (s *ProjectService) GetAllTags(ctx context.Context, pid uint) ([]string, er
 				return tags, err
 			}
 			return tags, nil
+		} else {
+			return nil, err
 		}
-		return nil, err
+
 	}
 	return re, nil
 }

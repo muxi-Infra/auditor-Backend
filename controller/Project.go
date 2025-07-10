@@ -90,6 +90,7 @@ func (ctrl *ProjectController) Create(ctx *gin.Context, req request.CreateProjec
 		return response.Response{
 			Code: 400,
 			Msg:  "创建项目失败",
+			Data: err,
 		}, nil
 	}
 	return response.Response{

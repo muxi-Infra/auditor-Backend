@@ -200,7 +200,7 @@ func (d *UserDAO) CreateProject(ctx context.Context, project *model.Project) (ui
 	if err := d.DB.WithContext(ctx).Save(project).Error; err != nil {
 		return project.ID, "", err
 	}
-	return project.ID, "", nil
+	return project.ID, key, nil
 }
 func (d *UserDAO) GetProjectDetails(ctx context.Context, id uint) (model.Project, error) {
 	var project model.Project
@@ -283,8 +283,8 @@ func (d *UserDAO) Select(ctx context.Context, req request.SelectReq) ([]model.It
 	}
 	//query对title和author的模糊查询
 	if req.Query != "" {
-		query = query.Where("title LIKE ?", "%"+req.Query+"%")
-		query = query.Where("author LIKE ?", "%"+req.Query+"%")
+		keyword := "%" + req.Query + "%"
+		query = query.Where("title LIKE ? OR author LIKE ?", keyword, keyword)
 	}
 
 	var items []model.Item
