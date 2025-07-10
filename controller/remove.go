@@ -18,7 +18,7 @@ type RemoveController struct {
 	service RemoveItemService
 }
 type RemoveItemService interface {
-	CheckPower(c context.Context, ac, temp, signature string) (bool, uint, error)
+	CheckPower(c context.Context, apikey string) (bool, uint, error)
 	Upload(c context.Context, req request.UploadReq, projectId uint) (uint, error)
 	Update(c context.Context, req request.UploadReq, projectId uint) (uint, error)
 	Delete(c context.Context, itemId uint, projectId uint) error
@@ -220,15 +220,13 @@ func stringSliceToUintSlice(strs []string) ([]uint, error) {
 
 // CheckPower 鉴权控制器
 func (c *RemoveController) CheckPower(g *gin.Context) (uint, error) {
-	ac := g.GetHeader("AccessKey")
-	temp := g.GetHeader("Timestamp")
-	signature := g.GetHeader("Signature")
-	if ac == "" || temp == "" || signature == "" {
+	ac := g.GetHeader("api_key")
+	if ac == "" {
 
 		return 0, errors.New("http header parameters required")
 	}
 	//鉴权,返回project_id
-	ok, id, err := c.service.CheckPower(g, ac, temp, signature)
+	ok, id, err := c.service.CheckPower(g, ac)
 	if !ok || err != nil {
 		return 0, err
 	}

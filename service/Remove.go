@@ -21,17 +21,12 @@ func NewRemoveService(db dao.UserDAOInterface) *RemoveService {
 }
 
 // CheckPower 鉴权，看是否是已注册应用
-func (service *RemoveService) CheckPower(c context.Context, ac, temp, signature string) (bool, uint, error) {
-	se, id, err := service.Db.GetSecretKey(c, ac)
+func (service *RemoveService) CheckPower(c context.Context, ac string) (bool, uint, error) {
+	claims, err := apikey.ParseAPIKey(ac)
 	if err != nil {
 		return false, 0, err
 	}
-	//重新模拟生成一遍标签，看是否一样
-	res := apikey.SignRequest(se, temp)
-	if res != signature {
-		return false, 0, nil
-	}
-	return true, id, nil
+	return true, claims["sub"].(uint), nil
 }
 func (service *RemoveService) Upload(c context.Context, req request.UploadReq, projectId uint) (uint, error) {
 	now := time.Now()
