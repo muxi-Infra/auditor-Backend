@@ -9,7 +9,6 @@ import (
 
 func main() {
 	ac := "xxxxxx"
-	sc := "xxxxxxxx"
 	c := NewMuxiAuditClient(&http.Client{}, "http://localhost:8080/api/v1")
 	var req = request.UploadReq{
 		HookUrl:    "http://localhost:8081",
@@ -29,10 +28,10 @@ func main() {
 			},
 		},
 	}
-	c.UploadItem(ac, sc, req)
+	c.UploadItem(ac, req)
 	//req.Content.Topic.Title = "test2"
 	//c.UpdateItem(ac, sc, req)
 	//c.DeleteItem(ac, sc, 12)
-	c.GetItem(ac, sc, []uint{12})
+	c.GetItem(ac, []uint{12})
 
 }

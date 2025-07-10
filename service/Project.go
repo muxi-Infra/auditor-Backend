@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/apikey"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/jwt"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/cache"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/cache/errorxs"
@@ -34,64 +33,59 @@ func NewProjectService(userDAO dao.UserDAOInterface, redisJwtHandler *jwt.RedisJ
 }
 
 //这里的逻辑有点神秘了，但已经写成这样了，懒得改了，目前大概是有两个鉴权机制，一个是用来获取project_id,区分project的
-//另一个是access_key机制，就和七牛云一样，这个是来确认调用方身份的。
+//另一个是access_key机制，就和七牛云一样，这个是来确认调用方身份的。老实了，要去改了
 
-func (s *ProjectService) Create(ctx context.Context, name string, url string, logo string, audioRule string, ids []uint) (uint, error) {
+func (s *ProjectService) Create(ctx context.Context, name string, url string, logo string, audioRule string, ids []uint) (uint, string, error) {
 
 	users, err := s.userDAO.FindByUserIDs(ctx, ids)
 	if err != nil {
-		return 0, err
+		return 0, "", err
 	}
-	ac, se := apikey.GenerateKeyPair()
-
 	project := model.Project{
 		ProjectName: name,
 		Logo:        logo,
 		AudioRule:   audioRule,
 		Users:       users,
-		AccessKey:   ac,
-		SecretKey:   se,
 		HookUrl:     url,
 	}
-	key, err := s.userDAO.CreateProject(ctx, &project)
+	id, key, err := s.userDAO.CreateProject(ctx, &project)
 	if err != nil {
-
-		return key, err
+		return id, key, err
 	}
 	go func() {
 		if err := s.ReturnApiKey("", url); err != nil {
 			log.Println(err)
 		}
 	}()
-	return key, nil
+	return id, key, nil
 }
 
 //给调用方指定接口发送密钥
 
-func (s *ProjectService) ReturnSecretKey(ac string, se string, to string) error {
-	var b = request.ReturnSecret{
-		SecretKey: se,
-		AccessKey: ac,
-		Message:   "私钥只生成一次，请妥善保管，如遗失请重置",
-	}
-	data, err := json.Marshal(b)
-	if err != nil {
-		return err
-	}
-	req, err := http.NewRequest(http.MethodPost, to, bytes.NewBuffer(data))
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	return nil
+//func (s *ProjectService) ReturnSecretKey(ac string, se string, to string) error {
+//	var b = request.ReturnSecret{
+//		SecretKey: se,
+//		AccessKey: ac,
+//		Message:   "私钥只生成一次，请妥善保管，如遗失请重置",
+//	}
+//	data, err := json.Marshal(b)
+//	if err != nil {
+//		return err
+//	}
+//	req, err := http.NewRequest(http.MethodPost, to, bytes.NewBuffer(data))
+//	if err != nil {
+//		return err
+//	}
+//	req.Header.Set("Content-Type", "application/json")
+//	client := &http.Client{}
+//	resp, err := client.Do(req)
+//	if err != nil {
+//		return err
+//	}
+//	defer resp.Body.Close()
+//	return nil
+//}
 
-}
 func (s *ProjectService) ReturnApiKey(apiKey string, hookUrl string) error {
 	var b = request.ReturnApiKey{
 		ApiKey:  apiKey,

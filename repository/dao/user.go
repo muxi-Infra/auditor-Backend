@@ -27,7 +27,7 @@ type UserDAOInterface interface {
 	PPFUserByid(ctx context.Context, id uint) (model.User, error)
 	ChangeProjectRole(ctx context.Context, user model.User, projectPermit []model.ProjectPermit) error
 	GetProjectList(ctx context.Context) ([]model.Project, error)
-	CreateProject(ctx context.Context, project *model.Project) (uint, error)
+	CreateProject(ctx context.Context, project *model.Project) (uint, string, error)
 	GetProjectDetails(ctx context.Context, id uint) (model.Project, error)
 	Select(ctx context.Context, req request.SelectReq) ([]model.Item, error)
 	AuditItem(ctx context.Context, ItemId uint, Status int, Reason string, id uint) error
@@ -43,7 +43,7 @@ type UserDAOInterface interface {
 	GetUserProjectRoles(ctx context.Context, users []model.User, projects []model.Project) ([]response.UserAllInfo, error)
 	GetItems(ctx context.Context, pid uint) ([]model.Item, error)
 	GetItemDetail(ctx context.Context, itemId uint) (model.Item, error)
-	GetSecretKey(ctx context.Context, ac string) (string, uint, error)
+	//GetSecretKey(ctx context.Context, ac string) (string, uint, error)
 	GetItemByHookId(ctx context.Context, hookId uint) (model.Item, error)
 	DeleteItemByHookId(ctx context.Context, hookId uint, projectId uint) error
 }
@@ -188,20 +188,19 @@ func (d *UserDAO) GetProjectList(ctx context.Context) ([]model.Project, error) {
 
 	return projects, nil
 }
-func (d *UserDAO) CreateProject(ctx context.Context, project *model.Project) (uint, error) {
+func (d *UserDAO) CreateProject(ctx context.Context, project *model.Project) (uint, string, error) {
 	if err := d.DB.WithContext(ctx).Create(project).Error; err != nil {
-		return project.ID, err
+		return project.ID, "", err
 	}
 	key, err := apikey.GenerateAPIKey(project.ID)
 	if err != nil {
-		return project.ID, errors.New("生成apikey失败")
+		return project.ID, "", errors.New("生成apikey失败")
 	}
 	project.Apikey = key
 	if err := d.DB.WithContext(ctx).Save(project).Error; err != nil {
-		return project.ID, err
+		return project.ID, "", err
 	}
-	return project.ID, nil
-
+	return project.ID, "", nil
 }
 func (d *UserDAO) GetProjectDetails(ctx context.Context, id uint) (model.Project, error) {
 	var project model.Project
@@ -605,13 +604,14 @@ func (d *UserDAO) GetItems(ctx context.Context, pid uint) ([]model.Item, error) 
 	}
 	return items, nil
 }
-func (d *UserDAO) GetSecretKey(ctx context.Context, ac string) (string, uint, error) {
-	var p model.Project
-	if err := d.DB.WithContext(ctx).Model(&model.Project{}).Where("access_key = ?", ac).First(&p).Error; err != nil {
-		return "", 0, err
-	}
-	return p.SecretKey, p.ID, nil
-}
+
+//	func (d *UserDAO) GetSecretKey(ctx context.Context, ac string) (string, uint, error) {
+//		var p model.Project
+//		if err := d.DB.WithContext(ctx).Model(&model.Project{}).Where("access_key = ?", ac).First(&p).Error; err != nil {
+//			return "", 0, err
+//		}
+//		return p.SecretKey, p.ID, nil
+//	}
 func (d *UserDAO) GetItemByHookId(ctx context.Context, hookId uint) (model.Item, error) {
 	var item model.Item
 	err := d.DB.WithContext(ctx).Where("hook_id = ?", hookId).First(&item).Error

@@ -24,9 +24,9 @@ type Project struct {
 	Users       []User `gorm:"many2many:user_projects;"`
 	Items       []Item `gorm:"foreignKey:ProjectId"`
 	Apikey      string `gorm:"column:apikey"`
-	AccessKey   string `gorm:"column:access_key;not null;uniqueIndex,size:64"`
-	SecretKey   string `gorm:"column:secret_key;not null"`
-	HookUrl     string `gorm:"column:hook_url;not null"`
+	//AccessKey   string `gorm:"column:access_key;not null;uniqueIndex,size:64"`
+	//SecretKey   string `gorm:"column:secret_key;not null"`
+	HookUrl string `gorm:"column:hook_url;not null"`
 }
 type UserProject struct {
 	UserID    uint `gorm:"primaryKey"`
