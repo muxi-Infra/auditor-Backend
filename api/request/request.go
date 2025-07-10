@@ -77,10 +77,7 @@ type HookPayload struct {
 	Data  any    `json:"data,omitempty"`
 	Try   int    `json:"try"` // 重试次数，最大不超过五
 }
-type ReturnSecret struct {
-	ApiKey  string `json:"apikey"`
-	Message string `json:"message"`
-}
+
 type ReturnApiKey struct {
 	ApiKey  string `json:"api_key"`
 	Message string `json:"message"`

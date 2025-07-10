@@ -38,7 +38,7 @@ func (k *KeyGet) Run() error {
 
 func DefaultServe(engine *gin.Engine, addr string, path string) *KeyGet {
 	handler := func(c *gin.Context) {
-		var data request.ReturnSecret
+		var data request.ReturnApiKey
 		err := c.ShouldBind(&data)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
