@@ -242,7 +242,7 @@ func (d *UserDAO) Select(ctx context.Context, req request.SelectReq) ([]model.It
 		for _, tag := range req.Tags {
 			tagConditions = append(tagConditions, fmt.Sprintf("JSON_CONTAINS(tags, '\"%s\"')", tag))
 		}
-		query = query.Where(strings.Join(tagConditions, " OR "))
+		query = query.Where(strings.Join(tagConditions, " AND "))
 	}
 
 	if len(req.Statuses) > 0 {
