@@ -21,6 +21,7 @@ type Project struct {
 	ProjectName string `gorm:"column:project_name;not null"`
 	Logo        string `gorm:"column:logo;not null"`
 	AudioRule   string `gorm:"column:audio_rule;not null"`
+	Description string `gorm:"column:description;not null"`
 	Users       []User `gorm:"many2many:user_projects;"`
 	Items       []Item `gorm:"foreignKey:ProjectId"`
 	Apikey      string `gorm:"column:apikey"`

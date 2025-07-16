@@ -15,6 +15,7 @@ type ItemController interface {
 	SearchHistory(g *gin.Context, cla jwt.UserClaims) (response.Response, error)
 	Upload(g *gin.Context, req request.UploadReq) (response.Response, error)
 	Detail(g *gin.Context) (response.Response, error)
+	AuditAll(ctx *gin.Context, req request.ManyAuditReq, cla jwt.UserClaims) (response.Response, error)
 }
 
 func ItemRoutes(
@@ -28,4 +29,5 @@ func ItemRoutes(
 	ItemGroup.GET("/searchHistory", authMiddleware, ginx.WrapClaims(c.SearchHistory))
 	ItemGroup.PUT("/upload", authMiddleware, ginx.WrapReq(c.Upload))
 	ItemGroup.GET("/:item_id/detail", authMiddleware, ginx.Wrap(c.Detail))
+	ItemGroup.POST("/auditMany", authMiddleware, ginx.WrapClaimsAndReq(c.AuditAll))
 }

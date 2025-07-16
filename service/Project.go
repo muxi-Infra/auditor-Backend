@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/jwt"
@@ -17,6 +16,8 @@ import (
 	"net/http"
 	"strconv"
 )
+
+const DefaultDescription = "这个项目管理很懒，没有任何描述"
 
 type ProjectService struct {
 	userDAO         dao.UserDAOInterface
@@ -35,26 +36,32 @@ func NewProjectService(userDAO dao.UserDAOInterface, redisJwtHandler *jwt.RedisJ
 //这里的逻辑有点神秘了，但已经写成这样了，懒得改了，目前大概是有两个鉴权机制，一个是用来获取project_id,区分project的
 //另一个是access_key机制，就和七牛云一样，这个是来确认调用方身份的。老实了，要去改了
 
-func (s *ProjectService) Create(ctx context.Context, name string, url string, logo string, audioRule string, ids []uint) (uint, string, error) {
-
+func (s *ProjectService) Create(ctx context.Context, req request.CreateProject) (uint, string, error) {
+	var ids []uint
+	for _, v := range req.Users {
+		ids = append(ids, v.Userid)
+	}
 	users, err := s.userDAO.FindByUserIDs(ctx, ids)
 	if err != nil {
 		return 0, "", err
 	}
+	if req.Description == "" {
+		req.Description = DefaultDescription
+	}
 	project := model.Project{
-		ProjectName: name,
-		Logo:        logo,
-		AudioRule:   audioRule,
+		ProjectName: req.Name,
+		Logo:        req.Logo,
+		AudioRule:   req.AudioRule,
 		Users:       users,
-		HookUrl:     url,
+		HookUrl:     req.HookUrl,
+		Description: req.Description,
 	}
 	id, key, err := s.userDAO.CreateProject(ctx, &project)
-	fmt.Println(key)
 	if err != nil {
 		return id, key, err
 	}
 	go func() {
-		if err := s.ReturnApiKey(key, url); err != nil {
+		if err := s.ReturnApiKey(key, req.HookUrl); err != nil {
 			log.Println(err)
 		}
 	}()
@@ -127,7 +134,7 @@ func (s *ProjectService) GetProjectList(ctx context.Context) ([]model.ProjectLis
 	return list, nil
 }
 func (s *ProjectService) Detail(ctx context.Context, id uint) (response.GetDetailResp, error) {
-	cacheKey := fmt.Sprintf("Datil_%s", strconv.Itoa(int(id)))
+	cacheKey := "MuxiAuditor:Detail:" + strconv.Itoa(int(id))
 	r, err := s.redisJwtHandler.GetSByKey(ctx, cacheKey)
 	if err == nil {
 		var detailResp response.GetDetailResp
@@ -161,6 +168,8 @@ func (s *ProjectService) Detail(ctx context.Context, id uint) (response.GetDetai
 		CurrentNumber: countMap[0],
 		Apikey:        project.Apikey,
 		AuditRule:     project.AudioRule,
+		ProjectName:   project.ProjectName,
+		Description:   project.Description,
 	}
 	jsonData, _ := json.Marshal(re)
 	s.redisJwtHandler.SetByKey(ctx, cacheKey, jsonData)
