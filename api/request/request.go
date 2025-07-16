@@ -92,3 +92,10 @@ type UserInProject struct {
 	Userid      uint `json:"user_id"`
 	ProjectRole int  `json:"project_role"`
 }
+type UserRole struct {
+	Userid uint `json:"user_id"`
+	Role   int  `json:"role"` //审核平台的权限，并非项目中的权限
+}
+type ChangeUserRolesReq struct {
+	List []UserRole `json:"list"`
+}

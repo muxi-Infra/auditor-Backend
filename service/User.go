@@ -8,7 +8,10 @@ import (
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/jwt"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/dao"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/model"
+	"sync"
 )
+
+const maxConcurrency = 10
 
 type UserService struct {
 	userDAO         *dao.UserDAO
@@ -18,6 +21,8 @@ type UserService struct {
 func NewUserService(userDAO *dao.UserDAO, redisJwtHandler *jwt.RedisJWTHandler) *UserService {
 	return &UserService{userDAO: userDAO, redisJwtHandler: redisJwtHandler}
 }
+
+//好的架构师做乘法，而我一直做加法😅
 
 func (s *UserService) UpdateUserRole(ctx context.Context, userId uint, projectPermit []model.ProjectPermit, role int) error {
 	user, err := s.userDAO.PPFUserByid(ctx, userId)
@@ -38,6 +43,37 @@ func (s *UserService) UpdateUserRole(ctx context.Context, userId uint, projectPe
 	err = s.userDAO.ChangeProjectRole(ctx, user, projectPermit)
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+// UpdateUsersRole 批量更新user role
+func (s *UserService) UpdateUsersRole(ctx context.Context, li []request.UserRole) error {
+
+	sem := make(chan struct{}, maxConcurrency)
+	var (
+		mu   sync.Mutex
+		wait sync.WaitGroup
+		errs []error
+	)
+	for _, v := range li {
+		wait.Add(1)
+		sem <- struct{}{} // 占用一个槽位
+		go func(v request.UserRole) {
+			defer wait.Done()
+			defer func() { <-sem }() // 释放槽位
+			user := model.User{UserRole: v.Role}
+			mu.Lock()
+			err := s.userDAO.Update(ctx, &user, v.Userid)
+			if err != nil {
+				errs = append(errs, err)
+			}
+			mu.Unlock()
+		}(v)
+	}
+	wait.Wait()
+	if len(errs) > 0 {
+		return merr.Join(errs...)
 	}
 	return nil
 }

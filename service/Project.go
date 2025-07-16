@@ -56,6 +56,7 @@ func (s *ProjectService) Create(ctx context.Context, req request.CreateProject) 
 		HookUrl:     req.HookUrl,
 		Description: req.Description,
 	}
+	//创建项目
 	id, key, err := s.userDAO.CreateProject(ctx, &project)
 	if err != nil {
 		return id, key, err
@@ -65,6 +66,11 @@ func (s *ProjectService) Create(ctx context.Context, req request.CreateProject) 
 			log.Println(err)
 		}
 	}()
+	//many two many并不会自动更新其他字段，这里手动写入project_role,并发加锁提高效率
+	err = s.userDAO.ChangeRoleInOneProject(ctx, id, req.Users)
+	if err != nil {
+		return id, key, err
+	}
 	return id, key, nil
 }
 
