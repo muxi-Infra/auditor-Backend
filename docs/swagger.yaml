@@ -16,6 +16,13 @@ definitions:
         description: 0未审核，1通过，2未通过
         type: integer
     type: object
+  request.ChangeUserRolesReq:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/request.UserRole'
+        type: array
+    type: object
   request.CreateProject:
     properties:
       audio_rule:
@@ -29,9 +36,9 @@ definitions:
         type: string
       name:
         type: string
-      user_ids:
+      users:
         items:
-          type: integer
+          $ref: '#/definitions/request.UserInProject'
         type: array
     type: object
   request.LoginReq:
@@ -129,6 +136,21 @@ definitions:
         items:
           type: string
         type: array
+    type: object
+  request.UserInProject:
+    properties:
+      project_role:
+        type: integer
+      user_id:
+        type: integer
+    type: object
+  request.UserRole:
+    properties:
+      role:
+        description: 审核平台的权限，并非项目中的权限
+        type: integer
+      user_id:
+        type: integer
     type: object
   response.Comment:
     properties:
@@ -955,14 +977,14 @@ paths:
     post:
       consumes:
       - application/json
-      description: 更新当前用户的信息，如邮箱、名称和头像
+      description: 批量更新用户在审核平台的权限
       parameters:
-      - description: 更新用户信息请求体
+      - description: 更新用户在审核平台的权限请求体
         in: body
         name: update
         required: true
         schema:
-          $ref: '#/definitions/request.UpdateUserReq'
+          $ref: '#/definitions/request.ChangeUserRolesReq'
       produces:
       - application/json
       responses:
@@ -974,9 +996,13 @@ paths:
           description: Invalid or expired token
           schema:
             $ref: '#/definitions/response.Response'
+        "403":
+          description: no power
+          schema:
+            $ref: '#/definitions/response.Response'
       security:
       - ApiKeyAuth: []
-      summary: 更新用户信息
+      summary: 批量更新权限
       tags:
       - User
   /api/v1/user/updateUser:

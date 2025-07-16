@@ -21,6 +21,7 @@ type UserService interface {
 	UpdateMyInfo(ctx context.Context, req request.UpdateUserReq, id uint) error
 	GetUsers(ctx context.Context, req request.GetUsers) ([]response.UserAllInfo, error)
 	GetUserInfo(ctx context.Context, id uint) (*model.User, error)
+	UpdateUsersRole(ctx context.Context, li []request.UserRole) error
 }
 
 func NewUserController(service *service.UserService) *UserController {
@@ -207,4 +208,39 @@ func (c *UserController) GetUserInfo(ctx *gin.Context) (response.Response, error
 		},
 		Msg: "获取成功",
 	}, nil
+}
+
+// ChangeUsersRole 批量更新权限
+// @Summary 批量更新权限
+// @Description 批量更新用户在审核平台的权限
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param update body request.ChangeUserRolesReq true "更新用户在审核平台的权限请求体"
+// @Success 200 {object} response.Response "成功更新用户信息"
+// @Failure 400 {object} response.Response "Invalid or expired token"
+// @Failure 403 {object} response.Response "no power"
+// @Security ApiKeyAuth
+// @Router /api/v1/user/updateMyInfo [post]
+func (c *UserController) ChangeUsersRole(ctx *gin.Context, req request.ChangeUserRolesReq, cla jwt.UserClaims) (response.Response, error) {
+	if cla.UserRule != 2 {
+		return response.Response{
+			Code: 403,
+			Data: nil,
+			Msg:  "no power",
+		}, nil
+	}
+	err := c.service.UpdateUsersRole(ctx, req.List)
+	if err != nil {
+		return response.Response{
+			Code: 400,
+			Data: nil,
+			Msg:  "更新用户权限失败",
+		}, err
+	}
+	return response.Response{
+		Code: 200,
+		Data: nil,
+		Msg:  "success",
+	}, err
 }

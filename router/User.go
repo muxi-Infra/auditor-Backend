@@ -15,6 +15,7 @@ type UserController interface {
 	UpdateMyInfo(g *gin.Context, req request.UpdateUserReq, cla jwt.UserClaims) (response.Response, error)
 	SelectUsers(g *gin.Context) (response.Response, error)
 	GetUserInfo(g *gin.Context) (response.Response, error)
+	ChangeUsersRole(ctx *gin.Context, req request.ChangeUserRolesReq, cla jwt.UserClaims) (response.Response, error)
 }
 
 func UserRoutes(
@@ -30,4 +31,5 @@ func UserRoutes(
 	UserGroup.POST("/updateMyInfo", authMiddleware, ginx.WrapClaimsAndReq(c.UpdateMyInfo))
 	UserGroup.GET("/getUsers", authMiddleware, ginx.Wrap(c.SelectUsers))
 	UserGroup.GET("/:id/getUserInfo", authMiddleware, ginx.Wrap(c.GetUserInfo))
+	UserGroup.POST("/changeRoles", authMiddleware, ginx.WrapClaimsAndReq(c.ChangeUsersRole))
 }

@@ -1149,7 +1149,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "更新当前用户的信息，如邮箱、名称和头像",
+                "description": "批量更新用户在审核平台的权限",
                 "consumes": [
                     "application/json"
                 ],
@@ -1159,15 +1159,15 @@ const docTemplate = `{
                 "tags": [
                     "User"
                 ],
-                "summary": "更新用户信息",
+                "summary": "批量更新权限",
                 "parameters": [
                     {
-                        "description": "更新用户信息请求体",
+                        "description": "更新用户在审核平台的权限请求体",
                         "name": "update",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/request.UpdateUserReq"
+                            "$ref": "#/definitions/request.ChangeUserRolesReq"
                         }
                     }
                 ],
@@ -1180,6 +1180,12 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Invalid or expired token",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "no power",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -1316,6 +1322,17 @@ const docTemplate = `{
                 }
             }
         },
+        "request.ChangeUserRolesReq": {
+            "type": "object",
+            "properties": {
+                "list": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/request.UserRole"
+                    }
+                }
+            }
+        },
         "request.CreateProject": {
             "type": "object",
             "properties": {
@@ -1335,10 +1352,10 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "user_ids": {
+                "users": {
                     "type": "array",
                     "items": {
-                        "type": "integer"
+                        "$ref": "#/definitions/request.UserInProject"
                     }
                 }
             }
@@ -1484,6 +1501,29 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "request.UserInProject": {
+            "type": "object",
+            "properties": {
+                "project_role": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "request.UserRole": {
+            "type": "object",
+            "properties": {
+                "role": {
+                    "description": "审核平台的权限，并非项目中的权限",
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "integer"
                 }
             }
         },

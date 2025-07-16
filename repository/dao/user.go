@@ -10,6 +10,7 @@ import (
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/model"
 	"gorm.io/gorm"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -25,6 +26,7 @@ type UserDAOInterface interface {
 	FindByUserIDs(ctx context.Context, ids []uint) ([]model.User, error)
 	GetResponse(ctx context.Context, users []model.User, pid uint) ([]model.UserResponse, error)
 	PPFUserByid(ctx context.Context, id uint) (model.User, error)
+	ChangeRoleInOneProject(ctx context.Context, projectId uint, roles []request.UserInProject) error
 	ChangeProjectRole(ctx context.Context, user model.User, projectPermit []model.ProjectPermit) error
 	GetProjectList(ctx context.Context) ([]model.Project, error)
 	CreateProject(ctx context.Context, project *model.Project) (uint, string, error)
@@ -635,4 +637,39 @@ func (d *UserDAO) DeleteItemByHookId(ctx context.Context, hookId uint, projectId
 		return err
 	}
 	return nil
+}
+
+// ChangeRoleInOneProject 这个函数用于修改某一project里的审核人权限
+func (d *UserDAO) ChangeRoleInOneProject(ctx context.Context, projectId uint, roles []request.UserInProject) error {
+	var (
+		wg   sync.WaitGroup
+		mu   sync.Mutex
+		errs []error
+	)
+	for _, role := range roles {
+		wg.Add(1)
+
+		go func(r request.UserInProject) {
+			defer wg.Done()
+
+			err := d.DB.WithContext(ctx).
+				Model(&model.UserProject{}).
+				Where("user_id = ? AND project_id = ?", r.Userid, projectId).
+				Update("role", r.ProjectRole).Error
+
+			if err != nil {
+				mu.Lock()
+				errs = append(errs, fmt.Errorf("更新 user_id=%d 失败: %w", r.Userid, err))
+				mu.Unlock()
+			}
+		}(role)
+	}
+	wg.Wait()
+
+	if len(errs) > 0 {
+		//好东西啊，避免了更新中断，还可以以一个errr的形式返回
+		return errors.Join(errs...)
+	}
+	return nil
+
 }
