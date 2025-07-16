@@ -27,6 +27,7 @@ type ItemService interface {
 	Hook(service.Data, model.Item) error
 	RoleBack(item model.Item) error
 	GetDetail(ctx context.Context, id uint) (model.Item, error)
+	AuditMany(g context.Context, items []request.AuditReq, uid uint) []service.Data
 }
 
 func NewItemController(service *service.ItemService) *ItemController {
@@ -345,4 +346,48 @@ func (ic *ItemController) Detail(ctx *gin.Context) (response.Response, error) {
 		}, nil
 	}
 
+}
+
+// AuditAll 批量审核item
+// @Summary 批量审核条目，可接受拒绝交杂
+// @Description 批量审核项目并更新审核状态,不要超过10个
+// @Tags Item
+// @Accept json
+// @Produce json
+// @Param auditReq body request.ManyAuditReq true "审核请求体"
+// @Success 200 {object} response.Response "批量审核成功"
+// @Failure 400 {object} response.Response "批量审核失败"
+// @Failure 400 {object} response.Response "too many items"
+// @Security ApiKeyAuth
+// @Router /api/v1/item/auditMany [post]
+func (ic *ItemController) AuditAll(ctx *gin.Context, req request.ManyAuditReq, cla jwt.UserClaims) (response.Response, error) {
+	if cla.UserRule == 0 {
+		return response.Response{
+			Msg:  "no power",
+			Code: 403,
+			Data: nil,
+		}, nil
+	}
+	if len(req.Reqs) > 10 {
+		return response.Response{
+			Msg:  "too many items",
+			Code: 400,
+			Data: nil,
+		}, nil
+	}
+	datas := ic.service.AuditMany(ctx, req.Reqs, cla.Uid)
+	if len(datas) == 0 {
+
+		return response.Response{
+			Msg:  "批量审核成功",
+			Code: 200,
+			Data: nil,
+		}, nil
+	} else {
+		return response.Response{
+			Msg:  "批量审核失败案例",
+			Code: 400,
+			Data: datas,
+		}, nil
+	}
 }

@@ -21,6 +21,8 @@ definitions:
       audio_rule:
         description: 审核规则
         type: string
+      description:
+        type: string
       hook_url:
         type: string
       logo:
@@ -36,6 +38,13 @@ definitions:
     properties:
       code:
         type: string
+    type: object
+  request.ManyAuditReq:
+    properties:
+      reqs:
+        items:
+          $ref: '#/definitions/request.AuditReq'
+        type: array
     type: object
   request.SelectReq:
     properties:
@@ -73,7 +82,11 @@ definitions:
     properties:
       audio_rule:
         type: string
+      description:
+        type: string
       logo:
+        type: string
+      project_name:
         type: string
     type: object
   request.UpdateUserReq:
@@ -145,6 +158,10 @@ definitions:
       current_number:
         description: 未审核的数目
         type: integer
+      description:
+        type: string
+      project_name:
+        type: string
       total_number:
         description: 项目中item总数
         type: integer
@@ -327,6 +344,34 @@ paths:
       summary: 审核条目
       tags:
       - Item
+  /api/v1/item/auditMany:
+    post:
+      consumes:
+      - application/json
+      description: 批量审核项目并更新审核状态,不要超过10个
+      parameters:
+      - description: 审核请求体
+        in: body
+        name: auditReq
+        required: true
+        schema:
+          $ref: '#/definitions/request.ManyAuditReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 批量审核成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: too many items
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 批量审核条目，可接受拒绝交杂
+      tags:
+      - Item
   /api/v1/item/searchHistory:
     get:
       consumes:
@@ -427,11 +472,6 @@ paths:
       - application/json
       description: 通过项目 ID 删除指定的项目
       parameters:
-      - description: Bearer Token
-        in: header
-        name: Authorization
-        required: true
-        type: string
       - description: 项目ID
         in: path
         name: project_id

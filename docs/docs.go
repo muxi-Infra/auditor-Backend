@@ -176,6 +176,51 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/item/auditMany": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "批量审核项目并更新审核状态,不要超过10个",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Item"
+                ],
+                "summary": "批量审核条目，可接受拒绝交杂",
+                "parameters": [
+                    {
+                        "description": "审核请求体",
+                        "name": "auditReq",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.ManyAuditReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "批量审核成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "too many items",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/item/searchHistory": {
             "get": {
                 "security": [
@@ -476,13 +521,6 @@ const docTemplate = `{
                 ],
                 "summary": "删除项目",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Bearer Token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
                     {
                         "type": "integer",
                         "description": "项目ID",
@@ -1285,6 +1323,9 @@ const docTemplate = `{
                     "description": "审核规则",
                     "type": "string"
                 },
+                "description": {
+                    "type": "string"
+                },
                 "hook_url": {
                     "type": "string"
                 },
@@ -1307,6 +1348,17 @@ const docTemplate = `{
             "properties": {
                 "code": {
                     "type": "string"
+                }
+            }
+        },
+        "request.ManyAuditReq": {
+            "type": "object",
+            "properties": {
+                "reqs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/request.AuditReq"
+                    }
                 }
             }
         },
@@ -1363,7 +1415,13 @@ const docTemplate = `{
                 "audio_rule": {
                     "type": "string"
                 },
+                "description": {
+                    "type": "string"
+                },
                 "logo": {
+                    "type": "string"
+                },
+                "project_name": {
                     "type": "string"
                 }
             }
@@ -1470,6 +1528,12 @@ const docTemplate = `{
                 "current_number": {
                     "description": "未审核的数目",
                     "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "project_name": {
+                    "type": "string"
                 },
                 "total_number": {
                     "description": "项目中item总数",

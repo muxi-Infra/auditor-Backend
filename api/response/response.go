@@ -9,6 +9,8 @@ type Response struct {
 	Data interface{} `json:"data"`
 }
 type GetDetailResp struct {
+	ProjectName   string `json:"project_name"`
+	Description   string `json:"description"`
 	TotalNumber   int    `json:"total_number"`   //项目中item总数
 	CurrentNumber int    `json:"current_number"` //未审核的数目
 	Apikey        string `json:"api_key"`        //由project_id生成的key

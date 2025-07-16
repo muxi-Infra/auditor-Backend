@@ -520,16 +520,25 @@ func (d *UserDAO) GetProjectRole(ctx context.Context, uid uint, pid uint) (int, 
 	return project.Role, nil
 }
 func (d *UserDAO) UpdateProject(ctx context.Context, id uint, req request.UpdateProject) error {
-	var project model.Project
-	err := d.DB.WithContext(ctx).Where("id =?", id).First(&project).Error
-	if err != nil {
-		return errors.New("project不存在")
+	updates := map[string]interface{}{}
+	if req.AudioRule != "" {
+		updates["audio_rule"] = req.AudioRule
 	}
-	project.AudioRule = req.AudioRule
-	project.Logo = req.Logo
-	err = d.DB.WithContext(ctx).Save(&project).Error
+	if req.Logo != "" {
+		updates["logo"] = req.Logo
+	}
+	if req.Description != "" {
+		updates["description"] = req.Description
+	}
+	if req.ProjectName != "" {
+		updates["project_name"] = req.ProjectName
+	}
+	if len(updates) == 0 {
+		return nil // 或 errors.New("没有字段需要更新")
+	}
+	err := d.DB.WithContext(ctx).Model(&model.Project{}).Where("id = ?", id).Updates(updates).Error
 	if err != nil {
-		return errors.New("更新project失败")
+		return fmt.Errorf("更新 project 失败: %w", err)
 	}
 	return nil
 }

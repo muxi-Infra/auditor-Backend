@@ -11,10 +11,13 @@ import (
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/jwt"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/dao"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/model"
+	"golang.org/x/sync/errgroup"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -220,3 +223,47 @@ func (s *ItemService) GetDetail(ctx context.Context, id uint) (model.Item, error
 //	}
 //	return tags, nil
 //}
+
+// AuditMany 批量审核方法实现
+func (s *ItemService) AuditMany(ctx context.Context, reqs []request.AuditReq, uid uint) []Data {
+	var (
+		datas []Data
+		mu    sync.Mutex
+	)
+
+	g, ctx := errgroup.WithContext(ctx)
+
+	for _, req := range reqs {
+		req := req // 防止闭包引用错误
+
+		g.Go(func() error {
+			data, item, err := s.Audit(ctx, req, uid)
+
+			// 把结果 append 到 datas（保护 datas 的并发写）
+			if err != nil {
+				mu.Lock()
+				defer mu.Unlock()
+				data.Id = req.ItemId
+
+				data.Msg = err.Error()
+				datas = append(datas, data)
+
+			} else {
+				go func() {
+					err = s.Hook(data, item)
+					if err != nil {
+						log.Println(err)
+						err = s.RoleBack(item)
+						if err != nil {
+							log.Println(err)
+						}
+					}
+				}()
+			}
+			return nil
+		})
+	}
+
+	_ = g.Wait()
+	return datas
+}

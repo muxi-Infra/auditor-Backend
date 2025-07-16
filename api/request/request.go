@@ -25,11 +25,12 @@ type UpdateUserRoleReq struct {
 	ProjectPermit []model.ProjectPermit `json:"project_permit"` //允许的项目列表
 }
 type CreateProject struct {
-	Name      string `json:"name"`
-	Logo      string `json:"logo"`
-	AudioRule string `json:"audio_rule"` //审核规则
-	UserIds   []uint `json:"user_ids"`
-	HookUrl   string `json:"hook_url"`
+	Name        string          `json:"name"`
+	Logo        string          `json:"logo"`
+	AudioRule   string          `json:"audio_rule"` //审核规则
+	Users       []UserInProject `json:"users"`
+	HookUrl     string          `json:"hook_url"`
+	Description string          `json:"description"`
 }
 type GetProjectDetail struct {
 	ProjectId uint `json:"project_id"`
@@ -63,8 +64,10 @@ type DeleteProject struct {
 	ProjectId uint `json:"project_id"`
 }
 type UpdateProject struct {
-	Logo      string `json:"logo"`
-	AudioRule string `json:"audio_rule"`
+	ProjectName string `json:"project_name"`
+	Logo        string `json:"logo"`
+	AudioRule   string `json:"audio_rule"`
+	Description string `json:"description"`
 }
 
 type GetUsers struct {
@@ -81,4 +84,11 @@ type HookPayload struct {
 type ReturnApiKey struct {
 	ApiKey  string `json:"api_key"`
 	Message string `json:"message"`
+}
+type ManyAuditReq struct {
+	Reqs []AuditReq
+}
+type UserInProject struct {
+	Userid      uint `json:"user_id"`
+	ProjectRole int  `json:"project_role"`
 }

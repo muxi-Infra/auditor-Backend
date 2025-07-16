@@ -17,7 +17,7 @@ type ProjectController struct {
 }
 type ProjectService interface {
 	GetProjectList(ctx context.Context) ([]model.ProjectList, error)
-	Create(ctx context.Context, name string, url string, logo string, audioRule string, ids []uint) (uint, string, error)
+	Create(ctx context.Context, project request.CreateProject) (uint, string, error)
 	Detail(ctx context.Context, id uint) (response.GetDetailResp, error)
 	Delete(ctx context.Context, cla jwt.UserClaims, p uint) error
 	Update(ctx context.Context, id uint, req request.UpdateProject) error
@@ -85,7 +85,7 @@ func (ctrl *ProjectController) Create(ctx *gin.Context, req request.CreateProjec
 			Msg:  "无权限",
 		}, nil
 	}
-	id, _, err := ctrl.service.Create(ctx, req.Name, req.HookUrl, req.Logo, req.AudioRule, req.UserIds)
+	id, _, err := ctrl.service.Create(ctx, req)
 	if err != nil {
 		return response.Response{
 			Code: 400,
@@ -153,7 +153,6 @@ func (ctrl *ProjectController) Detail(ctx *gin.Context, cla jwt.UserClaims) (res
 // @Tags Project
 // @Accept json
 // @Produce json
-// @Param Authorization header string true "Bearer Token"
 // @Param project_id path int true "项目ID"
 // @Success 200 {object} response.Response "删除成功"
 // @Failure 400 {object} response.Response "删除失败"
