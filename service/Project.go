@@ -7,6 +7,7 @@ import (
 	"errors"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/apikey"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/jwt"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/cache"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/cache/errorxs"
@@ -15,6 +16,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"sync"
 )
 
 const DefaultDescription = "这个项目管理很懒，没有任何描述"
@@ -51,7 +53,7 @@ func (s *ProjectService) Create(ctx context.Context, req request.CreateProject) 
 	project := model.Project{
 		ProjectName: req.Name,
 		Logo:        req.Logo,
-		AudioRule:   req.AudioRule,
+		AuditRule:   req.AudioRule,
 		Users:       users,
 		HookUrl:     req.HookUrl,
 		Description: req.Description,
@@ -173,9 +175,10 @@ func (s *ProjectService) Detail(ctx context.Context, id uint) (response.GetDetai
 		TotalNumber:   countMap[0] + countMap[1] + countMap[2],
 		CurrentNumber: countMap[0],
 		Apikey:        project.Apikey,
-		AuditRule:     project.AudioRule,
+		AuditRule:     project.AuditRule,
 		ProjectName:   project.ProjectName,
 		Description:   project.Description,
+		Logo:          project.Logo,
 	}
 	jsonData, _ := json.Marshal(re)
 	s.redisJwtHandler.SetByKey(ctx, cacheKey, jsonData)
@@ -186,7 +189,7 @@ func (s *ProjectService) Delete(ctx context.Context, cla jwt.UserClaims, project
 	uid := cla.Uid
 
 	if cla.UserRule == 2 {
-		err := s.userDAO.DeleteUserProject(ctx, projectId)
+		err := s.userDAO.DeleteUserProject(ctx, projectId, 0)
 		if err != nil {
 			return err
 		}
@@ -201,7 +204,7 @@ func (s *ProjectService) Delete(ctx context.Context, cla jwt.UserClaims, project
 		return err
 	}
 	if role == 1 {
-		err = s.userDAO.DeleteUserProject(ctx, projectId)
+		err = s.userDAO.DeleteUserProject(ctx, projectId, 0)
 		if err != nil {
 			return err
 		}
@@ -218,6 +221,22 @@ func (s *ProjectService) Update(ctx context.Context, id uint, req request.Update
 	if err != nil {
 		return err
 	}
+	go func() {
+		cacheKey := "MuxiAuditor:Detail:" + strconv.Itoa(int(id))
+		r, er := s.redisJwtHandler.GetSByKey(ctx, cacheKey)
+		if er == nil {
+			var detailResp response.GetDetailResp
+			if er = json.Unmarshal([]byte(r), &detailResp); er != nil {
+				log.Println(detailResp)
+			}
+			detailResp.Description = req.Description
+			detailResp.AuditRule = req.AuditRule
+			detailResp.ProjectName = req.ProjectName
+			detailResp.Logo = req.Logo
+			jsonData, _ := json.Marshal(detailResp)
+			s.redisJwtHandler.SetByKey(ctx, cacheKey, jsonData)
+		}
+	}()
 	return nil
 }
 func (s *ProjectService) GetUsers(ctx context.Context, id uint) ([]model.UserResponse, error) {
@@ -264,4 +283,111 @@ func (s *ProjectService) GetAllTags(ctx context.Context, pid uint) ([]string, er
 
 	}
 	return re, nil
+}
+func (s *ProjectService) AddUsers(ctx context.Context, userRole int, uid uint, key string, req []request.AddUser) error {
+	//鉴权
+	pid, err := s.checkPower(ctx, userRole, uid, key)
+	if err != nil {
+		return err
+	}
+	//添加用户
+	var (
+		lasterr []error
+		wg      sync.WaitGroup
+		mu      sync.Mutex
+	)
+	for _, user := range req {
+		wg.Add(1)
+		go func(user request.AddUser) {
+			defer wg.Done()
+			mu.Lock()
+			defer mu.Unlock()
+			er := s.userDAO.CreateUserProject(ctx, pid, user.UserId, user.ProjectRole)
+			if er != nil {
+				lasterr = append(lasterr, er)
+			}
+		}(user)
+	}
+	wg.Wait()
+	if len(lasterr) > 0 {
+		return errors.Join(lasterr...)
+	}
+	return nil
+}
+func (s *ProjectService) DeleteUser(ctx context.Context, userRole int, uid uint, key string, ids []uint) error {
+	pid, err := s.checkPower(ctx, userRole, uid, key)
+	if err != nil {
+		return err
+	}
+	var (
+		lasterr []error
+		wg      sync.WaitGroup
+		mu      sync.Mutex
+	)
+	for _, id := range ids {
+		wg.Add(1)
+		go func(id uint) {
+			defer wg.Done()
+			mu.Lock()
+			defer mu.Unlock()
+			er := s.userDAO.DeleteUserProject(ctx, pid, id)
+			if er != nil {
+				lasterr = append(lasterr, er)
+			}
+		}(id)
+	}
+	wg.Wait()
+	if len(lasterr) > 0 {
+		return errors.Join(lasterr...)
+	}
+	return nil
+}
+func (s *ProjectService) GiveProjectRole(ctx context.Context, userRole int, uid uint, key string, req []request.AddUser) ([]request.AddUser, error) {
+	pid, err := s.checkPower(ctx, userRole, uid, key)
+	if err != nil {
+		return nil, err
+	}
+
+	var (
+		lasterr []error
+		wg      sync.WaitGroup
+		mu      sync.Mutex
+		users   []request.AddUser
+	)
+	for _, user := range req {
+		wg.Add(1)
+		go func(user request.AddUser) {
+			defer wg.Done()
+			mu.Lock()
+			defer mu.Unlock()
+			er := s.userDAO.UpdateUserProject(ctx, pid, user.UserId, user.ProjectRole)
+			if er != nil {
+				lasterr = append(lasterr, er)
+			} else {
+				users = append(users, user)
+			}
+		}(user)
+	}
+	wg.Wait()
+	if len(lasterr) > 0 {
+		return users, errors.Join(lasterr...)
+	}
+	return users, nil
+}
+func (s *ProjectService) checkPower(ctx context.Context, userRole int, uid uint, key string) (uint, error) {
+	claims, err := apikey.ParseAPIKey(key)
+	if err != nil {
+		return 0, err
+	}
+	projectID := uint(claims["sub"].(float64))
+	if userRole != 2 {
+		role, err := s.userDAO.GetProjectRole(ctx, uid, projectID)
+		if err != nil {
+			return 0, err
+		}
+		if role != 1 {
+			return 0, errors.New("no power")
+		}
+	}
+	return projectID, nil
 }
