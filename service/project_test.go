@@ -87,7 +87,7 @@ func setupProjectService() *projectService {
 //		{Model: gorm.Model{ID: 1},
 //			ProjectName: "Project A",
 //			Logo:        "logo.png",
-//			AudioRule:   "Audio Rule A",
+//			AuditRule:   "Audio Rule A",
 //			Users:       []model.User{user1, user2, user3}, // 直接使用已有的用户
 //			Items: []model.Item{
 //				{Author: "Item 1", Status: 1, PublicTime: time.Now()},
@@ -98,7 +98,7 @@ func setupProjectService() *projectService {
 //			Model:       gorm.Model{ID: 2},
 //			ProjectName: "Project B",
 //			Logo:        "logo.png",
-//			AudioRule:   "Audio Rule B",
+//			AuditRule:   "Audio Rule B",
 //			Users: []model.User{
 //				{Name: "User 4", Avatar: "logo.png"},
 //			},
@@ -150,7 +150,7 @@ func (s *projectService) DatilWithRedis(ctx context.Context) (response.GetDetail
 		TotleNumber:   countMap[0] + countMap[1] + countMap[2],
 		CurrentNumber: countMap[0],
 		Apikey:        project.Apikey,
-		AuditRule:     project.AudioRule,
+		AuditRule:     project.AuditRule,
 		Members:       users,
 	}
 	jsonData, _ := json.Marshal(re)
@@ -192,7 +192,7 @@ func (s *projectService) DatilNoRedis(ctx context.Context) (response.GetDetailRe
 		TotleNumber:   countMap[0] + countMap[1] + countMap[2],
 		CurrentNumber: countMap[0],
 		Apikey:        project.Apikey,
-		AuditRule:     project.AudioRule,
+		AuditRule:     project.AuditRule,
 		Members:       users,
 	}
 	return re, nil
