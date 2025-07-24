@@ -15,6 +15,7 @@ type GetDetailResp struct {
 	CurrentNumber int    `json:"current_number"` //未审核的数目
 	Apikey        string `json:"api_key"`        //由project_id生成的key
 	AuditRule     string `json:"audit_rule"`
+	Logo          string `json:"logo"`
 }
 type SelectResp struct {
 	Items []Item `json:"items"`

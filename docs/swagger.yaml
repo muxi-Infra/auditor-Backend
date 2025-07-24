@@ -6,6 +6,20 @@ definitions:
       project_role:
         type: integer
     type: object
+  request.AddUser:
+    properties:
+      project_role:
+        type: integer
+      user_id:
+        type: integer
+    type: object
+  request.AddUsersReq:
+    properties:
+      add_users:
+        items:
+          $ref: '#/definitions/request.AddUser'
+        type: array
+    type: object
   request.AuditReq:
     properties:
       item_id:
@@ -39,6 +53,13 @@ definitions:
       users:
         items:
           $ref: '#/definitions/request.UserInProject'
+        type: array
+    type: object
+  request.DeleteUsers:
+    properties:
+      ids:
+        items:
+          type: integer
         type: array
     type: object
   request.LoginReq:
@@ -87,7 +108,7 @@ definitions:
     type: object
   request.UpdateProject:
     properties:
-      audio_rule:
+      audit_rule:
         type: string
       description:
         type: string
@@ -181,6 +202,8 @@ definitions:
         description: 未审核的数目
         type: integer
       description:
+        type: string
+      logo:
         type: string
       project_name:
         type: string
@@ -646,6 +669,43 @@ paths:
       summary: 更新项目
       tags:
       - Project
+  /api/v1/project/addUsers:
+    post:
+      consumes:
+      - application/json
+      description: 根据api_key和用户id，向项目中批量添加用户
+      parameters:
+      - description: API 认证密钥(api_key)
+        in: header
+        name: api_key
+        required: true
+        type: string
+      - description: 添加用户请求体
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.AddUsersReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 添加成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求错误（缺少api_key或参数错误）
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 添加项目成员
+      tags:
+      - Project
   /api/v1/project/create:
     post:
       consumes:
@@ -674,6 +734,43 @@ paths:
       summary: 创建项目
       tags:
       - Project
+  /api/v1/project/deleteUsers:
+    delete:
+      consumes:
+      - application/json
+      description: 根据api_key和用户id，批量删除项目中的用户
+      parameters:
+      - description: API 认证密钥(api_key)
+        in: header
+        name: api_key
+        required: true
+        type: string
+      - description: 删除用户请求体
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.DeleteUsers'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求错误（缺少api_key或参数错误）
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 删除项目成员
+      tags:
+      - Project
   /api/v1/project/getProjectList:
     get:
       consumes:
@@ -693,6 +790,43 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 获取项目列表
+      tags:
+      - Project
+  /api/v1/project/giveProjectRole:
+    put:
+      consumes:
+      - application/json
+      description: 根据 api_key 和用户信息，批量更新项目中的用户权
+      parameters:
+      - description: API 认证密钥(api_key)
+        in: header
+        name: api_key
+        required: true
+        type: string
+      - description: 更新用户角色请求体（包含用户 ID 与新角色）
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.AddUsersReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 更新成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求错误（缺少 api_key 或参数错误）
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 更新项目成员权限
       tags:
       - Project
   /api/v1/remove/delete:
@@ -908,6 +1042,38 @@ paths:
       summary: 获取用户信息
       tags:
       - User
+  /api/v1/user/changeRoles:
+    post:
+      consumes:
+      - application/json
+      description: 批量更新用户在审核平台的权限
+      parameters:
+      - description: 更新用户在审核平台的权限请求体
+        in: body
+        name: update
+        required: true
+        schema:
+          $ref: '#/definitions/request.ChangeUserRolesReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功更新用户信息
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Invalid or expired token
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: no power
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 批量更新权限
+      tags:
+      - User
   /api/v1/user/getMyInfo:
     get:
       consumes:
@@ -977,14 +1143,14 @@ paths:
     post:
       consumes:
       - application/json
-      description: 批量更新用户在审核平台的权限
+      description: 更新当前用户的信息，如邮箱、名称和头像
       parameters:
-      - description: 更新用户在审核平台的权限请求体
+      - description: 更新用户信息请求体
         in: body
         name: update
         required: true
         schema:
-          $ref: '#/definitions/request.ChangeUserRolesReq'
+          $ref: '#/definitions/request.UpdateUserReq'
       produces:
       - application/json
       responses:
@@ -996,13 +1162,9 @@ paths:
           description: Invalid or expired token
           schema:
             $ref: '#/definitions/response.Response'
-        "403":
-          description: no power
-          schema:
-            $ref: '#/definitions/response.Response'
       security:
       - ApiKeyAuth: []
-      summary: 批量更新权限
+      summary: 更新用户信息
       tags:
       - User
   /api/v1/user/updateUser:

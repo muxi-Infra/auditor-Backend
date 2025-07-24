@@ -221,7 +221,7 @@ func (c *UserController) GetUserInfo(ctx *gin.Context) (response.Response, error
 // @Failure 400 {object} response.Response "Invalid or expired token"
 // @Failure 403 {object} response.Response "no power"
 // @Security ApiKeyAuth
-// @Router /api/v1/user/updateMyInfo [post]
+// @Router /api/v1/user/changeRoles [post]
 func (c *UserController) ChangeUsersRole(ctx *gin.Context, req request.ChangeUserRolesReq, cla jwt.UserClaims) (response.Response, error) {
 	if cla.UserRule != 2 {
 		return response.Response{

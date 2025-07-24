@@ -20,7 +20,7 @@ type Project struct {
 	gorm.Model
 	ProjectName string `gorm:"column:project_name;not null"`
 	Logo        string `gorm:"column:logo;not null"`
-	AudioRule   string `gorm:"column:audio_rule;not null"`
+	AuditRule   string `gorm:"column:audit_rule;not null"`
 	Description string `gorm:"column:description;not null"`
 	Users       []User `gorm:"many2many:user_projects;"`
 	Items       []Item `gorm:"foreignKey:ProjectId"`
@@ -42,6 +42,7 @@ type UserResponse struct {
 	Name        string `json:"name"`
 	ID          uint   `json:"id"` //user_id
 	Avatar      string `json:"avatar"`
+	Email       string `json:"email"`
 	ProjectRole int    `json:"project_role"`
 	Role        int    `json:"role"`
 }

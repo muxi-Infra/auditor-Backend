@@ -30,6 +30,7 @@ type UserDAOInterface interface {
 	ChangeProjectRole(ctx context.Context, user model.User, projectPermit []model.ProjectPermit) error
 	GetProjectList(ctx context.Context) ([]model.Project, error)
 	CreateProject(ctx context.Context, project *model.Project) (uint, string, error)
+	CreateUserProject(ctx context.Context, projectId uint, uid uint, projectRole int) error
 	GetProjectDetails(ctx context.Context, id uint) (model.Project, error)
 	Select(ctx context.Context, req request.SelectReq) ([]model.Item, error)
 	AuditItem(ctx context.Context, ItemId uint, Status int, Reason string, id uint) error
@@ -39,7 +40,7 @@ type UserDAOInterface interface {
 	UpdateItem(ctx context.Context, req request.UploadReq, id uint, time time.Time) (uint, error)
 	GetProjectRole(ctx context.Context, uid uint, pid uint) (int, error)
 	DeleteProject(ctx context.Context, pid uint) error
-	DeleteUserProject(ctx context.Context, pid uint) error
+	DeleteUserProject(ctx context.Context, pid uint, uid uint) error
 	RollBack(ItemId uint, Status int, Reason string) error
 	UpdateProject(ctx context.Context, id uint, req request.UpdateProject) error
 	GetUserProjectRoles(ctx context.Context, users []model.User, projects []model.Project) ([]response.UserAllInfo, error)
@@ -48,6 +49,7 @@ type UserDAOInterface interface {
 	//GetSecretKey(ctx context.Context, ac string) (string, uint, error)
 	GetItemByHookId(ctx context.Context, hookId uint) (model.Item, error)
 	DeleteItemByHookId(ctx context.Context, hookId uint, projectId uint) error
+	UpdateUserProject(ctx context.Context, projectId uint, uid uint, projectRole int) error
 }
 type UserDAO struct {
 	DB *gorm.DB
@@ -99,11 +101,19 @@ func (d *UserDAO) DeleteProject(ctx context.Context, pid uint) error {
 
 	return nil
 }
-func (d *UserDAO) DeleteUserProject(ctx context.Context, pid uint) error {
-	if err := d.DB.WithContext(ctx).Where("project_id=?", pid).Delete(&model.UserProject{}).Error; err != nil {
-		return err
+func (d *UserDAO) DeleteUserProject(ctx context.Context, pid uint, uid uint) error {
+	if uid == 0 {
+		if err := d.DB.WithContext(ctx).Where("project_id=?", pid).Delete(&model.UserProject{}).Error; err != nil {
+			return err
+		}
+		return nil
+	} else {
+		if err := d.DB.WithContext(ctx).Where("project_id=? AND user_id=?", pid, uid).Delete(&model.UserProject{}).Error; err != nil {
+			return err
+		}
+		return nil
 	}
-	return nil
+
 }
 func (d *UserDAO) List(ctx context.Context) ([]model.User, error) {
 	var users []model.User
@@ -151,6 +161,7 @@ func (d *UserDAO) GetResponse(ctx context.Context, users []model.User, pid uint)
 		userResponses = append(userResponses, model.UserResponse{
 			Name:        user.Name,
 			ID:          user.ID,
+			Email:       user.Email,
 			Avatar:      user.Avatar,
 			ProjectRole: userProject.Role,
 			Role:        user.UserRole,
@@ -523,8 +534,8 @@ func (d *UserDAO) GetProjectRole(ctx context.Context, uid uint, pid uint) (int, 
 }
 func (d *UserDAO) UpdateProject(ctx context.Context, id uint, req request.UpdateProject) error {
 	updates := map[string]interface{}{}
-	if req.AudioRule != "" {
-		updates["audio_rule"] = req.AudioRule
+	if req.AuditRule != "" {
+		updates["audit_rule"] = req.AuditRule
 	}
 	if req.Logo != "" {
 		updates["logo"] = req.Logo
@@ -672,4 +683,24 @@ func (d *UserDAO) ChangeRoleInOneProject(ctx context.Context, projectId uint, ro
 	}
 	return nil
 
+}
+
+// 向项目中添加审核员
+func (d *UserDAO) CreateUserProject(ctx context.Context, projectId uint, uid uint, projectRole int) error {
+	var user = model.UserProject{
+		UserID:    uid,
+		ProjectID: projectId,
+		Role:      projectRole,
+	}
+	err := d.DB.WithContext(ctx).Create(&user).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func (d *UserDAO) UpdateUserProject(ctx context.Context, projectId uint, uid uint, projectRole int) error {
+	if err := d.DB.WithContext(ctx).Model(&model.UserProject{}).Where("project_id=? AND user_id=?", projectId, uid).Update("role", projectRole).Error; err != nil {
+		return err
+	}
+	return nil
 }

@@ -66,7 +66,7 @@ type DeleteProject struct {
 type UpdateProject struct {
 	ProjectName string `json:"project_name"`
 	Logo        string `json:"logo"`
-	AudioRule   string `json:"audio_rule"`
+	AuditRule   string `json:"audit_rule"`
 	Description string `json:"description"`
 }
 
@@ -98,4 +98,14 @@ type UserRole struct {
 }
 type ChangeUserRolesReq struct {
 	List []UserRole `json:"list"`
+}
+type AddUser struct {
+	UserId      uint `json:"user_id"`
+	ProjectRole int  `json:"project_role"`
+}
+type AddUsersReq struct {
+	AddUsers []AddUser `json:"add_users"`
+}
+type DeleteUsers struct {
+	Ids []uint `json:"ids"`
 }
