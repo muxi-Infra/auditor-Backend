@@ -43,7 +43,7 @@ func TestGetProjectList(t *testing.T) {
 			},
 			ProjectName: "Project A",
 			Logo:        "logo.png",
-			AudioRule:   "Audio Rule A",
+			AuditRule:   "Audio Rule A",
 			Users: []model.User{
 				{Model: gorm.Model{ID: 1}, Name: "User 1"},
 				{Model: gorm.Model{ID: 2}, Name: "User 2"},
@@ -60,7 +60,7 @@ func TestGetProjectList(t *testing.T) {
 			},
 			ProjectName: "Project B",
 			Logo:        "logo2.png",
-			AudioRule:   "Audio Rule B",
+			AuditRule:   "Audio Rule B",
 			Users: []model.User{
 				{Model: gorm.Model{ID: 3}, Name: "User 3"},
 			},
@@ -84,7 +84,7 @@ func TestDetail(t *testing.T) {
 		Model:       gorm.Model{ID: 1},
 		ProjectName: "Project A",
 		Logo:        "logo.png",
-		AudioRule:   "Audio Rule A",
+		AuditRule:   "Audio Rule A",
 		Users: []model.User{
 			{Model: gorm.Model{ID: 1}, Name: "User 1", Avatar: "logo.png"},
 			{Model: gorm.Model{ID: 2}, Name: "User 2", Avatar: "logo.png"},

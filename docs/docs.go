@@ -423,6 +423,64 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/project/addUsers": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "根据api_key和用户id，向项目中批量添加用户",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "添加项目成员",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API 认证密钥(api_key)",
+                        "name": "api_key",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "添加用户请求体",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.AddUsersReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "添加成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "请求错误（缺少api_key或参数错误）",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/project/create": {
             "post": {
                 "security": [
@@ -468,6 +526,64 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/project/deleteUsers": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "根据api_key和用户id，批量删除项目中的用户",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "删除项目成员",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API 认证密钥(api_key)",
+                        "name": "api_key",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "删除用户请求体",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.DeleteUsers"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "删除成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "请求错误（缺少api_key或参数错误）",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/project/getProjectList": {
             "get": {
                 "security": [
@@ -495,6 +611,64 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "获取项目列表失败",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/project/giveProjectRole": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "根据 api_key 和用户信息，批量更新项目中的用户权",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "更新项目成员权限",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API 认证密钥(api_key)",
+                        "name": "api_key",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "更新用户角色请求体（包含用户 ID 与新角色）",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.AddUsersReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "更新成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "请求错误（缺少 api_key 或参数错误）",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -1030,6 +1204,57 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/user/changeRoles": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "批量更新用户在审核平台的权限",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "批量更新权限",
+                "parameters": [
+                    {
+                        "description": "更新用户在审核平台的权限请求体",
+                        "name": "update",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.ChangeUserRolesReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功更新用户信息",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid or expired token",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "403": {
+                        "description": "no power",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/user/getMyInfo": {
             "get": {
                 "security": [
@@ -1149,7 +1374,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "批量更新用户在审核平台的权限",
+                "description": "更新当前用户的信息，如邮箱、名称和头像",
                 "consumes": [
                     "application/json"
                 ],
@@ -1159,15 +1384,15 @@ const docTemplate = `{
                 "tags": [
                     "User"
                 ],
-                "summary": "批量更新权限",
+                "summary": "更新用户信息",
                 "parameters": [
                     {
-                        "description": "更新用户在审核平台的权限请求体",
+                        "description": "更新用户信息请求体",
                         "name": "update",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/request.ChangeUserRolesReq"
+                            "$ref": "#/definitions/request.UpdateUserReq"
                         }
                     }
                 ],
@@ -1180,12 +1405,6 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Invalid or expired token",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "403": {
-                        "description": "no power",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -1307,6 +1526,28 @@ const docTemplate = `{
                 }
             }
         },
+        "request.AddUser": {
+            "type": "object",
+            "properties": {
+                "project_role": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "request.AddUsersReq": {
+            "type": "object",
+            "properties": {
+                "add_users": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/request.AddUser"
+                    }
+                }
+            }
+        },
         "request.AuditReq": {
             "type": "object",
             "properties": {
@@ -1356,6 +1597,17 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/request.UserInProject"
+                    }
+                }
+            }
+        },
+        "request.DeleteUsers": {
+            "type": "object",
+            "properties": {
+                "ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
                     }
                 }
             }
@@ -1429,7 +1681,7 @@ const docTemplate = `{
         "request.UpdateProject": {
             "type": "object",
             "properties": {
-                "audio_rule": {
+                "audit_rule": {
                     "type": "string"
                 },
                 "description": {
@@ -1570,6 +1822,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "description": {
+                    "type": "string"
+                },
+                "logo": {
                     "type": "string"
                 },
                 "project_name": {

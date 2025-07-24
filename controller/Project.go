@@ -24,6 +24,9 @@ type ProjectService interface {
 	GetUsers(ctx context.Context, id uint) ([]model.UserResponse, error)
 	ReturnApiKey(apiKey string, hookUrl string) error
 	GetAllTags(ctx context.Context, pid uint) ([]string, error)
+	AddUsers(ctx context.Context, role int, uid uint, key string, req []request.AddUser) error
+	DeleteUser(ctx context.Context, role int, uid uint, key string, ids []uint) error
+	GiveProjectRole(ctx context.Context, userRole int, uid uint, key string, req []request.AddUser) ([]request.AddUser, error)
 }
 
 func NewProjectController(service *service.ProjectService) *ProjectController {
@@ -326,5 +329,116 @@ func (ctrl *ProjectController) GetAllTags(ctx *gin.Context, cla jwt.UserClaims) 
 		Code: 200,
 		Data: re,
 		Msg:  "获取tags成功",
+	}, nil
+}
+
+// AddUsers 添加项目成员
+// @Summary 添加项目成员
+// @Description 根据api_key和用户id，向项目中批量添加用户
+// @Tags Project
+// @Accept json
+// @Produce json
+// @Param api_key header string true "API 认证密钥(api_key)"
+// @Param request body request.AddUsersReq true "添加用户请求体"
+// @Security ApiKeyAuth
+// @Success 200 {object} response.Response "添加成功"
+// @Failure 400 {object} response.Response "请求错误（缺少api_key或参数错误）"
+// @Failure 500 {object} response.Response "服务器错误"
+// @Router /api/v1/project/addUsers [post]
+func (ctrl *ProjectController) AddUsers(ctx *gin.Context, req request.AddUsersReq, cla jwt.UserClaims) (response.Response, error) {
+	uid := cla.Uid
+	key := ctx.GetHeader("api_key")
+	if key == "" {
+		return response.Response{
+			Code: 400,
+			Msg:  "api_key is necessary",
+		}, nil
+	}
+	userRole := cla.UserRule
+	err := ctrl.service.AddUsers(ctx, userRole, uid, key, req.AddUsers)
+	if err != nil {
+		return response.Response{
+			Code: 400,
+			Msg:  err.Error(),
+		}, err
+	}
+	return response.Response{
+		Code: 200,
+		Msg:  "添加成功",
+	}, nil
+
+}
+
+// DeleteUsers 删除项目成员
+// @Summary 删除项目成员
+// @Description 根据api_key和用户id，批量删除项目中的用户
+// @Tags Project
+// @Accept json
+// @Produce json
+// @Param api_key header string true "API 认证密钥(api_key)"
+// @Param request body request.DeleteUsers true "删除用户请求体"
+// @Security ApiKeyAuth
+// @Success 200 {object} response.Response "删除成功"
+// @Failure 400 {object} response.Response "请求错误（缺少api_key或参数错误）"
+// @Failure 500 {object} response.Response "服务器错误"
+// @Router /api/v1/project/deleteUsers [delete]
+func (ctrl *ProjectController) DeleteUsers(ctx *gin.Context, req request.DeleteUsers, cla jwt.UserClaims) (response.Response, error) {
+	uid := cla.Uid
+	key := ctx.GetHeader("api_key")
+	if key == "" {
+		return response.Response{
+			Code: 400,
+			Msg:  "api_key is necessary",
+		}, nil
+	}
+	userRole := cla.UserRule
+	err := ctrl.service.DeleteUser(ctx, userRole, uid, key, req.Ids)
+	if err != nil {
+		return response.Response{
+			Code: 400,
+			Msg:  err.Error(),
+		}, err
+	}
+	return response.Response{
+		Code: 200,
+		Msg:  "删除成功",
+	}, nil
+}
+
+// GiveProjectRole 更新项目成员权限
+// @Summary 更新项目成员权限
+// @Description 根据 api_key 和用户信息，批量更新项目中的用户权
+// @Tags Project
+// @Accept json
+// @Produce json
+// @Param api_key header string true "API 认证密钥(api_key)"
+// @Param request body request.AddUsersReq true "更新用户角色请求体（包含用户 ID 与新角色）"
+// @Security ApiKeyAuth
+// @Success 200 {object} response.Response "更新成功"
+// @Failure 400 {object} response.Response "请求错误（缺少 api_key 或参数错误）"
+// @Failure 500 {object} response.Response "服务器错误"
+// @Router /api/v1/project/giveProjectRole [put]
+func (ctrl *ProjectController) GiveProjectRole(ctx *gin.Context, req request.AddUsersReq, cla jwt.UserClaims) (response.Response, error) {
+	uid := cla.Uid
+	key := ctx.GetHeader("api_key")
+	if key == "" {
+		return response.Response{
+			Code: 400,
+			Msg:  "api_key is necessary",
+		}, nil
+	}
+	userRole := cla.UserRule
+	data, err := ctrl.service.GiveProjectRole(ctx, userRole, uid, key, req.AddUsers)
+	if err != nil {
+		return response.Response{
+			Code: 400,
+			Msg:  err.Error(),
+			Data: data,
+		}, err
+	}
+	return response.Response{
+		Code: 200,
+		Msg:  "更新成功",
+		Data: data,
 	}, nil
 }

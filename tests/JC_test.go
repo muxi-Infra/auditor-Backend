@@ -42,7 +42,7 @@ func initDB(db *gorm.DB) {
 		Model:       gorm.Model{ID: 1},
 		ProjectName: "Project A",
 		Logo:        "logo.png",
-		AudioRule:   "Audio Rule A",
+		AuditRule:   "Audio Rule A",
 		Users: []model.User{
 			{Model: gorm.Model{ID: 1}, Name: "User 1", Avatar: "logo.png"},
 			{Model: gorm.Model{ID: 2}, Name: "User 2", Avatar: "logo.png"},
@@ -58,7 +58,7 @@ func initDB(db *gorm.DB) {
 			Model:       gorm.Model{ID: 2},
 			ProjectName: "Project B",
 			Logo:        "logo.png",
-			AudioRule:   "Audio Rule B",
+			AuditRule:   "Audio Rule B",
 			Users: []model.User{
 				{Model: gorm.Model{ID: 4}, Name: "User 4", Avatar: "logo.png"},
 			},

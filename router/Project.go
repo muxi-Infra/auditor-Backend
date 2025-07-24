@@ -17,6 +17,9 @@ type ProjectController interface {
 	Update(ctx *gin.Context, req request.UpdateProject, cla jwt.UserClaims) (response.Response, error)
 	GetUsers(g *gin.Context, cla jwt.UserClaims) (response.Response, error)
 	GetAllTags(ctx *gin.Context, cla jwt.UserClaims) (response.Response, error)
+	AddUsers(ctx *gin.Context, req request.AddUsersReq, cla jwt.UserClaims) (response.Response, error)
+	DeleteUsers(ctx *gin.Context, req request.DeleteUsers, cla jwt.UserClaims) (response.Response, error)
+	GiveProjectRole(ctx *gin.Context, req request.AddUsersReq, cla jwt.UserClaims) (response.Response, error)
 }
 
 func RegisterProjectRoutes(
@@ -33,4 +36,7 @@ func RegisterProjectRoutes(
 	authGroup.POST("/:project_id/update", authMiddleware, ginx.WrapClaimsAndReq(c.Update))
 	authGroup.GET("/:project_id/getUsers", authMiddleware, ginx.WrapClaims(c.GetUsers))
 	authGroup.GET("/:project_id/getAllTags", authMiddleware, ginx.WrapClaims(c.GetAllTags))
+	authGroup.POST("/addUsers", authMiddleware, ginx.WrapClaimsAndReq(c.AddUsers))
+	authGroup.DELETE("/deleteUsers", authMiddleware, ginx.WrapClaimsAndReq(c.DeleteUsers))
+	authGroup.PUT("giveProjectRole", authMiddleware, ginx.WrapClaimsAndReq(c.GiveProjectRole))
 }
