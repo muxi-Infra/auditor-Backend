@@ -389,7 +389,6 @@ func (d *UserDAO) Upload(ctx context.Context, req request.UploadReq, id uint, ti
 			var item = model.Item{
 				Status:     0,
 				ProjectId:  id,
-				Auditor:    req.Auditor,
 				Author:     req.Author,
 				Tags:       req.Tags,
 				PublicTime: time,
@@ -484,7 +483,6 @@ func (d *UserDAO) UpdateItem(ctx context.Context, req request.UploadReq, id uint
 	}
 	it.Status = 0
 	it.ProjectId = id
-	it.Auditor = req.Auditor
 	it.Author = req.Author
 	it.Tags = req.Tags
 	it.PublicTime = time
