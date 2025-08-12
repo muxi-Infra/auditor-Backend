@@ -26,7 +26,9 @@ func (service *RemoveService) CheckPower(c context.Context, ac string) (bool, ui
 	if err != nil {
 		return false, 0, err
 	}
-	return true, claims["sub"].(uint), nil
+	projectIdFloat := claims["sub"].(float64)
+	projectIdUint := uint(projectIdFloat)
+	return true, projectIdUint, nil
 }
 func (service *RemoveService) Upload(c context.Context, req request.UploadReq, projectId uint) (uint, error) {
 	now := time.Now()
