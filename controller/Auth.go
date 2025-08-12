@@ -44,7 +44,6 @@ func NewOAuthController(client *client.OAuthClient, service *service.AuthService
 // @Router /api/v1/auth/login [post]
 func (c *AuthController) Login(ctx *gin.Context, req request.LoginReq) (response.Response, error) {
 
-	////随便写的逻辑,你需要进行更改
 	accessToken, err := c.client.GetOAuth(req.Code)
 	if err != nil {
 		return response.Response{
