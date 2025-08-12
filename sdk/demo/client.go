@@ -1,15 +1,16 @@
-package client
+package main
 
 import (
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/sdk/client"
 	"net/http"
 	"time"
 )
 
 func main() {
-	ac := "xxxxxx"
-	c := NewMuxiAuditClient(&http.Client{}, "http://localhost:8080/api/v1")
+	ac := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTIxNDE2OTYsInN1YiI6NH0.6bNgD_MF1zp8oNcpBPJnKaKU2i4-BdCRdqKNoBiU5Ys"
+	c := client.NewMuxiAuditClient(&http.Client{}, "http://60.205.12.92:8080/api/v1")
 	var req = request.UploadReq{
 		HookUrl:    "http://localhost:8081",
 		Id:         12,
