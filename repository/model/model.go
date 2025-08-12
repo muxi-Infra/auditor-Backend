@@ -61,7 +61,7 @@ type Item struct {
 	Content    string          `gorm:"column:content;not null"`
 	Title      string          `gorm:"column:title;not null"`
 	Comments   []Comment       `gorm:"foreignKey:ItemId"`
-	Auditor    uint            `gorm:"column:auditor;not null"`
+	Auditor    uint            `gorm:"column:auditor;"`
 	Reason     string          `gorm:"column:reason"`
 	Pictures   GormStringSlice `gorm:"type:json"`
 	HookUrl    string          `gorm:"column:hook_url;not null"`

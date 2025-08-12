@@ -53,7 +53,6 @@ type AuditReq struct {
 type UploadReq struct {
 	HookUrl    string            `json:"hook_url"`
 	Id         uint              `json:"id"` //hook_id
-	Auditor    uint              `json:"auditor"`
 	Author     string            `json:"author"`
 	PublicTime int64             `json:"public_time"`
 	Tags       []string          `json:"tags"`
