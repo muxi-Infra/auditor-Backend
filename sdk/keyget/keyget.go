@@ -3,7 +3,6 @@ package keyget
 import (
 	"fmt"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
-
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"os"
@@ -16,6 +15,9 @@ type KeyGet struct {
 	Addr    string
 	Path    string
 	Handler gin.HandlerFunc
+}
+type ViperSetting interface {
+	SetApiKey(key string, value string) error
 }
 
 func NewKeyGet(engine *gin.Engine, addr string, path string, handler gin.HandlerFunc) *KeyGet {
@@ -58,6 +60,24 @@ func DefaultServe(engine *gin.Engine, addr string, path string) *KeyGet {
 			return
 		}
 
+	}
+	k := NewKeyGet(engine, addr, path, handler)
+	k.Serve()
+	return k
+}
+func ServeWriteToConfig(engine *gin.Engine, addr string, path string, v ViperSetting, key string) *KeyGet {
+	handler := func(c *gin.Context) {
+		var data request.ReturnApiKey
+		err := c.ShouldBind(&data)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		err = v.SetApiKey(key, data.ApiKey)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
 	}
 	k := NewKeyGet(engine, addr, path, handler)
 	k.Serve()
