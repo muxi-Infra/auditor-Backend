@@ -1,2 +1,1 @@
-secret_key:aa0lswAkWcJhq08NlNBEs21Gukxk9Ncb
-,access_key:cli_aa0lswAkWcJhq08N
+api_key:13231231312

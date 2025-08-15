@@ -41,7 +41,7 @@ func InitWebServer(confPath string) *App {
 	userService := service.NewUserService(userDAO, redisJWTHandler)
 	userController := controller.NewUserController(userService)
 	itemService := service.NewItemService(userDAO, redisJWTHandler)
-	itemController := controller.NewItemController(itemService)
+	itemController := controller.NewItemController(itemService, logger)
 	qiNiuYunConfig := config.NewQiniuConf(vipperSetting)
 	tubeService := service.NewTubeService(userDAO, redisJWTHandler, qiNiuYunConfig)
 	tubeController := controller.NewTuberController(tubeService)

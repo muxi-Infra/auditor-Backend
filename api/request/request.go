@@ -75,9 +75,9 @@ type GetUsers struct {
 	PageSize int    `json:"size"`
 }
 type HookPayload struct {
-	Event string `json:"event"`
-	Data  any    `json:"data,omitempty"`
-	Try   int    `json:"try"` // 重试次数，最大不超过五
+	Event string      `json:"event"`
+	Data  WebHookData `json:"data,omitempty"`
+	Try   int         `json:"try"` // 重试次数，最大不超过五
 }
 
 type ReturnApiKey struct {
@@ -107,4 +107,9 @@ type AddUsersReq struct {
 }
 type DeleteUsers struct {
 	Ids []uint `json:"ids"`
+}
+type WebHookData struct {
+	Id     uint
+	Status string
+	Msg    string
 }

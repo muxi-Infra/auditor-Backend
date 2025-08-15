@@ -62,18 +62,18 @@ func (s *ItemService) Select(ctx context.Context, req request.SelectReq) ([]mode
 	}
 	return nil, nil
 }
-func (s *ItemService) Audit(ctx context.Context, req request.AuditReq, id uint) (Data, model.Item, error) {
+func (s *ItemService) Audit(ctx context.Context, req request.AuditReq, id uint) (request.WebHookData, model.Item, error) {
 
 	err := s.userDAO.AuditItem(ctx, req.ItemId, req.Status, req.Reason, id)
 
 	if err != nil {
-		return Data{}, model.Item{}, err
+		return request.WebHookData{}, model.Item{}, err
 	}
 	item, err := s.userDAO.SelectItemById(ctx, req.ItemId)
 	if err != nil {
-		return Data{}, model.Item{}, err
+		return request.WebHookData{}, model.Item{}, err
 	}
-	reqBody := Data{
+	reqBody := request.WebHookData{
 		Id:     item.HookId,
 		Status: M[item.Status],
 		Msg:    req.Reason,
@@ -81,7 +81,8 @@ func (s *ItemService) Audit(ctx context.Context, req request.AuditReq, id uint) 
 
 	return reqBody, item, nil
 }
-func (s *ItemService) Hook(reqbody Data, item model.Item) error {
+
+func (s *ItemService) Hook(reqbody request.WebHookData, item model.Item) error {
 	try := os.Getenv("HOOK_TRY_MAX")
 	num, err := strconv.Atoi(try) // 将 string 转成 int
 	if err != nil {
@@ -97,37 +98,13 @@ func (s *ItemService) Hook(reqbody Data, item model.Item) error {
 	}
 	_, err = s.HookBack(item.HookUrl, req, "")
 	if err != nil {
+		fmt.Println("t---", err)
 		return err
 	}
 	return nil
-	//body, err := json.Marshal(req)
-	//if err != nil {
-	//	return err
-	//}
-	//
-	//reqs, err := http.NewRequest("POST", item.HookUrl, bytes.NewBuffer(body))
-	//
-	//if err != nil {
-	//
-	//	return err
-	//}
-	//reqs.Header.Set("Content-Type", "application/json")
-	//client := &http.Client{}
-	//resp, err := client.Do(reqs)
-	//if err != nil {
-	//	return err
-	//}
-	//defer resp.Body.Close()
-	//if resp.StatusCode != http.StatusOK {
-	//
-	//	return errorxs.New("回调HookUrl失败")
-	//}
-	//return nil
 }
+
 func (s *ItemService) HookBack(t string, data request.HookPayload, authorization string) ([]byte, error) {
-	if data.Try > 10 {
-		return nil, errors.New("too many hooks")
-	}
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal hook payload: %w", err)
@@ -162,15 +139,17 @@ func (s *ItemService) HookBack(t string, data request.HookPayload, authorization
 			return body, nil
 		}
 	}
-
+	fmt.Println("last----", lasterr)
 	return nil, lasterr
 }
 func (s *ItemService) RoleBack(item model.Item) error {
-	err := s.userDAO.RollBack(item.ID, 0, item.Reason)
-	if err != nil {
-		return errors.New("回滚失败")
-	}
-	return nil
+
+	return fmt.Errorf("回滚失败: item=%+v, 原因: %s", item, "test")
+	//err := s.userDAO.RollBack(item.ID, 0, "")
+	//if err != nil {
+	//	return fmt.Errorf("回滚失败: item=%+v, 原因: %w", item, err)
+	//}
+	//return nil
 }
 func (s *ItemService) SearchHistory(ctx context.Context, id uint) ([]model.Item, error) {
 	var items []model.Item
@@ -206,44 +185,26 @@ func (s *ItemService) GetDetail(ctx context.Context, id uint) (model.Item, error
 	return item, nil
 }
 
-//func (s *ItemService) GetTags(ctx context.Context, id uint) ([]string, error) {
-//	items, err := s.userDAO.GetItems(ctx, id)
-//	if err != nil {
-//		return nil, err
-//	}
-//	m := make(map[string]string)
-//	tags := make([]string, 0)
-//	for _, item := range items {
-//		for _, tag := range item.Tags {
-//			m[tag] = tag
-//		}
-//	}
-//	for tag, _ := range m {
-//		tags = append(tags, tag)
-//	}
-//	return tags, nil
-//}
-
 // AuditMany 批量审核方法实现
-func (s *ItemService) AuditMany(ctx context.Context, reqs []request.AuditReq, uid uint) []Data {
+func (s *ItemService) AuditMany(ctx context.Context, reqs []request.AuditReq, uid uint) []request.WebHookData {
 	var (
-		datas []Data
+		datas []request.WebHookData
 		mu    sync.Mutex
 	)
 
 	g, ctx := errgroup.WithContext(ctx)
 
 	for _, req := range reqs {
-		req := req // 防止闭包引用错误
+		re := req // 防止闭包引用错误
 
 		g.Go(func() error {
-			data, item, err := s.Audit(ctx, req, uid)
+			data, item, err := s.Audit(ctx, re, uid)
 
 			// 把结果 append 到 datas（保护 datas 的并发写）
 			if err != nil {
 				mu.Lock()
 				defer mu.Unlock()
-				data.Id = req.ItemId
+				data.Id = re.ItemId
 
 				data.Msg = err.Error()
 				datas = append(datas, data)
