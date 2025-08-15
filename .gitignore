@@ -1,4 +1,4 @@
-config/config-example.yaml
+/config/config.yaml
 deploy/db
 .idea
 logs
