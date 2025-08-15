@@ -9,7 +9,6 @@ import (
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/jwt"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/logger"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/model"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/service"
 	"github.com/gin-gonic/gin"
@@ -18,7 +17,6 @@ import (
 
 type ItemController struct {
 	service ItemService
-	lo      logger.Logger
 }
 type ItemService interface {
 	Select(ctx context.Context, req request.SelectReq) ([]model.Item, error)
@@ -26,15 +24,14 @@ type ItemService interface {
 	SearchHistory(g context.Context, id uint) ([]model.Item, error)
 	Upload(g context.Context, req request.UploadReq, key string) (uint, error)
 	Hook(request.WebHookData, model.Item) error
-	RoleBack(item model.Item) error
+	RoleBack(item model.Item)
 	GetDetail(ctx context.Context, id uint) (model.Item, error)
 	AuditMany(g context.Context, items []request.AuditReq, uid uint) []request.WebHookData
 }
 
-func NewItemController(service *service.ItemService, lo logger.Logger) *ItemController {
+func NewItemController(service *service.ItemService) *ItemController {
 	return &ItemController{
 		service: service,
-		lo:      lo,
 	}
 }
 
@@ -135,11 +132,7 @@ func (ic *ItemController) Audit(c *gin.Context, req request.AuditReq, cla jwt.Us
 		er := ic.service.Hook(data, item)
 
 		if er != nil {
-			ic.lo.Error("hook back error", logger.Error(er))
-			er = ic.service.RoleBack(item)
-			if er != nil {
-				ic.lo.Error("role back error", logger.Error(er))
-			}
+			ic.service.RoleBack(item)
 		}
 	}()
 	return response.Response{

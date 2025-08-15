@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ELASTIC_PASSWORD=changeme123  # ES超级用户密码
+      - xpack.security.enabled=true
+      - xpack.security.http.ssl.enabled=false  # 关闭HTTP SSL（简化测试）
+      - xpack.security.transport.ssl.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"  # 限制内存使用
+    ports:
+      - "9200:9200"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    networks:
+      - elk-network  # 加入共享网络
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.13.4
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=kibana_system  # Kibana默认系统用户
+      - ELASTICSEARCH_PASSWORD=changeme123  # 与ES密码一致
+    depends_on:
+      - elasticsearch
+    ports:
+      - "5601:5601"
+    networks:
+      - elk-network
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.13.4
+    container_name: logstash
+    depends_on:
+      - elasticsearch
+    ports:
+      - "5000:5000"  # 接收Filebeat数据的端口
+      - "9600:9600"  # Logstash监控端口
+    volumes:
+      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+      - logstash-data:/usr/share/logstash/data
+    environment:
+      - "LS_JAVA_OPTS=-Xms256m -Xmx256m"
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=logstash_writer
+      - ELASTICSEARCH_PASSWORD=changeme123
+    networks:
+      - elk-network
+
+  # 添加Filebeat服务
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.13.4  # 与ELK版本保持一致
+    container_name: filebeat
+    user: root  # 解决日志文件读取权限问题
+    depends_on:
+      - logstash  # 依赖Logstash启动
+    volumes:
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro  # 挂载Filebeat配置
+      - ../logs/:/var/log/app/:ro  # 挂载你的应用日志目录
+      - filebeat-data:/usr/share/filebeat/data  # 持久化Filebeat状态
+    environment:
+      - LOGSTASH_HOST=logstash  # Logstash服务名
+      - LOGSTASH_PORT=5000
+    networks:
+      - elk-network  # 加入共享网络，与Logstash通信
+
+volumes:
+  esdata:
+  logstash-data:  # 新增Logstash数据卷
+  filebeat-data:  # 新增Filebeat数据卷
+
+networks:
+  elk-network:  # 统一网络，确保所有服务可通信
+    driver: bridge

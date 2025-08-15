@@ -1,0 +1,42 @@
+# Git相关
+.git
+.gitignore
+
+# 文档
+README.md
+docs/
+
+# 测试文件
+tests/
+*_test.go
+
+# 构建输出
+dist/
+build/
+
+# 日志文件
+logs/
+*.log
+
+# 环境文件
+.env
+.env.*
+
+# IDE配置
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 临时文件
+*.tmp
+*.temp
+
+# Docker相关
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# 其他
+.DS_Store
+Thumbs.db

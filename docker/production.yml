@@ -1,0 +1,34 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        VERSION: ${VERSION:-latest}
+    image: muxi-auditor-backend:${VERSION:-latest}
+    container_name: muxi-auditor-backend-prod
+    ports:
+      - "8080:8080"
+    environment:
+      - CONFIG_PATH=/data/conf/config.yaml
+      - GIN_MODE=release
+    env_file:
+      - ../.env
+    volumes:
+      - ../config:/data/conf:ro
+      - ../logs:/app/logs
+    networks:
+      - muxi-network
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+
+networks:
+  muxi-network:
+    driver: bridge
