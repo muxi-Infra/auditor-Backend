@@ -139,8 +139,6 @@ definitions:
     type: object
   request.UploadReq:
     properties:
-      auditor:
-        type: integer
       author:
         type: string
       content:

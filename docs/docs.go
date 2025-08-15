@@ -1728,9 +1728,6 @@ const docTemplate = `{
         "request.UploadReq": {
             "type": "object",
             "properties": {
-                "auditor": {
-                    "type": "integer"
-                },
                 "author": {
                     "type": "string"
                 },

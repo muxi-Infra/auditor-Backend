@@ -1,6 +1,6 @@
-config/config.yaml
+config/config-example.yaml
 deploy/db
 .idea
 logs
-
-
+.env
+dist
