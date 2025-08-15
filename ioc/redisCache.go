@@ -41,11 +41,6 @@ func (rc *RedisCache) GetStringSlice(ctx context.Context, key string) ([]string,
 	return result, nil
 }
 
-//	func (rc *RedisCache) SetAllTags(ctx context.Context, pid uint, val []string) error {
-//		key := TAGSKEY + strconv.FormatUint(uint64(pid), 10)
-//		return fmt.Errorf("%w", rc.Client.Set(ctx, key, val, 0).Err())
-//	}
-
 // SetStringSlice 设置tag
 func (rc *RedisCache) SetStringSlice(ctx context.Context, key string, val []string, expiration time.Duration) error {
 	bytes, err := json.Marshal(val)

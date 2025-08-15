@@ -25,8 +25,7 @@ func (setting *viperSetting) SetApiKey(key string, value string) error {
 	return nil
 }
 func main() {
-	//ac:="cli_26JsjTlJcDdcmWKs"
-	//sc:="26JsjTlJcDdcmWKsUz6mIrWHm9UTHYcb"
+
 	e := gin.Default()
 	vp := viper.New()
 	vp.SetConfigFile("./demo.yaml") // 指定配置文件路径

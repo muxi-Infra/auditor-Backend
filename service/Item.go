@@ -9,11 +9,11 @@ import (
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/apikey"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/jwt"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/logger"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/dao"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/model"
 	"golang.org/x/sync/errgroup"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -24,6 +24,7 @@ import (
 type ItemService struct {
 	userDAO         *dao.UserDAO
 	redisJwtHandler *jwt.RedisJWTHandler
+	logger          logger.Logger
 }
 type Data struct {
 	Id     uint
@@ -37,8 +38,8 @@ var M = map[int]string{
 	2: "不通过",
 }
 
-func NewItemService(userDAO *dao.UserDAO, redisJwtHandler *jwt.RedisJWTHandler) *ItemService {
-	return &ItemService{userDAO: userDAO, redisJwtHandler: redisJwtHandler}
+func NewItemService(userDAO *dao.UserDAO, redisJwtHandler *jwt.RedisJWTHandler, lo logger.Logger) *ItemService {
+	return &ItemService{userDAO: userDAO, redisJwtHandler: redisJwtHandler, logger: lo}
 }
 func (s *ItemService) Select(ctx context.Context, req request.SelectReq) ([]model.Item, error) {
 	if req.Page < 1 {
@@ -98,7 +99,7 @@ func (s *ItemService) Hook(reqbody request.WebHookData, item model.Item) error {
 	}
 	_, err = s.HookBack(item.HookUrl, req, "")
 	if err != nil {
-		fmt.Println("t---", err)
+		s.logger.Error("hook back error", logger.Error(err))
 		return err
 	}
 	return nil
@@ -139,17 +140,15 @@ func (s *ItemService) HookBack(t string, data request.HookPayload, authorization
 			return body, nil
 		}
 	}
-	fmt.Println("last----", lasterr)
+
 	return nil, lasterr
 }
-func (s *ItemService) RoleBack(item model.Item) error {
+func (s *ItemService) RoleBack(item model.Item) {
 
-	return fmt.Errorf("回滚失败: item=%+v, 原因: %s", item, "test")
-	//err := s.userDAO.RollBack(item.ID, 0, "")
-	//if err != nil {
-	//	return fmt.Errorf("回滚失败: item=%+v, 原因: %w", item, err)
-	//}
-	//return nil
+	err := s.userDAO.RollBack(item.ID, 0, "")
+	if err != nil {
+		s.logger.Error("role back error", logger.Error(fmt.Errorf("回滚失败: item=%+v, 原因: %w", item, err)))
+	}
 }
 func (s *ItemService) SearchHistory(ctx context.Context, id uint) ([]model.Item, error) {
 	var items []model.Item
@@ -213,11 +212,7 @@ func (s *ItemService) AuditMany(ctx context.Context, reqs []request.AuditReq, ui
 				go func() {
 					err = s.Hook(data, item)
 					if err != nil {
-						log.Println(err)
-						err = s.RoleBack(item)
-						if err != nil {
-							log.Println(err)
-						}
+						s.RoleBack(item)
 					}
 				}()
 			}

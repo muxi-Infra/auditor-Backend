@@ -12,5 +12,9 @@ build:
 	GOOS=linux GOARCH=amd64 go build -o $(BUILDDIR)/app $(REPODIR)
 	@echo "Build completed: $(BUILDDIR)/app"
 
+.PHONY:deploy
+deploy:
+	docker compose up -d
+
 run:
 	cd $(REPODIR) && ./dist/app
