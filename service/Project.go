@@ -76,32 +76,6 @@ func (s *ProjectService) Create(ctx context.Context, req request.CreateProject) 
 	return id, key, nil
 }
 
-//给调用方指定接口发送密钥
-
-//func (s *ProjectService) ReturnSecretKey(ac string, se string, to string) error {
-//	var b = request.ReturnSecret{
-//		SecretKey: se,
-//		AccessKey: ac,
-//		Message:   "私钥只生成一次，请妥善保管，如遗失请重置",
-//	}
-//	data, err := json.Marshal(b)
-//	if err != nil {
-//		return err
-//	}
-//	req, err := http.NewRequest(http.MethodPost, to, bytes.NewBuffer(data))
-//	if err != nil {
-//		return err
-//	}
-//	req.Header.Set("Content-Type", "application/json")
-//	client := &http.Client{}
-//	resp, err := client.Do(req)
-//	if err != nil {
-//		return err
-//	}
-//	defer resp.Body.Close()
-//	return nil
-//}
-
 func (s *ProjectService) ReturnApiKey(apiKey string, hookUrl string) error {
 	var b = request.ReturnApiKey{
 		ApiKey:  apiKey,
@@ -162,14 +136,6 @@ func (s *ProjectService) Detail(ctx context.Context, id uint) (response.GetDetai
 	for _, item := range project.Items {
 		countMap[item.Status]++
 	}
-	//var users []model.UserResponse
-	//for _, user := range project.Users {
-	//	users = append(users, model.UserResponse{
-	//		Name:   user.Name,
-	//		UserID: user.ID,
-	//		Avatar: user.Avatar,
-	//	})
-	//}
 
 	re := response.GetDetailResp{
 		TotalNumber:   countMap[0] + countMap[1] + countMap[2],
@@ -390,4 +356,24 @@ func (s *ProjectService) checkPower(ctx context.Context, userRole int, uid uint,
 		}
 	}
 	return projectID, nil
+}
+func parseApiKey(key string) (uint, error) {
+	claims, err := apikey.ParseAPIKey(key)
+	if err != nil {
+		return 0, err
+	}
+	projectID := uint(claims["sub"].(float64))
+	return projectID, nil
+}
+func (s *ProjectService) SelectUser(ctx context.Context, query string, apiKey string) ([]model.User, error) {
+	_, err := parseApiKey(apiKey)
+	if err != nil {
+		return nil, err
+	}
+	users, errr := s.userDAO.FindUserByName(ctx, query)
+	if errr != nil {
+		return nil, errr
+	}
+	return users, nil
+
 }

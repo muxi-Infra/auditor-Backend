@@ -27,6 +27,7 @@ type ProjectService interface {
 	AddUsers(ctx context.Context, role int, uid uint, key string, req []request.AddUser) error
 	DeleteUser(ctx context.Context, role int, uid uint, key string, ids []uint) error
 	GiveProjectRole(ctx context.Context, userRole int, uid uint, key string, req []request.AddUser) ([]request.AddUser, error)
+	SelectUser(ctx context.Context, query string, apiKey string) ([]model.User, error)
 }
 
 func NewProjectController(service *service.ProjectService) *ProjectController {
@@ -440,5 +441,65 @@ func (ctrl *ProjectController) GiveProjectRole(ctx *gin.Context, req request.Add
 		Code: 200,
 		Msg:  "更新成功",
 		Data: data,
+	}, nil
+}
+
+// SelectUser 搜索用户
+// @Summary 根据用户名称搜索用户
+// @Description 根据用户名称搜索用户
+// @Tags Project
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param the_query query string true "查询关键字"
+// @Success 200 {object} response.Response "获取成功"
+// @Failure 400 {object} response.Response "请求错误（参数错误/无query）"
+// @Failure 500 {object} response.Response "服务器错误"
+// @Router /api/v1/project/selectUsers [get]
+func (ctrl *ProjectController) SelectUser(ctx *gin.Context, cla jwt.UserClaims) (response.Response, error) {
+	if cla.UserRule == 0 {
+		return response.Response{
+			Msg:  "no power",
+			Code: 403,
+			Data: nil,
+		}, nil
+	}
+	key := ctx.GetHeader("api_key")
+	if key == "" {
+		return response.Response{
+			Code: 400,
+			Msg:  "api_key is necessary",
+		}, nil
+	}
+	query := ctx.DefaultQuery("the_query", "")
+	if query == "" {
+		return response.Response{
+			Msg:  "query is necessary",
+			Code: 400,
+			Data: nil,
+		}, nil
+	}
+	users, err := ctrl.service.SelectUser(ctx, query, key)
+	if err != nil {
+		return response.Response{
+			Msg:  "",
+			Code: 0,
+			Data: nil,
+		}, err
+	}
+	var da []response.UserInfo
+	for _, user := range users {
+		da = append(da, response.UserInfo{
+			Avatar: user.Avatar,
+			Name:   user.Name,
+			Id:     user.ID,
+			Role:   user.UserRole,
+			Email:  user.Email,
+		})
+	}
+	return response.Response{
+		Msg:  "",
+		Code: 0,
+		Data: da,
 	}, nil
 }

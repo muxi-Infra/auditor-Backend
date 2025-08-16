@@ -827,6 +827,37 @@ paths:
       summary: 更新项目成员权限
       tags:
       - Project
+  /api/v1/project/selectUsers:
+    get:
+      consumes:
+      - application/json
+      description: 根据用户名称搜索用户
+      parameters:
+      - description: 查询关键字
+        in: query
+        name: the_query
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求错误（参数错误/无query）
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 根据用户名称搜索用户
+      tags:
+      - Project
   /api/v1/remove/delete:
     delete:
       consumes:

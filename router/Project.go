@@ -20,6 +20,7 @@ type ProjectController interface {
 	AddUsers(ctx *gin.Context, req request.AddUsersReq, cla jwt.UserClaims) (response.Response, error)
 	DeleteUsers(ctx *gin.Context, req request.DeleteUsers, cla jwt.UserClaims) (response.Response, error)
 	GiveProjectRole(ctx *gin.Context, req request.AddUsersReq, cla jwt.UserClaims) (response.Response, error)
+	SelectUser(ctx *gin.Context, cla jwt.UserClaims) (response.Response, error)
 }
 
 func RegisterProjectRoutes(
@@ -39,4 +40,5 @@ func RegisterProjectRoutes(
 	authGroup.POST("/addUsers", authMiddleware, ginx.WrapClaimsAndReq(c.AddUsers))
 	authGroup.DELETE("/deleteUsers", authMiddleware, ginx.WrapClaimsAndReq(c.DeleteUsers))
 	authGroup.PUT("giveProjectRole", authMiddleware, ginx.WrapClaimsAndReq(c.GiveProjectRole))
+	authGroup.GET("/selectUser", authMiddleware, ginx.WrapClaims(c.SelectUser))
 }
