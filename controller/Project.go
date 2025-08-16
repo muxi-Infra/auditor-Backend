@@ -451,11 +451,12 @@ func (ctrl *ProjectController) GiveProjectRole(ctx *gin.Context, req request.Add
 // @Accept json
 // @Produce json
 // @Security ApiKeyAuth
+// @Param api_key header string true "API 认证密钥(api_key)"
 // @Param the_query query string true "查询关键字"
 // @Success 200 {object} response.Response "获取成功"
 // @Failure 400 {object} response.Response "请求错误（参数错误/无query）"
 // @Failure 500 {object} response.Response "服务器错误"
-// @Router /api/v1/project/selectUsers [get]
+// @Router /api/v1/project/selectUser [get]
 func (ctrl *ProjectController) SelectUser(ctx *gin.Context, cla jwt.UserClaims) (response.Response, error) {
 	if cla.UserRule == 0 {
 		return response.Response{
@@ -499,7 +500,7 @@ func (ctrl *ProjectController) SelectUser(ctx *gin.Context, cla jwt.UserClaims) 
 	}
 	return response.Response{
 		Msg:  "",
-		Code: 0,
+		Code: 200,
 		Data: da,
 	}, nil
 }

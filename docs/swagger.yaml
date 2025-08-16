@@ -827,12 +827,17 @@ paths:
       summary: 更新项目成员权限
       tags:
       - Project
-  /api/v1/project/selectUsers:
+  /api/v1/project/selectUser:
     get:
       consumes:
       - application/json
       description: 根据用户名称搜索用户
       parameters:
+      - description: API 认证密钥(api_key)
+        in: header
+        name: api_key
+        required: true
+        type: string
       - description: 查询关键字
         in: query
         name: the_query

@@ -676,7 +676,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/project/selectUsers": {
+        "/api/v1/project/selectUser": {
             "get": {
                 "security": [
                     {
@@ -695,6 +695,13 @@ const docTemplate = `{
                 ],
                 "summary": "根据用户名称搜索用户",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API 认证密钥(api_key)",
+                        "name": "api_key",
+                        "in": "header",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "查询关键字",
