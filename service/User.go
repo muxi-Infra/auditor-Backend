@@ -8,6 +8,7 @@ import (
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/jwt"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/dao"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/model"
+	"gorm.io/gorm"
 	"sync"
 )
 
@@ -130,6 +131,24 @@ func (s *UserService) GetUsers(ctx context.Context, req request.GetUsers) ([]res
 	return re, nil
 
 }
+
+func (s *UserService) NoPermissionUsers(ctx context.Context) ([]response.UserInfo, error) {
+	users, err := s.userDAO.NoPermissionList(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var re []response.UserInfo
+	for _, v := range users {
+		re = append(re, response.UserInfo{
+			Id:     v.ID,
+			Name:   v.Name,
+			Avatar: v.Avatar,
+			Role:   v.UserRole,
+			Email:  v.Email,
+		})
+	}
+	return re, nil
+}
 func (s *UserService) GetUserInfo(ctx context.Context, id uint) (*model.User, error) {
 	user, err := s.userDAO.Read(ctx, id)
 	if err != nil {
@@ -137,4 +156,15 @@ func (s *UserService) GetUserInfo(ctx context.Context, id uint) (*model.User, er
 	}
 	return user, nil
 
+}
+func (s *UserService) GetRoleInProject(ctx context.Context, projectId uint, uid uint) (int, error) {
+	r, err := s.userDAO.GetProjectRole(ctx, uid, projectId)
+	if err != nil {
+		if merr.Is(err, gorm.ErrRecordNotFound) {
+
+			return 0, nil
+		}
+		return 0, err
+	}
+	return r, nil
 }

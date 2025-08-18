@@ -20,6 +20,7 @@ type UserDAOInterface interface {
 	Read(ctx context.Context, id uint) (*model.User, error)
 	Update(ctx context.Context, user *model.User, id uint) error
 	Delete(ctx context.Context, id uint) error
+	NoPermissionList(ctx context.Context) ([]model.User, error)
 	List(ctx context.Context) ([]model.User, error)
 	FindByEmail(ctx context.Context, email string) (*model.User, error)
 	FindByProjectID(ctx context.Context, id uint) ([]model.User, error)
@@ -122,6 +123,16 @@ func (d *UserDAO) List(ctx context.Context) ([]model.User, error) {
 	}
 	return users, nil
 }
+
+// NoPermissionList 获取待授权用户信息
+func (d *UserDAO) NoPermissionList(ctx context.Context) ([]model.User, error) {
+	var users []model.User
+	if err := d.DB.WithContext(ctx).Where("user_role = 0").Find(&users).Error; err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
 func (d *UserDAO) FindByEmail(ctx context.Context, email string) (*model.User, error) {
 	var user model.User
 	err := d.DB.WithContext(ctx).Where("email = ?", email).First(&user).Error
@@ -382,7 +393,7 @@ func (d *UserDAO) SearchHistory(ctx context.Context, items *[]model.Item, id uin
 }
 func (d *UserDAO) Upload(ctx context.Context, req request.UploadReq, id uint, time time.Time) (uint, error) {
 	var it model.Item
-	err := d.DB.WithContext(ctx).Where("hook_id =?", req.Id).First(&it).Error
+	err := d.DB.WithContext(ctx).Where("hook_id =? AND project_id = ?", req.Id, id).First(&it).Error
 	if err != nil {
 
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -628,6 +639,13 @@ func (d *UserDAO) ChangeRoleInOneProject(ctx context.Context, projectId uint, ro
 
 // 向项目中添加审核员
 func (d *UserDAO) CreateUserProject(ctx context.Context, projectId uint, uid uint, projectRole int) error {
+	//todo: 前端完成授权界面后删除
+	var u = model.User{}
+	d.DB.WithContext(ctx).Where("id = ?", uid).First(&u)
+	if u.UserRole == 0 {
+		u.UserRole = 1
+		d.DB.WithContext(ctx).Where("id = ?", uid).Updates(&u)
+	}
 	var user = model.UserProject{
 		UserID:    uid,
 		ProjectID: projectId,
@@ -640,6 +658,14 @@ func (d *UserDAO) CreateUserProject(ctx context.Context, projectId uint, uid uin
 	return nil
 }
 func (d *UserDAO) UpdateUserProject(ctx context.Context, projectId uint, uid uint, projectRole int) error {
+	//todo: 前端完成授权界面后删除
+	var user = model.User{}
+	d.DB.WithContext(ctx).Where("id = ?", uid).First(&user)
+	if user.UserRole == 0 {
+		user.UserRole = 1
+		d.DB.WithContext(ctx).Where("id = ?", uid).Updates(&user)
+	}
+
 	if err := d.DB.WithContext(ctx).Model(&model.UserProject{}).Where("project_id=? AND user_id=?", projectId, uid).Update("role", projectRole).Error; err != nil {
 		return err
 	}

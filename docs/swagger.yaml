@@ -1139,6 +1139,62 @@ paths:
       summary: 获取自己信息
       tags:
       - User
+  /api/v1/user/getNoPermissionUsers:
+    get:
+      consumes:
+      - application/json
+      description: 获取已注册但待审核成员
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/response.UserInfo'
+                  type: array
+              type: object
+        "400":
+          description: 请求错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 获取待审核成员
+      tags:
+      - User
+  /api/v1/user/getProjectRole/{project_id}:
+    get:
+      consumes:
+      - application/json
+      description: 获取用户在某个project的projectRole
+      parameters:
+      - description: project ID
+        in: path
+        name: project_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: integer
+              type: object
+        "400":
+          description: 请求错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 获取projectRole
+      tags:
+      - User
   /api/v1/user/getUsers:
     get:
       consumes:

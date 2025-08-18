@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
@@ -22,6 +23,8 @@ type UserService interface {
 	GetUsers(ctx context.Context, req request.GetUsers) ([]response.UserAllInfo, error)
 	GetUserInfo(ctx context.Context, id uint) (*model.User, error)
 	UpdateUsersRole(ctx context.Context, li []request.UserRole) error
+	NoPermissionUsers(ctx context.Context) ([]response.UserInfo, error)
+	GetRoleInProject(ctx context.Context, projectId uint, uid uint) (int, error)
 }
 
 func NewUserController(service *service.UserService) *UserController {
@@ -210,6 +213,38 @@ func (c *UserController) GetUserInfo(ctx *gin.Context) (response.Response, error
 	}, nil
 }
 
+// GetNoPermissionUsers 获取待审核成员
+// @Summary 获取待审核成员
+// @Description 获取已注册但待审核成员
+// @Tags User
+// @Accept json
+// @Produce json
+// @Success 200 {object} response.Response{data=[]response.UserInfo} "获取成功"
+// @Failure 400 {object} response.Response "请求错误"
+// @Router /api/v1/user/getNoPermissionUsers [get]
+func (c *UserController) GetNoPermissionUsers(ctx *gin.Context, cla jwt.UserClaims) (response.Response, error) {
+	if cla.UserRule != 2 {
+		return response.Response{
+			Msg:  "no power",
+			Code: 403,
+			Data: nil,
+		}, nil
+	}
+	r, err := c.service.NoPermissionUsers(ctx)
+	if err != nil {
+		return response.Response{
+			Msg:  "获取失败",
+			Code: 400,
+			Data: nil,
+		}, err
+	}
+	return response.Response{
+		Msg:  "获取待审核成员成功",
+		Code: 200,
+		Data: r,
+	}, nil
+}
+
 // ChangeUsersRole 批量更新权限
 // @Summary 批量更新权限
 // @Description 批量更新用户在审核平台的权限
@@ -243,4 +278,46 @@ func (c *UserController) ChangeUsersRole(ctx *gin.Context, req request.ChangeUse
 		Data: nil,
 		Msg:  "success",
 	}, err
+}
+
+// GetProjectRole 获取projectRole
+// @Summary 获取projectRole
+// @Description 获取用户在某个project的projectRole
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param project_id path int true "project ID"
+// @Success 200 {object} response.Response{data=int} "获取成功"
+// @Failure 400 {object} response.Response "请求错误"
+// @Router /api/v1/user/getProjectRole/{project_id} [get]
+func (c *UserController) GetProjectRole(ctx *gin.Context, cla jwt.UserClaims) (response.Response, error) {
+	pid := ctx.Param("project_id")
+	if pid == "" {
+		return response.Response{
+			Msg:  "project_id is empty",
+			Code: 400,
+			Data: nil,
+		}, errors.New("project_id is necessary")
+	}
+	projectID, err := strconv.ParseUint(pid, 10, 64)
+	if err != nil {
+		return response.Response{
+			Msg:  "project_id is invalid",
+			Code: 400,
+			Data: nil,
+		}, errors.New("project_id is invalid")
+	}
+	r, err := c.service.GetRoleInProject(ctx, uint(projectID), cla.Uid)
+	if err != nil {
+		return response.Response{
+			Msg:  "获取project_role失败",
+			Code: 400,
+			Data: nil,
+		}, err
+	}
+	return response.Response{
+		Msg:  "获取成功",
+		Code: 200,
+		Data: r,
+	}, nil
 }

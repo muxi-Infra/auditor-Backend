@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"errors"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/ginx"
@@ -303,7 +304,7 @@ func (ctrl *ProjectController) GetAllTags(ctx *gin.Context, cla jwt.UserClaims) 
 		return response.Response{
 			Code: 403,
 			Msg:  "无权限",
-		}, nil
+		}, errors.New("no power")
 	}
 	projectID := ctx.Param("project_id")
 	if projectID == "" {
@@ -353,7 +354,7 @@ func (ctrl *ProjectController) AddUsers(ctx *gin.Context, req request.AddUsersRe
 		return response.Response{
 			Code: 400,
 			Msg:  "api_key is necessary",
-		}, nil
+		}, errors.New("api_key is necessary")
 	}
 	userRole := cla.UserRule
 	err := ctrl.service.AddUsers(ctx, userRole, uid, key, req.AddUsers)
@@ -463,14 +464,14 @@ func (ctrl *ProjectController) SelectUser(ctx *gin.Context, cla jwt.UserClaims) 
 			Msg:  "no power",
 			Code: 403,
 			Data: nil,
-		}, nil
+		}, errors.New("no power")
 	}
 	key := ctx.GetHeader("api_key")
 	if key == "" {
 		return response.Response{
 			Code: 400,
 			Msg:  "api_key is necessary",
-		}, nil
+		}, errors.New("api_key is necessary")
 	}
 	query := ctx.DefaultQuery("the_query", "")
 	if query == "" {
@@ -478,13 +479,13 @@ func (ctrl *ProjectController) SelectUser(ctx *gin.Context, cla jwt.UserClaims) 
 			Msg:  "query is necessary",
 			Code: 400,
 			Data: nil,
-		}, nil
+		}, errors.New("query is necessary")
 	}
 	users, err := ctrl.service.SelectUser(ctx, query, key)
 	if err != nil {
 		return response.Response{
-			Msg:  "",
-			Code: 0,
+			Msg:  "数据搜索有误",
+			Code: 400,
 			Data: nil,
 		}, err
 	}
