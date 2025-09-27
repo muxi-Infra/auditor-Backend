@@ -17,7 +17,7 @@ type ProjectController struct {
 	service ProjectService
 }
 type ProjectService interface {
-	GetProjectList(ctx context.Context) ([]model.ProjectList, error)
+	GetProjectList(ctx context.Context, cla jwt.UserClaims) ([]model.ProjectList, error)
 	Create(ctx context.Context, project request.CreateProject) (uint, string, error)
 	Detail(ctx context.Context, id uint) (response.GetDetailResp, error)
 	Delete(ctx context.Context, cla jwt.UserClaims, p uint) error
@@ -47,9 +47,9 @@ func NewProjectController(service *service.ProjectService) *ProjectController {
 // @Failure 400 {object} response.Response "获取项目列表失败"
 // @Security ApiKeyAuth
 // @Router /api/v1/project/getProjectList [get]
-func (ctrl *ProjectController) GetProjectList(ctx *gin.Context) (response.Response, error) {
+func (ctrl *ProjectController) GetProjectList(ctx *gin.Context, cla jwt.UserClaims) (response.Response, error) {
 
-	list, err := ctrl.service.GetProjectList(ctx)
+	list, err := ctrl.service.GetProjectList(ctx, cla)
 	if err != nil {
 		return response.Response{
 			Code: 400,
@@ -62,6 +62,7 @@ func (ctrl *ProjectController) GetProjectList(ctx *gin.Context) (response.Respon
 		Code: 200,
 		Msg:  "获取列表成功",
 	}, nil
+
 }
 
 // Create 创建项目
@@ -141,9 +142,6 @@ func (ctrl *ProjectController) Detail(ctx *gin.Context, cla jwt.UserClaims) (res
 			Data: nil,
 		}, err
 	}
-	if cla.UserRule != 2 {
-		detail.Apikey = "*********"
-	}
 	return response.Response{
 		Code: 200,
 		Msg:  "获取成功",
@@ -182,6 +180,13 @@ func (ctrl *ProjectController) Delete(ctx *gin.Context, cla jwt.UserClaims) (res
 	p := uint(pid)
 	err = ctrl.service.Delete(ctx, cla, p)
 	if err != nil {
+		if err.Error() == "无权限" {
+			return response.Response{
+				Code: 400,
+				Msg:  "无权限",
+				Data: nil,
+			}, nil
+		}
 		return response.Response{
 			Code: 400,
 			Msg:  "",
@@ -258,7 +263,7 @@ func (ctrl *ProjectController) Update(ctx *gin.Context, req request.UpdateProjec
 // @Failure 400 {object} response.Response "请求错误（参数错误/无 project_id）"
 // @Failure 500 {object} response.Response "服务器错误"
 // @Router /api/v1/project/{project_id}/getUsers [get]
-func (ctrl *ProjectController) GetUsers(ctx *gin.Context, cla jwt.UserClaims) (response.Response, error) {
+func (ctrl *ProjectController) GetUsers(ctx *gin.Context) (response.Response, error) {
 	projectID := ctx.Param("project_id")
 	if projectID == "" {
 		return response.Response{

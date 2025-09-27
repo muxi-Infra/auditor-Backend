@@ -99,21 +99,34 @@ func (s *ProjectService) ReturnApiKey(apiKey string, hookUrl string) error {
 	return nil
 }
 
-func (s *ProjectService) GetProjectList(ctx context.Context) ([]model.ProjectList, error) {
-
-	projects, err := s.userDAO.GetProjectList(ctx)
-	if err != nil {
-		return nil, err
-	}
+func (s *ProjectService) GetProjectList(ctx context.Context, cla jwt.UserClaims) ([]model.ProjectList, error) {
 	var list []model.ProjectList
-	for _, project := range projects {
-		list = append(list, model.ProjectList{
-			Id:   project.ID,
-			Name: project.ProjectName,
-		})
-	}
+	if cla.UserRule == 2 {
+		projects, err := s.userDAO.GetProjectList(ctx)
+		if err != nil {
+			return nil, err
+		}
 
+		for _, project := range projects {
+			list = append(list, model.ProjectList{
+				Id:   project.ID,
+				Name: project.ProjectName,
+			})
+		}
+	} else if cla.UserRule == 1 {
+		projects, err := s.userDAO.GetUserProjects(ctx, cla.Uid)
+		if err != nil {
+			return nil, err
+		}
+		for _, project := range projects {
+			list = append(list, model.ProjectList{
+				Id:   project.ID,
+				Name: project.ProjectName,
+			})
+		}
+	}
 	return list, nil
+
 }
 func (s *ProjectService) Detail(ctx context.Context, id uint) (response.GetDetailResp, error) {
 	cacheKey := "MuxiAuditor:Detail:" + strconv.Itoa(int(id))
@@ -152,8 +165,6 @@ func (s *ProjectService) Detail(ctx context.Context, id uint) (response.GetDetai
 
 }
 func (s *ProjectService) Delete(ctx context.Context, cla jwt.UserClaims, projectId uint) error {
-	uid := cla.Uid
-
 	if cla.UserRule == 2 {
 		err := s.userDAO.DeleteUserProject(ctx, projectId, 0)
 		if err != nil {
@@ -164,23 +175,9 @@ func (s *ProjectService) Delete(ctx context.Context, cla jwt.UserClaims, project
 			return err
 		}
 		return nil
+	} else {
+		return errors.New("无权限")
 	}
-	role, err := s.userDAO.GetProjectRole(ctx, uid, projectId)
-	if err != nil {
-		return err
-	}
-	if role == 1 {
-		err = s.userDAO.DeleteUserProject(ctx, projectId, 0)
-		if err != nil {
-			return err
-		}
-		err = s.userDAO.DeleteProject(ctx, projectId)
-		if err != nil {
-			return err
-		}
-		return nil
-	}
-	return errors.New("无权限")
 }
 func (s *ProjectService) Update(ctx context.Context, id uint, req request.UpdateProject) error {
 	err := s.userDAO.UpdateProject(ctx, id, req)
@@ -351,7 +348,7 @@ func (s *ProjectService) checkPower(ctx context.Context, userRole int, uid uint,
 		if err != nil {
 			return 0, err
 		}
-		if role != 1 {
+		if role != 2 {
 			return 0, errors.New("no power")
 		}
 	}

@@ -51,6 +51,7 @@ type UserDAOInterface interface {
 	GetItemByHookId(ctx context.Context, hookId uint) (model.Item, error)
 	DeleteItemByHookId(ctx context.Context, hookId uint, projectId uint) error
 	UpdateUserProject(ctx context.Context, projectId uint, uid uint, projectRole int) error
+	GetUserProjects(ctx context.Context, uid uint) ([]model.Project, error)
 }
 type UserDAO struct {
 	DB *gorm.DB
@@ -657,6 +658,7 @@ func (d *UserDAO) CreateUserProject(ctx context.Context, projectId uint, uid uin
 	}
 	return nil
 }
+
 func (d *UserDAO) UpdateUserProject(ctx context.Context, projectId uint, uid uint, projectRole int) error {
 	//todo: 前端完成授权界面后删除
 	var user = model.User{}
@@ -670,4 +672,14 @@ func (d *UserDAO) UpdateUserProject(ctx context.Context, projectId uint, uid uin
 		return err
 	}
 	return nil
+}
+
+func (d *UserDAO) GetUserProjects(ctx context.Context, uid uint) ([]model.Project, error) {
+	var projects []model.Project
+	err := d.DB.WithContext(ctx).Joins("JOIN user_projects ON projects.id = user_projects.project_id").
+		Where("user_projects.user_id = ? ", uid).Find(&projects).Error
+	if err != nil {
+		return nil, err
+	}
+	return projects, nil
 }
