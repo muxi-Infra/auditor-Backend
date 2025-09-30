@@ -16,6 +16,7 @@ type viperSetting struct {
 func newSetting(vp *viper.Viper) *viperSetting {
 	return &viperSetting{vp: vp}
 }
+
 func (setting *viperSetting) SetApiKey(key string, value string) error {
 	setting.vp.Set(key, value)
 	if err := setting.vp.WriteConfig(); err != nil {

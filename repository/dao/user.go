@@ -495,7 +495,7 @@ func (d *UserDAO) UpdateProject(ctx context.Context, id uint, req request.Update
 		updates["project_name"] = req.ProjectName
 	}
 	if len(updates) == 0 {
-		return nil // 或 errors.New("没有字段需要更新")
+		return nil // 或 errorx.New("没有字段需要更新")
 	}
 	err := d.DB.WithContext(ctx).Model(&model.Project{}).Where("id = ?", id).Updates(updates).Error
 	if err != nil {

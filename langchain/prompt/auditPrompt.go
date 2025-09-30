@@ -2,8 +2,8 @@ package prompt
 
 import "fmt"
 
-func buildPrompt(auditRole, content string) string {
-	return fmt.Sprintf(`
+func buildPrompt(auditRole, content string) PromptType {
+	return PromptType(fmt.Sprintf(`
 	你是一个专业的内容审核系统。请根据以下要求审核如下内容：
 
 	【最基本审核维度】(如有违法直接拒绝)
@@ -20,11 +20,11 @@ func buildPrompt(auditRole, content string) string {
 	- 只返回 JSON 格式
 	- 字段包括：
 	  - result: "pass" | "review" | "reject"
-	  - reasons: 数组，违规类别
+	  - reason:string类型
 	  - confidence: 0~1 之间的置信度
 	  - suggestion: "通过" | "人工复核" | "删除或屏蔽"
 	
 	【待审核内容】
 	%s
-	`, auditRole, content)
+	`, auditRole, content))
 }
