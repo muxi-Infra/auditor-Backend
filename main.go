@@ -8,7 +8,6 @@ import (
 )
 
 func main() {
-
 	// 可选加载 .env（不存在则忽略）；容器内建议用环境变量或 env_file 注入
 	_ = godotenv.Load()
 	app := InitWebServer(os.Getenv("CONFIG_PATH"))
@@ -30,7 +29,6 @@ func NewApp(r *gin.Engine, c *conf.AppConf) *App {
 
 // 启动
 func (a *App) Run() {
-
 	err := a.r.Run(a.c.Addr)
 
 	if err != nil {

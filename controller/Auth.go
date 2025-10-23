@@ -3,14 +3,13 @@ package controller
 import (
 	"context"
 	"fmt"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/config"
-	//"errorxs"
-	"github.com/gin-gonic/gin"
-	//api_errors "muxi_auditor/api/errorxs"
+
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/client"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/config"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/service"
+	"github.com/gin-gonic/gin"
 )
 
 type AuthController struct {

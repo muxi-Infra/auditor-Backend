@@ -20,6 +20,22 @@ definitions:
           $ref: '#/definitions/request.AddUser'
         type: array
     type: object
+  request.AuditByLLMReq:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/request.AuditItem'
+        type: array
+    type: object
+  request.AuditItem:
+    properties:
+      contents:
+        $ref: '#/definitions/response.Contents'
+      id:
+        type: integer
+      projectID:
+        type: integer
+    type: object
   request.AuditReq:
     properties:
       item_id:
@@ -166,7 +182,7 @@ definitions:
   request.UserRole:
     properties:
       role:
-        description: 审核平台的权限，并非项目中的权限
+        description: 审核平台的权限，并非项目中的权限,0无权限，1普通用户，2管理者
         type: integer
       user_id:
         type: integer
@@ -509,6 +525,32 @@ paths:
       summary: 上传条目,这个似乎不用接
       tags:
       - Item
+  /api/v1/llm/audit:
+    post:
+      consumes:
+      - application/json
+      description: 根据请求将需要审核的条目加入ai审核队列
+      parameters:
+      - description: 审核请求
+        in: body
+        name: auditReq
+        required: true
+        schema:
+          $ref: '#/definitions/request.AuditByLLMReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功返回success
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 审核失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: ai审核条目
+      tags:
+      - LLM
   /api/v1/project/{project_id}/delete:
     delete:
       consumes:

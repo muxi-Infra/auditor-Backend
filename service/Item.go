@@ -1,9 +1,7 @@
 package service
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
@@ -13,8 +11,6 @@ import (
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/dao"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/model"
 	"golang.org/x/sync/errgroup"
-	"io"
-	"net/http"
 	"os"
 	"strconv"
 	"sync"
@@ -97,52 +93,13 @@ func (s *ItemService) Hook(reqbody request.WebHookData, item model.Item) error {
 		Data:  reqbody,
 		Try:   num,
 	}
-	_, err = s.HookBack(item.HookUrl, req, "")
+	_, err = hookBack(item.HookUrl, req, "")
 	if err != nil {
-		s.logger.Error("hook back error", logger.Error(err))
 		return err
 	}
 	return nil
 }
 
-func (s *ItemService) HookBack(t string, data request.HookPayload, authorization string) ([]byte, error) {
-	jsonBytes, err := json.Marshal(data)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal hook payload: %w", err)
-	}
-	var lasterr error
-	for i := 0; i < data.Try; i++ {
-		reqs, err := http.NewRequest("POST", t, bytes.NewBuffer(jsonBytes))
-		if err != nil {
-			lasterr = err
-			time.Sleep(time.Second)
-			continue
-		}
-		reqs.Header.Set("Content-Type", "application/json")
-		if authorization != "" {
-			reqs.Header.Set("Authorization", authorization)
-		}
-		client := &http.Client{}
-		resp, err := client.Do(reqs)
-		if err != nil {
-			lasterr = err
-			time.Sleep(time.Second)
-			continue
-		}
-
-		body, readErr := io.ReadAll(resp.Body)
-		resp.Body.Close()
-		if readErr != nil {
-			lasterr = readErr
-			break
-		}
-		if resp.StatusCode == http.StatusOK {
-			return body, nil
-		}
-	}
-
-	return nil, lasterr
-}
 func (s *ItemService) RoleBack(item model.Item) {
 
 	err := s.userDAO.RollBack(item.ID, 0, "")

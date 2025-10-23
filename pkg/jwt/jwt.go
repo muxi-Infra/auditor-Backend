@@ -73,6 +73,14 @@ func (j *JWT) SetJWTToken(uid uint, email string, userRole int) (string, error) 
 type UserClaims struct {
 	jwt.RegisteredClaims
 	Uid      uint   // 用户 ID
-	Email    string //用户名称
+	Email    string //用户email
 	UserRule int
+}
+
+func (u UserClaims) IfStaff() bool {
+	return u.UserRule != 0
+}
+
+func (u UserClaims) IfBoos() bool {
+	return u.UserRule == 2
 }

@@ -49,3 +49,15 @@ func (rc *RedisCache) SetStringSlice(ctx context.Context, key string, val []stri
 	}
 	return rc.Client.Set(ctx, key, bytes, expiration).Err()
 }
+
+func (rc *RedisCache) SetString(ctx context.Context, key string, val string, expiration time.Duration) error {
+	return rc.Client.Set(ctx, key, val, expiration).Err()
+}
+
+func (rc *RedisCache) GetString(ctx context.Context, key string) (string, error) {
+	val, err := rc.Client.Get(ctx, key).Result()
+	if err != nil {
+		return "", err
+	}
+	return val, nil
+}

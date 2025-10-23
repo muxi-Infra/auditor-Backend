@@ -1,5 +1,0 @@
-AI:
-  type: "ollama"
-  url: "http://localhost:11434/api/generate"
-  model:
-  api_key:

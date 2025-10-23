@@ -11,6 +11,8 @@ import (
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/config"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/controller"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/ioc"
+	client2 "github.com/cqhasy/2025-Muxi-Team-auditor-Backend/langchain/client"
+	config2 "github.com/cqhasy/2025-Muxi-Team-auditor-Backend/langchain/config"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/middleware"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/jwt"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/viperx"
@@ -46,6 +48,17 @@ func InitWebServer(confPath string) *App {
 	tubeService := service.NewTubeService(userDAO, redisJWTHandler, qiNiuYunConfig)
 	tubeController := controller.NewTuberController(tubeService)
 	userDAOInterface := ProvideUserDAO(db)
+	redisCache := ioc.NewRedisCache(redisClient)
+	cacheInterface := ProvideRedisCache(redisCache)
+	projectCache := cache.NewProjectCache(cacheInterface)
+	projectService := service.NewProjectService(userDAOInterface, redisJWTHandler, projectCache)
+	projectController := controller.NewProjectController(projectService)
+	itemDao := dao.NewItemDao(db)
+	projectDAO := dao.NewProjectDAO(db)
+	muxiAI := config2.NewMuxiAIConf(vipperSetting)
+	auditAIClient := client2.Connect(muxiAI)
+	llmService := service.NewLLMService(userDAO, itemDao, projectDAO, auditAIClient, logger, projectCache)
+	llmController := controller.NewLLMController(llmService)
 	removeService := service.NewRemoveService(userDAOInterface)
 	removeController := controller.NewRemoveController(removeService)
 	authMiddleware := middleware.NewAuthMiddleware(redisJWTHandler)
@@ -54,12 +67,7 @@ func InitWebServer(confPath string) *App {
 	prometheusConfig := config.NewPrometheusConf(vipperSetting)
 	prometheus := ioc.InitPrometheus(prometheusConfig)
 	loggerMiddleware := middleware.NewLoggerMiddleware(logger, prometheus)
-	redisCache := ioc.NewRedisCache(redisClient)
-	projectCacheInterface := ProvideRedisCache(redisCache)
-	projectCache := cache.NewProjectCache(projectCacheInterface)
-	projectService := service.NewProjectService(userDAOInterface, redisJWTHandler, projectCache)
-	projectController := controller.NewProjectController(projectService)
-	engine := router.NewRouter(authController, userController, itemController, tubeController, removeController, authMiddleware, corsMiddleware, loggerMiddleware, projectController)
+	engine := router.NewRouter(authController, userController, itemController, tubeController, projectController, llmController, removeController, authMiddleware, corsMiddleware, loggerMiddleware)
 	appConf := config.NewAppConf(vipperSetting)
 	app := NewApp(engine, appConf)
 	return app
@@ -72,6 +80,6 @@ func ProvideUserDAO(db *gorm.DB) dao.UserDAOInterface {
 	return &dao.UserDAO{DB: db}
 }
 
-func ProvideRedisCache(c *ioc.RedisCache) cache.ProjectCacheInterface {
+func ProvideRedisCache(c *ioc.RedisCache) cache.CacheInterface {
 	return c
 }

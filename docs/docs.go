@@ -423,6 +423,46 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/llm/audit": {
+            "post": {
+                "description": "根据请求将需要审核的条目加入ai审核队列",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "LLM"
+                ],
+                "summary": "ai审核条目",
+                "parameters": [
+                    {
+                        "description": "审核请求",
+                        "name": "auditReq",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.AuditByLLMReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功返回success",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "审核失败",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/project/addUsers": {
             "post": {
                 "security": [
@@ -1698,6 +1738,31 @@ const docTemplate = `{
                 }
             }
         },
+        "request.AuditByLLMReq": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/request.AuditItem"
+                    }
+                }
+            }
+        },
+        "request.AuditItem": {
+            "type": "object",
+            "properties": {
+                "contents": {
+                    "$ref": "#/definitions/response.Contents"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "projectID": {
+                    "type": "integer"
+                }
+            }
+        },
         "request.AuditReq": {
             "type": "object",
             "properties": {
@@ -1918,7 +1983,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "role": {
-                    "description": "审核平台的权限，并非项目中的权限",
+                    "description": "审核平台的权限，并非项目中的权限,0无权限，1普通用户，2管理者",
                     "type": "integer"
                 },
                 "user_id": {

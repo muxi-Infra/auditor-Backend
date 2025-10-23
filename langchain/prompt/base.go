@@ -2,23 +2,21 @@ package prompt
 
 import "strings"
 
-type PromptType string
-
-func GetToolsPrompt(task PromptType, tools string) string {
+func GetToolsPrompt(task string, tools string) string {
 	prompt := `
 你是一个智能助手，需要完成我指定的任务：
 请按照以下规则操作：
 1. 只返回你认为需要调用的工具列表，不要执行工具。
-2. JSON 输出严格如下：
+2. 请根据任务生成 JSON 输出，严格按照以下格式：
 {
-  "data": [ /* 需要调用的工具名称数组，例如 ["TextAnalyzer","SentimentChecker"] */ ],
-  "tokens": "本次任务消耗的 token 数",
+  "data": [ /* 需要调用的工具名称数组，例如 ["TextAnalyzer","SentimentChecker"] ,只返回必须调用的工具，对此次任务没有帮助的工具不要返回*/ ],
+  "tokens": "你本次任务消耗的token数，如果是本地模型不需要消耗的返回0，如果不知道返回-1",
   "error": "" // 如无法确定工具列表，填 "DesideToolListErr;如果此次任务无需外部工具或者外部工具为空，请跟就任务要求和内容把data字段赋值为对应结果"
 }
-3.只返回 JSON，不要有其他文字。
-本次任务: {{TOOLS}}
+3.只返回 JSON，不要添加任何解释、<think> 标签或者额外文本，不要任何注释或 Markdown 标记.
+本次任务: {{TASK}}
 你可以使用以下工具：
-{{TOOLS_LIST_JSON}}`
+{{TOOLS}}`
 	replacer := strings.NewReplacer(
 		"{{TASK}}", string(task),
 		"{{TOOLS}}", tools,
@@ -27,7 +25,7 @@ func GetToolsPrompt(task PromptType, tools string) string {
 	return replacer.Replace(prompt)
 }
 
-func ExecPrompt(task PromptType, tools string) string {
+func ExecPrompt(task string, tools string) string {
 
 	template := `
 只返回一个标准 JSON，不能有其他说明文字。

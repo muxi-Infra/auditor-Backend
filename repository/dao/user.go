@@ -469,6 +469,7 @@ func (d *UserDAO) UpdateItem(ctx context.Context, req request.UploadReq, id uint
 
 	return it.ID, nil
 }
+
 func (d *UserDAO) GetProjectRole(ctx context.Context, uid uint, pid uint) (int, error) {
 	var project model.UserProject
 
@@ -480,6 +481,7 @@ func (d *UserDAO) GetProjectRole(ctx context.Context, uid uint, pid uint) (int, 
 
 	return project.Role, nil
 }
+
 func (d *UserDAO) UpdateProject(ctx context.Context, id uint, req request.UpdateProject) error {
 	updates := map[string]interface{}{}
 	if req.AuditRule != "" {

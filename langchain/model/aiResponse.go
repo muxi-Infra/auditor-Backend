@@ -8,10 +8,11 @@ type AIResponse struct {
 	Error  error `json:"error"`  //ai返回的报错
 }
 
-func GetData[T ToolResult](r AIResponse) (T, error) {
+func GetAIResponseData[T any](r *AIResponse) (T, error) {
 	v, ok := r.Data.(T)
-	if ok {
-		return v, nil
+	if !ok {
+		var zero T
+		return zero, errorx.ErrDataInvalid
 	}
-	return T{}, errorx.ErrDataInvalid
+	return v, nil
 }

@@ -8,6 +8,8 @@ import (
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/config"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/controller"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/ioc"
+	lcl "github.com/cqhasy/2025-Muxi-Team-auditor-Backend/langchain/client"
+	lc "github.com/cqhasy/2025-Muxi-Team-auditor-Backend/langchain/config"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/middleware"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/jwt"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/viperx"
@@ -25,7 +27,7 @@ import (
 func ProvideUserDAO(db *gorm.DB) dao.UserDAOInterface {
 	return &dao.UserDAO{DB: db}
 }
-func ProvideRedisCache(c *ioc.RedisCache) cache.ProjectCacheInterface {
+func ProvideRedisCache(c *ioc.RedisCache) cache.CacheInterface {
 	return c
 }
 
@@ -41,6 +43,7 @@ func InitWebServer(confPath string) *App {
 		config.NewPrometheusConf,
 		config.NewMiddleWareConf,
 		config.NewQiniuConf,
+		lc.NewMuxiAIConf,
 		// 初始化基础依赖
 		ioc.InitDB,
 		ioc.InitLogger,
@@ -49,22 +52,27 @@ func InitWebServer(confPath string) *App {
 		ioc.InitPrometheus,
 		// 初始化具体模块
 		dao.NewUserDAO,
+		dao.NewProjectDAO,
+		dao.NewItemDao,
 		cache.NewProjectCache,
 		jwt.NewRedisJWTHandler,
 		service.NewAuthService,
 		service.NewUserService,
 		ProvideUserDAO,
 		ProvideRedisCache,
+		lcl.Connect,
 		service.NewProjectService,
 		service.NewItemService,
 		service.NewTubeService,
 		service.NewRemoveService,
+		service.NewLLMService,
 		controller.NewOAuthController,
 		controller.NewUserController,
 		controller.NewProjectController,
 		controller.NewItemController,
 		controller.NewTuberController,
 		controller.NewRemoveController,
+		controller.NewLLMController,
 		client.NewOAuthClient,
 		router.NewRouter,
 
