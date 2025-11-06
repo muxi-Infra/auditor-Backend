@@ -1,4 +1,4 @@
-package core
+package openais
 
 type OpenAIClient struct {
 	apiKey string
@@ -9,4 +9,6 @@ func NewOpenAIClient(apiKey string, url string) *OpenAIClient {
 	return &OpenAIClient{apiKey, url}
 }
 
-func (o *OpenAIClient) SendMessage(message string) error {}
+func (o *OpenAIClient) SendMessage(message string) error {
+	return nil
+}

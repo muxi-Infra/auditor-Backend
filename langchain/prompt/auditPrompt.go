@@ -31,17 +31,17 @@ func BuildPrompt(auditRole string, contents response.Contents) string {
 【字段说明】
 result: 没有违反基本规则和特定审核规则就pass(4), 不确定返回review(0), 认为不合适返回reject(5)
 reason: 简短说明拒绝或审核原因
-confidence: 0~1 之间，表示审核结果的可信度
+confidence: 0~100 之间，表示审核结果的可信度，比如100就是完全可信
 【示例】
 {
-  "result": 5,
+  "result": 4,
   "reason": "傻逼是辱骂用语",
-  "confidence": 0.95
+  "confidence": 95
 }
 {
-  "result": 4,
+  "result": 3,
   "reason": "你好是正常对话",
-  "confidence": 0.95
+  "confidence": 95
 }
 
 【待审核内容】

@@ -16,6 +16,7 @@ type User struct {
 	Projects []Project `gorm:"many2many:user_projects;"`
 	History  []History `gorm:"foreignKey:UserID"`
 }
+
 type Project struct {
 	gorm.Model
 	ProjectName string `gorm:"column:project_name;not null"`
@@ -29,15 +30,18 @@ type Project struct {
 	//SecretKey   string `gorm:"column:secret_key;not null"`
 	HookUrl string `gorm:"column:hook_url;not null"`
 }
+
 type UserProject struct {
 	UserID    uint `gorm:"primaryKey"`
 	ProjectID uint `gorm:"primaryKey"`
 	Role      int  `gorm:"column:role"`
 }
+
 type ProjectPermit struct {
 	ProjectID   uint `json:"project_id"`
 	ProjectRole int  `json:"project_role"`
 }
+
 type UserResponse struct {
 	Name        string `json:"name"`
 	ID          uint   `json:"id"` //user_id
@@ -46,6 +50,7 @@ type UserResponse struct {
 	ProjectRole int    `json:"project_role"`
 	Role        int    `json:"role"`
 }
+
 type ProjectList struct {
 	Id   uint   `json:"id"`
 	Name string `json:"name"`
@@ -74,11 +79,13 @@ type Comment struct {
 	Pictures GormStringSlice `gorm:"type:json"`
 	ItemId   uint            `gorm:"not null;index"`
 }
+
 type History struct {
 	gorm.Model
 	UserID uint `gorm:"index"`
 	ItemId uint `gorm:"index"`
 }
+
 type UserInfos struct {
 	Name          string          `json:"name"`
 	Avatar        string          `json:"avatar"`
@@ -86,6 +93,7 @@ type UserInfos struct {
 	UserRole      int             `json:"user_role"`
 	ProjectPermit []ProjectPermit `json:"project_permit"`
 }
+
 type GormStringSlice []string
 
 func (g GormStringSlice) Value() (driver.Value, error) {

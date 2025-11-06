@@ -32,6 +32,12 @@ func build(f func(*strings.Builder)) string {
 
 func Build(args ...string) string {
 	return build(func(b *strings.Builder) {
+		total := 0
+		for _, arg := range args {
+			total += len(arg)
+		}
+
+		b.Grow(total)
 		for _, arg := range args {
 			b.WriteString(arg)
 		}

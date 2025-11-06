@@ -5,27 +5,28 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/langchain/prompt"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/logger"
 	"net/http"
 	"strings"
 
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/langchain/client/service"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/langchain/model"
 )
 
 type OllamaClient struct {
-	url     string
-	model   string
-	service service.ServiceInterface
+	url   string
+	model string
 }
 
 func NewOllamaClient(url string, model string) *OllamaClient {
 	return &OllamaClient{url: url, model: model}
 }
 
-func (c *OllamaClient) SendMessage(prompt string) (model.AuditResult, error) {
+func (c *OllamaClient) SendMessage(content string, pic []string) (model.AuditResult, error) {
 	body := map[string]interface{}{
 		"model":  c.model,
-		"prompt": prompt,
+		"prompt": content, // 这里是prompt
 		"format": "json",
 		"stream": true,
 	}
@@ -63,3 +64,9 @@ func (c *OllamaClient) SendMessage(prompt string) (model.AuditResult, error) {
 	}
 	return response, nil
 }
+
+func (c *OllamaClient) Transform(role string, contents response.Contents) (string, []string) {
+	return prompt.BuildPrompt(role, contents), nil
+}
+
+func (c *OllamaClient) WrapLogger(logger logger.Logger) { return }

@@ -2,7 +2,6 @@ package cache
 
 import (
 	"context"
-	"fmt"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/stringx"
 	"strconv"
 	"time"
@@ -57,9 +56,7 @@ func (p *ProjectCache) SetAuditRole(ctx context.Context, pid uint, role string) 
 }
 
 func (p *ProjectCache) GetAuditRole(ctx context.Context, pid uint) (string, error) {
-
 	key := stringx.Build(AuditRoleKey, strconv.FormatUint(uint64(pid), 10))
-	fmt.Println(666)
 	v, err := p.Ca.GetString(ctx, key)
 	if err != nil {
 		return "", err

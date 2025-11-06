@@ -24,6 +24,11 @@ ES_PASSWORD := changeme123
 # compose文件路径（关键：指向es子目录）
 ES_COMPOSE_FILE := ./filebeat/docker-compose.yaml
 
+.PHONY: tests
+tests:
+	@echo "beginning to run test...."
+
+
 .PHONY: build
 build:
 	@echo "Cleaning up and downloading modules..."

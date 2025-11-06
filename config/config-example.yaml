@@ -59,5 +59,10 @@ QiNiuYun:
   Bucket: "fake-bucket"
   Domain: "fake-domain.com"
 
-OpenAi:
-  ApiKey: "fake-api-key"
+AI:
+  type: #使用的ai_type,包括ollama,open_ai,Alibaba
+  url: "http://localhost:11434/api/generate"
+  model:
+  api_key:
+  access_key_id:
+  access_key_secret:

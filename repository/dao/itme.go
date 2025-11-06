@@ -27,15 +27,12 @@ func NewItemDao(db *gorm.DB) *ItemDao {
 }
 
 func (d *ItemDao) AuditItem(id uint, status int, reason string) error {
-	var item = model.Item{
-		Status: status,
-		Reason: reason,
-	}
-	err := d.DB.Where("id = ?", id).Updates(&item).Error
-	if err != nil {
-		return err
-	}
-	return nil
+	return d.DB.Model(&model.Item{}).
+		Where("id = ?", id).
+		UpdateColumns(map[string]interface{}{
+			"status": status,
+			"reason": reason,
+		}).Error
 }
 
 func (d *ItemDao) GetOneItem() (*model.Item, error) {

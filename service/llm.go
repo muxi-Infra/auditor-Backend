@@ -5,15 +5,15 @@ import (
 	"errors"
 	"time"
 
+	"github.com/redis/go-redis/v9"
+
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/langchain/client"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/langchain/model"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/langchain/prompt"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/logger"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/cache"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/dao"
-	"github.com/redis/go-redis/v9"
 )
 
 const (
@@ -45,6 +45,7 @@ func NewLLMService(userDAO *dao.UserDAO, itemDAO *dao.ItemDao, proDAO *dao.Proje
 		results: make(chan model.AuditResult, maxResults),
 		pcache:  pc,
 	}
+	c.WrapLogger(lo)
 	go l.worker()
 	go l.consumer()
 	return &l
@@ -55,14 +56,14 @@ func (l *LLMService) worker() {
 		role, err := l.pcache.GetAuditRole(context.Background(), item.ProjectID)
 		if err != nil {
 			if errors.Is(err, redis.Nil) {
-				role, err = l.proDAO.GetProjectRole(context.Background(), item.ProjectID)
-				if err != nil {
-					l.log.Error(err.Error())
+				role, er := l.proDAO.GetProjectRole(context.Background(), item.ProjectID)
+				if er != nil {
+					l.log.Error(er.Error())
 					continue
 				}
 				go func(pid uint, role string) {
-					if err = l.pcache.SetAuditRole(context.Background(), pid, role); err != nil {
-						l.log.Error(err.Error())
+					if er = l.pcache.SetAuditRole(context.Background(), pid, role); er != nil {
+						l.log.Error(er.Error())
 					}
 				}(item.ProjectID, role)
 			}
@@ -74,7 +75,7 @@ func (l *LLMService) worker() {
 
 func (l *LLMService) consumer() {
 	for result := range l.results {
-		// 首次记录ai审核结果:待确认状态
+		// 首次记录ai审核结果:待确认状态.并没有更新auditor，后续要改。
 		err := l.itemDAO.AuditItem(result.ID, result.Result, result.Reason)
 		if err != nil {
 			l.log.Error(err.Error())
@@ -112,8 +113,9 @@ func (l *LLMService) consumer() {
 		}
 
 		// 兜底，如果仍为false,则回滚为pending
+		// todo: 基于栈实现一个回滚管理器
 		if f == false {
-			err := l.itemDAO.AuditItem(result.ID, Pending, "")
+			err := l.itemDAO.AuditItem(result.ID, model.Pending, "")
 			if err != nil {
 				l.log.Error(err.Error())
 			}
@@ -126,12 +128,13 @@ func (l *LLMService) consumer() {
 	}
 }
 
-func (l *LLMService) sendToLLM(id uint, r string, c response.Contents) {
-	for retry := 0; retry < 3; retry++ {
-		resp, err := l.client.SendMessage(prompt.BuildPrompt(r, c))
+func (l *LLMService) sendToLLM(id uint, role string, c response.Contents) {
+	td, imd := l.client.Transform(role, c)
+	for i := 0; i < retry; i++ {
+		resp, err := l.client.SendMessage(td, imd)
 		if err == nil {
 			resp.ID = id
-			if resp.Confidence >= 0.5 {
+			if resp.Confidence > 50 {
 				l.results <- resp
 			}
 			return

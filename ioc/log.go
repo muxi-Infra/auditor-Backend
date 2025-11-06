@@ -29,11 +29,12 @@ func InitLogger(logConfig *config.LogConfig) logger.Logger {
 		logLevel, // 设置日志级别
 	)
 
-	l := zap.New(core, zap.AddCaller())
+	l := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
 	res := logger.NewLogger(l)
 
 	return res
 }
+
 func getZapLevel(levelStr string) zapcore.Level {
 	levelStr = strings.ToLower(levelStr)
 

@@ -56,7 +56,7 @@ func InitWebServer(confPath string) *App {
 	itemDao := dao.NewItemDao(db)
 	projectDAO := dao.NewProjectDAO(db)
 	muxiAI := config2.NewMuxiAIConf(vipperSetting)
-	auditAIClient := client2.Connect(muxiAI)
+	auditAIClient := client2.AuditAIConnect(muxiAI)
 	llmService := service.NewLLMService(userDAO, itemDao, projectDAO, auditAIClient, logger, projectCache)
 	llmController := controller.NewLLMController(llmService)
 	removeService := service.NewRemoveService(userDAOInterface)

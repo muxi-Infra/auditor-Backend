@@ -60,7 +60,7 @@ func InitWebServer(confPath string) *App {
 		service.NewUserService,
 		ProvideUserDAO,
 		ProvideRedisCache,
-		lcl.Connect,
+		lcl.AuditAIConnect,
 		service.NewProjectService,
 		service.NewItemService,
 		service.NewTubeService,

@@ -1,10 +1,12 @@
 package main
 
 import (
-	conf "github.com/cqhasy/2025-Muxi-Team-auditor-Backend/config"
+	"os"
+
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"os"
+
+	conf "github.com/cqhasy/2025-Muxi-Team-auditor-Backend/config"
 )
 
 func main() {

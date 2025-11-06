@@ -1,6 +1,12 @@
 package logger
 
-import "go.uber.org/zap"
+import (
+	"go.uber.org/zap"
+	defLog "log"
+	"os"
+)
+
+const defaultLogPrefix = "[muxi-auditor]"
 
 type ZapLogger struct {
 	l *zap.Logger
@@ -34,4 +40,35 @@ func (z *ZapLogger) toArgs(args []Field) []zap.Field {
 		res = append(res, zap.Any(arg.Key, arg.Val))
 	}
 	return res
+}
+
+// DefaultLogger 用于test
+type DefaultLogger struct {
+	log *defLog.Logger
+}
+
+func NewDefaultLogger() *DefaultLogger {
+	return &DefaultLogger{
+		log: defLog.New(os.Stderr, defaultLogPrefix, defLog.LstdFlags),
+	}
+}
+
+func (d *DefaultLogger) WithField(key string, value interface{}) interface{} {
+	return d
+}
+
+func (d *DefaultLogger) Info(msg string, args ...Field) {
+	d.log.Print(msg)
+}
+
+func (d *DefaultLogger) Debug(msg string, args ...Field) {
+	d.log.Printf(msg)
+}
+
+func (d *DefaultLogger) Warn(msg string, args ...Field) {
+	d.log.Print(msg)
+}
+
+func (d *DefaultLogger) Error(msg string, args ...Field) {
+	d.log.Print(msg)
 }

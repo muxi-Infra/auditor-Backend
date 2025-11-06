@@ -9,27 +9,20 @@ import (
 	"time"
 
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
-)
-
-const (
-	Pending = iota
-	Pass
-	Reject
-	PassBeforeHook
-	RejectBeforeHook
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/langchain/model"
 )
 
 func auditStatusToString(status int) string {
 	switch status {
-	case Pending:
+	case model.Pending:
 		return "Pending"
-	case Pass:
+	case model.Pass:
 		return "Pass"
-	case Reject:
+	case model.Reject:
 		return "Reject"
-	case PassBeforeHook:
+	case model.PassBeforeHook:
 		return "PassBeforeHook"
-	case RejectBeforeHook:
+	case model.RejectBeforeHook:
 		return "RejectBeforeHook"
 	default:
 		panic("unhandled default case")
@@ -38,11 +31,11 @@ func auditStatusToString(status int) string {
 
 func auditStatusForHook(status int) string {
 	switch status {
-	case Pending:
+	case model.Pending:
 		return "Pending"
-	case Pass, PassBeforeHook:
+	case model.Pass, model.PassBeforeHook:
 		return "Pass"
-	case Reject, RejectBeforeHook:
+	case model.Reject, model.RejectBeforeHook:
 		return "Reject"
 	default:
 		panic("unhandled default case")
@@ -52,15 +45,15 @@ func auditStatusForHook(status int) string {
 func auditStatusToInt(status string) int {
 	switch status {
 	case "Pending":
-		return Pending
+		return model.Pending
 	case "Pass":
-		return Pass
+		return model.Pass
 	case "Reject":
-		return Reject
+		return model.Reject
 	case "PassBeforeHook":
-		return PassBeforeHook
+		return model.PassBeforeHook
 	case "RejectBeforeHook":
-		return RejectBeforeHook
+		return model.RejectBeforeHook
 	}
 	return -1
 }
