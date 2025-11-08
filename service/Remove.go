@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/apikey"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/dao"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/model"
-	"strings"
-	"time"
 )
 
 type RemoveService struct {
@@ -30,6 +31,7 @@ func (service *RemoveService) CheckPower(c context.Context, ac string) (bool, ui
 	projectIdUint := uint(projectIdFloat)
 	return true, projectIdUint, nil
 }
+
 func (service *RemoveService) Upload(c context.Context, req request.UploadReq, projectId uint) (uint, error) {
 	now := time.Now()
 	id, err := service.Db.Upload(c, req, projectId, now)
@@ -48,14 +50,15 @@ func (service *RemoveService) Update(c context.Context, req request.UploadReq, p
 	}
 	return id, nil
 }
-func (service *RemoveService) Delete(c context.Context, hookId uint, projectId uint) error {
 
+func (service *RemoveService) Delete(c context.Context, hookId uint, projectId uint) error {
 	err := service.Db.DeleteItemByHookId(c, hookId, projectId)
 	if err != nil {
 		return err
 	}
 	return nil
 }
+
 func (service *RemoveService) Get(c context.Context, itemIds []uint, projectId uint) ([]model.Item, error) {
 	if len(itemIds) == 1 && itemIds[0] == 0 {
 		re, err := service.Db.GetItems(c, projectId)

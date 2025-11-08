@@ -67,6 +67,7 @@ func uintSliceToString(ids []uint) string {
 	}
 	return strings.Join(strs, ",")
 }
+
 func (mc *MuxiAuditClient) UploadItem(apiKey string, req request.UploadReq) (response.Response, error) {
 	data, err := json.Marshal(req)
 	if err != nil {
@@ -78,6 +79,7 @@ func (mc *MuxiAuditClient) UploadItem(apiKey string, req request.UploadReq) (res
 	}
 	return resp, nil
 }
+
 func (mc *MuxiAuditClient) UpdateItem(ac string, req request.UploadReq) (response.Response, error) {
 	data, err := json.Marshal(req)
 	if err != nil {
@@ -89,6 +91,7 @@ func (mc *MuxiAuditClient) UpdateItem(ac string, req request.UploadReq) (respons
 	}
 	return resp, nil
 }
+
 func (mc *MuxiAuditClient) DeleteItem(ac string, itemId uint) (response.Response, error) {
 	path := fmt.Sprintf(DeletePath+"/%d", itemId)
 	resp, err := mc.httpServe(ac, nil, path, http.MethodDelete)
@@ -97,6 +100,7 @@ func (mc *MuxiAuditClient) DeleteItem(ac string, itemId uint) (response.Response
 	}
 	return resp, nil
 }
+
 func (mc *MuxiAuditClient) GetItem(ac string, ids []uint) (response.Response, error) {
 	query := url.Values{}
 	query.Set("ids", uintSliceToString(ids))

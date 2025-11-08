@@ -10,12 +10,17 @@ import (
 
 //负责获取密钥
 
+const (
+	ReturnKeyPath = "/key"
+)
+
 type KeyGet struct {
 	Engine  *gin.Engine
 	Addr    string
 	Path    string
 	Handler gin.HandlerFunc
 }
+
 type ViperSetting interface {
 	SetApiKey(key string, value string) error
 }
@@ -29,15 +34,15 @@ func NewKeyGet(engine *gin.Engine, addr string, path string, handler gin.Handler
 	}
 }
 func (k *KeyGet) Serve() *KeyGet {
-	k.Engine.POST(k.Path, k.Handler)
+	k.Engine.POST(k.Path+ReturnKeyPath, k.Handler)
 	return k
 }
+
 func (k *KeyGet) Run() error {
 	return k.Engine.Run(k.Addr)
 }
 
-//提供的默认处理函数，写入到当前文件夹
-
+// DefaultServe 提供的默认处理函数，写入到当前文件夹
 func DefaultServe(engine *gin.Engine, addr string, path string) *KeyGet {
 	handler := func(c *gin.Context) {
 		var data request.ReturnApiKey
@@ -65,6 +70,7 @@ func DefaultServe(engine *gin.Engine, addr string, path string) *KeyGet {
 	k.Serve()
 	return k
 }
+
 func ServeWriteToConfig(engine *gin.Engine, addr string, path string, v ViperSetting, key string) *KeyGet {
 	handler := func(c *gin.Context) {
 		var data request.ReturnApiKey

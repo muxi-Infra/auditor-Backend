@@ -12,7 +12,7 @@ func Handle(event string, data request.HookPayload) {
 }
 func main() {
 	r := gin.Default()
-	l := webhook.NewListener(r, "0.0.0.0:8085", "/webhook", Handle)
+	l := webhook.NewListener(r, "0.0.0.0:8085", "/audit", Handle)
 	l.RegisterRoutes()
 	l.Start()
 }

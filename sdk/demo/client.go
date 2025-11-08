@@ -12,7 +12,7 @@ func main() {
 	ac := "*****************"
 	c := client.NewMuxiAuditClient(&http.Client{}, "http://0.0.0.0:8080/api/v1")
 	var req = request.UploadReq{
-		HookUrl:    "http://localhost:8081",
+		HookUrl:    "http://localhost:8081/audit",
 		Id:         12,
 		Author:     "chen",
 		PublicTime: time.Now().Unix(),

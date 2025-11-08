@@ -7,7 +7,9 @@ import (
 	"log"
 )
 
-const ApiKey = "remove.api_key"
+const (
+	ApiKey = "remove.api_key"
+)
 
 type viperSetting struct {
 	vp *viper.Viper
@@ -37,7 +39,7 @@ func main() {
 	vp.WatchConfig()
 	v := newSetting(vp)
 	////default_sever
-	//keyget.DefaultServe(e, "localhost:8081", "/test").Run()
+	//keyget.DefaultServe(e, "localhost:8081", "/audit").Run()
 	//write to your config.yaml sever
-	keyget.ServeWriteToConfig(e, "localhost:8081", "/test", v, ApiKey).Run()
+	keyget.ServeWriteToConfig(e, "localhost:8081", "/audit", v, ApiKey).Run()
 }

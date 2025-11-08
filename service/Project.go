@@ -19,7 +19,10 @@ import (
 	"sync"
 )
 
-const DefaultDescription = "这个项目管理很懒，没有任何描述"
+const (
+	DefaultDescription = "这个项目管理很懒，没有任何描述"
+	ReturnKeyPath      = "/key"
+)
 
 type ProjectService struct {
 	userDAO         dao.UserDAOInterface
@@ -34,9 +37,6 @@ type Count struct {
 func NewProjectService(userDAO dao.UserDAOInterface, redisJwtHandler *jwt.RedisJWTHandler, ca *cache.ProjectCache) *ProjectService {
 	return &ProjectService{userDAO: userDAO, redisJwtHandler: redisJwtHandler, cache: ca}
 }
-
-//这里的逻辑有点神秘了，但已经写成这样了，懒得改了，目前大概是有两个鉴权机制，一个是用来获取project_id,区分project的
-//另一个是access_key机制，就和七牛云一样，这个是来确认调用方身份的。老实了，要去改了
 
 func (s *ProjectService) Create(ctx context.Context, req request.CreateProject) (uint, string, error) {
 	var ids []uint
@@ -85,7 +85,7 @@ func (s *ProjectService) ReturnApiKey(apiKey string, hookUrl string) error {
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequest(http.MethodPost, hookUrl, bytes.NewBuffer(data))
+	req, err := http.NewRequest(http.MethodPost, hookUrl+ReturnKeyPath, bytes.NewBuffer(data))
 	if err != nil {
 		return err
 	}
