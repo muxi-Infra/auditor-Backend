@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	WebHookPath = "/webhook"
+	HookPath = "/webhook"
 )
 
 // HandlerFunc 用户定义的回调处理函数
@@ -40,7 +40,7 @@ func NewListener(engine *gin.Engine, addr string, path string, handler HandlerFu
 }
 
 func (l *Listener) RegisterRoutes() {
-	l.Engine.POST(l.Path+WebHookPath, func(c *gin.Context) {
+	l.Engine.POST(l.Path+HookPath, func(c *gin.Context) {
 		var payload request.HookPayload
 		if err := c.ShouldBindJSON(&payload); err != nil {
 			c.JSON(http.StatusBadRequest, Response{
@@ -67,7 +67,7 @@ func (l *Listener) Start() error {
 }
 
 func (l *Listener) RegisterRouteWithKa(kafkaProducer sarama.SyncProducer, topic string) {
-	l.Engine.POST(l.Path+WebHookPath, func(c *gin.Context) {
+	l.Engine.POST(l.Path+HookPath, func(c *gin.Context) {
 		var payload request.HookPayload
 		if err := c.ShouldBindJSON(&payload); err != nil {
 			c.JSON(http.StatusBadRequest, Response{
@@ -108,4 +108,8 @@ func (l *Listener) RegisterRouteWithKa(kafkaProducer sarama.SyncProducer, topic 
 			Msg:  "success to send message to kafka",
 		})
 	})
+}
+
+func (l *Listener) RegisterRoutesCustom(handlerFunc gin.HandlerFunc) {
+	l.Engine.POST(l.Path+HookPath, handlerFunc)
 }
