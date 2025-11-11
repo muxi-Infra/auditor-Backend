@@ -46,27 +46,6 @@ func NewRemoveController(service *service.RemoveService) *RemoveController {
 // @Failure 400 {object} response.Response "获取项目列表失败"
 // @Router /api/v1/remove/upload [post]
 func (c *RemoveController) Upload(g *gin.Context, req request.UploadReq) (response.Response, error) {
-	//ac := g.GetHeader("AccessKey")
-	//temp := g.GetHeader("Timestamp")
-	//signature := g.GetHeader("Signature")
-	//if ac == "" || temp == "" || signature == "" {
-	//	var re = response.Response{
-	//		Code: http.StatusBadRequest,
-	//		Msg:  "header参数缺失",
-	//		Data: nil,
-	//	}
-	//
-	//	return re, errorxs.New("http header parameters required")
-	//}
-	////鉴权
-	//ok, id, err := c.service.CheckPower(g, ac, temp, signature)
-	//if !ok || err != nil {
-	//	var re = response.Response{
-	//		Code: http.StatusBadRequest,
-	//		Msg:  fmt.Errorf("鉴权失败%w", err).Error(),
-	//	}
-	//	return re, err
-	//}
 	id, err := c.CheckPower(g)
 	if err != nil {
 		return response.Response{

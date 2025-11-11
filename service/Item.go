@@ -1,20 +1,16 @@
 package service
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/apikey"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/jwt"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/logger"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/dao"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/model"
 	"golang.org/x/sync/errgroup"
-	"io"
-	"log"
-	"net/http"
 	"os"
 	"strconv"
 	"sync"
@@ -24,6 +20,7 @@ import (
 type ItemService struct {
 	userDAO         *dao.UserDAO
 	redisJwtHandler *jwt.RedisJWTHandler
+	logger          logger.Logger
 }
 type Data struct {
 	Id     uint
@@ -37,8 +34,8 @@ var M = map[int]string{
 	2: "不通过",
 }
 
-func NewItemService(userDAO *dao.UserDAO, redisJwtHandler *jwt.RedisJWTHandler) *ItemService {
-	return &ItemService{userDAO: userDAO, redisJwtHandler: redisJwtHandler}
+func NewItemService(userDAO *dao.UserDAO, redisJwtHandler *jwt.RedisJWTHandler, lo logger.Logger) *ItemService {
+	return &ItemService{userDAO: userDAO, redisJwtHandler: redisJwtHandler, logger: lo}
 }
 func (s *ItemService) Select(ctx context.Context, req request.SelectReq) ([]model.Item, error) {
 	if req.Page < 1 {
@@ -96,60 +93,19 @@ func (s *ItemService) Hook(reqbody request.WebHookData, item model.Item) error {
 		Data:  reqbody,
 		Try:   num,
 	}
-	_, err = s.HookBack(item.HookUrl, req, "")
+	_, err = hookBack(item.HookUrl, req, "")
 	if err != nil {
-		fmt.Println("t---", err)
 		return err
 	}
 	return nil
 }
 
-func (s *ItemService) HookBack(t string, data request.HookPayload, authorization string) ([]byte, error) {
-	jsonBytes, err := json.Marshal(data)
+func (s *ItemService) RoleBack(item model.Item) {
+
+	err := s.userDAO.RollBack(item.ID, 0, "")
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal hook payload: %w", err)
+		s.logger.Error("role back error", logger.Error(fmt.Errorf("回滚失败: item=%+v, 原因: %w", item, err)))
 	}
-	var lasterr error
-	for i := 0; i < data.Try; i++ {
-		reqs, err := http.NewRequest("POST", t, bytes.NewBuffer(jsonBytes))
-		if err != nil {
-			lasterr = err
-			time.Sleep(time.Second)
-			continue
-		}
-		reqs.Header.Set("Content-Type", "application/json")
-		if authorization != "" {
-			reqs.Header.Set("Authorization", authorization)
-		}
-		client := &http.Client{}
-		resp, err := client.Do(reqs)
-		if err != nil {
-			lasterr = err
-			time.Sleep(time.Second)
-			continue
-		}
-
-		body, readErr := io.ReadAll(resp.Body)
-		resp.Body.Close()
-		if readErr != nil {
-			lasterr = readErr
-			break
-		}
-		if resp.StatusCode == http.StatusOK {
-			return body, nil
-		}
-	}
-	fmt.Println("last----", lasterr)
-	return nil, lasterr
-}
-func (s *ItemService) RoleBack(item model.Item) error {
-
-	return fmt.Errorf("回滚失败: item=%+v, 原因: %s", item, "test")
-	//err := s.userDAO.RollBack(item.ID, 0, "")
-	//if err != nil {
-	//	return fmt.Errorf("回滚失败: item=%+v, 原因: %w", item, err)
-	//}
-	//return nil
 }
 func (s *ItemService) SearchHistory(ctx context.Context, id uint) ([]model.Item, error) {
 	var items []model.Item
@@ -213,11 +169,7 @@ func (s *ItemService) AuditMany(ctx context.Context, reqs []request.AuditReq, ui
 				go func() {
 					err = s.Hook(data, item)
 					if err != nil {
-						log.Println(err)
-						err = s.RoleBack(item)
-						if err != nil {
-							log.Println(err)
-						}
+						s.RoleBack(item)
 					}
 				}()
 			}

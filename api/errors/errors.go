@@ -7,8 +7,10 @@ import (
 
 // 400
 const (
-	UNAUTHORIED_ERROR_CODE = 40001
-	BAD_ENTITY_ERROR_CODE  = 40002
+	BADREQUEST_ERROR_CODE        = 40000
+	UNAUTHORIED_ERROR_CODE       = 40001
+	BAD_ENTITY_ERROR_CODE        = 40002
+	PERMISSION_DENIED_ERROR_CODE = 40003
 )
 
 // 500
@@ -37,5 +39,11 @@ var (
 
 	UNAUTHORIED_ERROR = func(err error) error {
 		return errorx.New(http.StatusUnauthorized, UNAUTHORIED_ERROR_CODE, "Authorization错误", "Common", err)
+	}
+	PERMISSION_DENIED_ERROR = func(err error) error {
+		return errorx.New(http.StatusForbidden, PERMISSION_DENIED_ERROR_CODE, "you don't have permission", "Common", err)
+	}
+	BAD_REQUEST_ERROR = func(err error) error {
+		return errorx.New(http.StatusBadRequest, BADREQUEST_ERROR_CODE, "Bad Request", "Common", err)
 	}
 )

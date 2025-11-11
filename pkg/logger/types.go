@@ -53,3 +53,10 @@ func Int32(key string, val int32) Field {
 		Val: val,
 	}
 }
+
+func Float32(key string, val float32) Field {
+	return Field{
+		Key: key,
+		Val: val,
+	}
+}

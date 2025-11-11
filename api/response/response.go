@@ -31,6 +31,8 @@ type Item struct {
 	Auditor    uint     `json:"auditor"`
 	Content    Contents `json:"content"` //item具体内容，包含题目内容和评论
 }
+
+// todo 将这些基本结构体分出response
 type Contents struct {
 	Topic       Topics  `json:"topic"`
 	LastComment Comment `json:"last_comment"`

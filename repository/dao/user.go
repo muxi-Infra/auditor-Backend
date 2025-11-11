@@ -20,10 +20,12 @@ type UserDAOInterface interface {
 	Read(ctx context.Context, id uint) (*model.User, error)
 	Update(ctx context.Context, user *model.User, id uint) error
 	Delete(ctx context.Context, id uint) error
+	NoPermissionList(ctx context.Context) ([]model.User, error)
 	List(ctx context.Context) ([]model.User, error)
 	FindByEmail(ctx context.Context, email string) (*model.User, error)
 	FindByProjectID(ctx context.Context, id uint) ([]model.User, error)
 	FindByUserIDs(ctx context.Context, ids []uint) ([]model.User, error)
+	FindUserByName(ctx context.Context, query string) ([]model.User, error)
 	GetResponse(ctx context.Context, users []model.User, pid uint) ([]model.UserResponse, error)
 	PPFUserByid(ctx context.Context, id uint) (model.User, error)
 	ChangeRoleInOneProject(ctx context.Context, projectId uint, roles []request.UserInProject) error
@@ -46,10 +48,10 @@ type UserDAOInterface interface {
 	GetUserProjectRoles(ctx context.Context, users []model.User, projects []model.Project) ([]response.UserAllInfo, error)
 	GetItems(ctx context.Context, pid uint) ([]model.Item, error)
 	GetItemDetail(ctx context.Context, itemId uint) (model.Item, error)
-	//GetSecretKey(ctx context.Context, ac string) (string, uint, error)
 	GetItemByHookId(ctx context.Context, hookId uint) (model.Item, error)
 	DeleteItemByHookId(ctx context.Context, hookId uint, projectId uint) error
 	UpdateUserProject(ctx context.Context, projectId uint, uid uint, projectRole int) error
+	GetUserProjects(ctx context.Context, uid uint) ([]model.Project, error)
 }
 type UserDAO struct {
 	DB *gorm.DB
@@ -122,6 +124,16 @@ func (d *UserDAO) List(ctx context.Context) ([]model.User, error) {
 	}
 	return users, nil
 }
+
+// NoPermissionList 获取待授权用户信息
+func (d *UserDAO) NoPermissionList(ctx context.Context) ([]model.User, error) {
+	var users []model.User
+	if err := d.DB.WithContext(ctx).Where("user_role = 0").Find(&users).Error; err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
 func (d *UserDAO) FindByEmail(ctx context.Context, email string) (*model.User, error) {
 	var user model.User
 	err := d.DB.WithContext(ctx).Where("email = ?", email).First(&user).Error
@@ -382,7 +394,7 @@ func (d *UserDAO) SearchHistory(ctx context.Context, items *[]model.Item, id uin
 }
 func (d *UserDAO) Upload(ctx context.Context, req request.UploadReq, id uint, time time.Time) (uint, error) {
 	var it model.Item
-	err := d.DB.WithContext(ctx).Where("hook_id =?", req.Id).First(&it).Error
+	err := d.DB.WithContext(ctx).Where("hook_id =? AND project_id = ?", req.Id, id).First(&it).Error
 	if err != nil {
 
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -414,65 +426,11 @@ func (d *UserDAO) Upload(ctx context.Context, req request.UploadReq, id uint, ti
 				return 0, err
 			}
 
-			//var comment1 = model.Comment{
-			//	Content:  req.Content.LastComment.Content,
-			//	Pictures: req.Content.LastComment.Pictures,
-			//	ItemId:   item.ID,
-			//}
-			//var comment2 = model.Comment{
-			//	Content:  req.Content.NextComment.Content,
-			//	Pictures: req.Content.NextComment.Pictures,
-			//	ItemId:   item.ID,
-			//}
-			//err = d.DB.WithContext(ctx).Create(&comment1).Error
-			//if err != nil {
-			//	return 0, err
-			//}
-			//err = d.DB.WithContext(ctx).Create(&comment2).Error
-			//if err != nil {
-			//	return 0, err
-			//}
 			return item.ID, nil
 		}
 		return 0, err
 	}
 	return it.ID, errors.New("该条目已被创建")
-	//it.Status = 0
-	//it.ProjectId = id
-	//it.Auditor = req.Auditor
-	//it.Author = req.Author
-	//it.Tags = req.Tags
-	//it.PublicTime = time
-	//it.Content = req.Content.Topic.Content
-	//it.Title = req.Content.Topic.Title
-	//it.Pictures = req.Content.Topic.Pictures
-	//it.HookUrl = req.HookUrl
-	//it.HookId = req.Id
-	//err = d.DB.WithContext(ctx).Where("id=?", it.ID).Updates(&it).Error
-	//
-	//if err != nil {
-	//	return 0, err
-	//}
-	//
-	//var comment1 = model.Comment{
-	//	Content:  req.Content.LastComment.Content,
-	//	Pictures: req.Content.LastComment.Pictures,
-	//	ItemId:   it.ID,
-	//}
-	//var comment2 = model.Comment{
-	//	Content:  req.Content.NextComment.Content,
-	//	Pictures: req.Content.NextComment.Pictures,
-	//	ItemId:   it.ID,
-	//}
-	//err = d.DB.WithContext(ctx).Where("item_id =?", it.ID).Updates(&comment1).Error
-	//if err != nil {
-	//	return 0, err
-	//}
-	//err = d.DB.WithContext(ctx).Where("item_id =?", it.ID).Updates(&comment2).Error
-	//if err != nil {
-	//	return 0, err
-	//}
-	//return it.ID, nil
 }
 
 func (d *UserDAO) UpdateItem(ctx context.Context, req request.UploadReq, id uint, time time.Time) (uint, error) {
@@ -509,16 +467,9 @@ func (d *UserDAO) UpdateItem(ctx context.Context, req request.UploadReq, id uint
 		return 0, err
 	}
 
-	//err = d.DB.WithContext(ctx).Where("item_id =?", it.ID).Updates(&comment1).Error
-	//if err != nil {
-	//	return 0, err
-	//}
-	//err = d.DB.WithContext(ctx).Where("item_id =?", it.ID).Updates(&comment2).Error
-	//if err != nil {
-	//	return 0, err
-	//}
 	return it.ID, nil
 }
+
 func (d *UserDAO) GetProjectRole(ctx context.Context, uid uint, pid uint) (int, error) {
 	var project model.UserProject
 
@@ -530,6 +481,7 @@ func (d *UserDAO) GetProjectRole(ctx context.Context, uid uint, pid uint) (int, 
 
 	return project.Role, nil
 }
+
 func (d *UserDAO) UpdateProject(ctx context.Context, id uint, req request.UpdateProject) error {
 	updates := map[string]interface{}{}
 	if req.AuditRule != "" {
@@ -545,7 +497,7 @@ func (d *UserDAO) UpdateProject(ctx context.Context, id uint, req request.Update
 		updates["project_name"] = req.ProjectName
 	}
 	if len(updates) == 0 {
-		return nil // 或 errors.New("没有字段需要更新")
+		return nil // 或 errorx.New("没有字段需要更新")
 	}
 	err := d.DB.WithContext(ctx).Model(&model.Project{}).Where("id = ?", id).Updates(updates).Error
 	if err != nil {
@@ -561,6 +513,18 @@ func (d *UserDAO) GetItemDetail(ctx context.Context, itemId uint) (model.Item, e
 	}
 	return item, nil
 }
+
+func (d *UserDAO) FindUserByName(ctx context.Context, query string) ([]model.User, error) {
+	var users []model.User
+	q := d.DB.WithContext(ctx).Model(&model.User{})
+	q.Where("name LIKE ?", "%"+query+"%")
+	err := q.Find(&users).Error
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
 func (d *UserDAO) GetUsers(ctx context.Context, req request.GetUsers) ([]model.User, error) {
 	var users []model.User
 	if req.Query == "" {
@@ -625,13 +589,6 @@ func (d *UserDAO) GetItems(ctx context.Context, pid uint) ([]model.Item, error) 
 	return items, nil
 }
 
-//	func (d *UserDAO) GetSecretKey(ctx context.Context, ac string) (string, uint, error) {
-//		var p model.Project
-//		if err := d.DB.WithContext(ctx).Model(&model.Project{}).Where("access_key = ?", ac).First(&p).Error; err != nil {
-//			return "", 0, err
-//		}
-//		return p.SecretKey, p.ID, nil
-//	}
 func (d *UserDAO) GetItemByHookId(ctx context.Context, hookId uint) (model.Item, error) {
 	var item model.Item
 	err := d.DB.WithContext(ctx).Where("hook_id = ?", hookId).First(&item).Error
@@ -685,6 +642,13 @@ func (d *UserDAO) ChangeRoleInOneProject(ctx context.Context, projectId uint, ro
 
 // 向项目中添加审核员
 func (d *UserDAO) CreateUserProject(ctx context.Context, projectId uint, uid uint, projectRole int) error {
+	//todo: 前端完成授权界面后删除
+	var u = model.User{}
+	d.DB.WithContext(ctx).Where("id = ?", uid).First(&u)
+	if u.UserRole == 0 {
+		u.UserRole = 1
+		d.DB.WithContext(ctx).Where("id = ?", uid).Updates(&u)
+	}
 	var user = model.UserProject{
 		UserID:    uid,
 		ProjectID: projectId,
@@ -696,9 +660,28 @@ func (d *UserDAO) CreateUserProject(ctx context.Context, projectId uint, uid uin
 	}
 	return nil
 }
+
 func (d *UserDAO) UpdateUserProject(ctx context.Context, projectId uint, uid uint, projectRole int) error {
+	//todo: 前端完成授权界面后删除
+	var user = model.User{}
+	d.DB.WithContext(ctx).Where("id = ?", uid).First(&user)
+	if user.UserRole == 0 {
+		user.UserRole = 1
+		d.DB.WithContext(ctx).Where("id = ?", uid).Updates(&user)
+	}
+
 	if err := d.DB.WithContext(ctx).Model(&model.UserProject{}).Where("project_id=? AND user_id=?", projectId, uid).Update("role", projectRole).Error; err != nil {
 		return err
 	}
 	return nil
+}
+
+func (d *UserDAO) GetUserProjects(ctx context.Context, uid uint) ([]model.Project, error) {
+	var projects []model.Project
+	err := d.DB.WithContext(ctx).Joins("JOIN user_projects ON projects.id = user_projects.project_id").
+		Where("user_projects.user_id = ? ", uid).Find(&projects).Error
+	if err != nil {
+		return nil, err
+	}
+	return projects, nil
 }

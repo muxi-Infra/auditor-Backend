@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VERSION: ${VERSION:-latest}
+    image: muxi-auditor-backend:${VERSION:-latest}
+    container_name: muxi-auditor-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - CONFIG_PATH=/data/conf/config.yaml
+      - GIN_MODE=release
+      - LOG_LEVEL=debug
+      - HOOK_TRY_MAX=5
+      - RUN_URL=0.0.0.0:8080
+    env_file:
+      - ./.env
+    volumes:
+      - ./config:/data/conf:ro
+      - ./logs:/app/logs
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - muxi-network
+    restart: always
+
+  mysql:
+    image: mysql:8.0
+    container_name: muxi-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: muxi_auditor
+      MYSQL_USER: muxi_user
+      MYSQL_PASSWORD: muxi_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - muxi-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: muxi-redis
+    command: redis-server --requirepass redispassword
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - muxi-network
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: muxi-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./deploy/config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    environment:
+      - TZ=Asia/Shanghai
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.enable-lifecycle"
+      - "--log.level=debug"
+    networks:
+      - muxi-network
+
+volumes:
+  mysql_data:
+  redis_data:
+  prometheus_data:
+
+networks:
+  muxi-network:
+    driver: bridge

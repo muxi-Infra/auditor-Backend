@@ -9,13 +9,19 @@ import (
 	"net/http"
 )
 
+const (
+	HookPath = "/webhook"
+)
+
 // HandlerFunc 用户定义的回调处理函数
 type HandlerFunc func(event string, data request.HookPayload)
+
 type Response struct {
 	Code int                 `json:"code"`
 	Msg  string              `json:"msg"`
 	Data request.HookPayload `json:"data"`
 }
+
 type Listener struct {
 	Engine  *gin.Engine
 	Addr    string
@@ -34,7 +40,7 @@ func NewListener(engine *gin.Engine, addr string, path string, handler HandlerFu
 }
 
 func (l *Listener) RegisterRoutes() {
-	l.Engine.POST(l.Path, func(c *gin.Context) {
+	l.Engine.POST(l.Path+HookPath, func(c *gin.Context) {
 		var payload request.HookPayload
 		if err := c.ShouldBindJSON(&payload); err != nil {
 			c.JSON(http.StatusBadRequest, Response{
@@ -59,8 +65,9 @@ func (l *Listener) RegisterRoutes() {
 func (l *Listener) Start() error {
 	return l.Engine.Run(l.Addr)
 }
+
 func (l *Listener) RegisterRouteWithKa(kafkaProducer sarama.SyncProducer, topic string) {
-	l.Engine.POST(l.Path, func(c *gin.Context) {
+	l.Engine.POST(l.Path+HookPath, func(c *gin.Context) {
 		var payload request.HookPayload
 		if err := c.ShouldBindJSON(&payload); err != nil {
 			c.JSON(http.StatusBadRequest, Response{
@@ -101,4 +108,8 @@ func (l *Listener) RegisterRouteWithKa(kafkaProducer sarama.SyncProducer, topic 
 			Msg:  "success to send message to kafka",
 		})
 	})
+}
+
+func (l *Listener) RegisterRoutesCustom(handlerFunc gin.HandlerFunc) {
+	l.Engine.POST(l.Path+HookPath, handlerFunc)
 }

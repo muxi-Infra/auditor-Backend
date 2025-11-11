@@ -423,6 +423,46 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/llm/audit": {
+            "post": {
+                "description": "根据请求将需要审核的条目加入ai审核队列",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "LLM"
+                ],
+                "summary": "ai审核条目",
+                "parameters": [
+                    {
+                        "description": "审核请求",
+                        "name": "auditReq",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.AuditByLLMReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功返回success",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "审核失败",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/project/addUsers": {
             "post": {
                 "security": [
@@ -663,6 +703,62 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "请求错误（缺少 api_key 或参数错误）",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/project/selectUser": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "根据用户名称搜索用户",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "根据用户名称搜索用户",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API 认证密钥(api_key)",
+                        "name": "api_key",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "查询关键字",
+                        "name": "the_query",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "请求错误（参数错误/无query）",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -1313,6 +1409,100 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/user/getNoPermissionUsers": {
+            "get": {
+                "description": "获取已注册但待审核成员",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "获取待审核成员",
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/response.UserInfo"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/user/getProjectRole/{project_id}": {
+            "get": {
+                "description": "获取用户在某个project的projectRole",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "获取projectRole",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "project ID",
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/user/getUsers": {
             "get": {
                 "security": [
@@ -1548,6 +1738,31 @@ const docTemplate = `{
                 }
             }
         },
+        "request.AuditByLLMReq": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/request.AuditItem"
+                    }
+                }
+            }
+        },
+        "request.AuditItem": {
+            "type": "object",
+            "properties": {
+                "contents": {
+                    "$ref": "#/definitions/response.Contents"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "projectID": {
+                    "type": "integer"
+                }
+            }
+        },
         "request.AuditReq": {
             "type": "object",
             "properties": {
@@ -1768,7 +1983,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "role": {
-                    "description": "审核平台的权限，并非项目中的权限",
+                    "description": "审核平台的权限，并非项目中的权限,0无权限，1普通用户，2管理者",
                     "type": "integer"
                 },
                 "user_id": {

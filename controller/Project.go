@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"errors"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/ginx"
@@ -16,7 +17,7 @@ type ProjectController struct {
 	service ProjectService
 }
 type ProjectService interface {
-	GetProjectList(ctx context.Context) ([]model.ProjectList, error)
+	GetProjectList(ctx context.Context, cla jwt.UserClaims) ([]model.ProjectList, error)
 	Create(ctx context.Context, project request.CreateProject) (uint, string, error)
 	Detail(ctx context.Context, id uint) (response.GetDetailResp, error)
 	Delete(ctx context.Context, cla jwt.UserClaims, p uint) error
@@ -27,6 +28,7 @@ type ProjectService interface {
 	AddUsers(ctx context.Context, role int, uid uint, key string, req []request.AddUser) error
 	DeleteUser(ctx context.Context, role int, uid uint, key string, ids []uint) error
 	GiveProjectRole(ctx context.Context, userRole int, uid uint, key string, req []request.AddUser) ([]request.AddUser, error)
+	SelectUser(ctx context.Context, query string, apiKey string) ([]model.User, error)
 }
 
 func NewProjectController(service *service.ProjectService) *ProjectController {
@@ -45,9 +47,9 @@ func NewProjectController(service *service.ProjectService) *ProjectController {
 // @Failure 400 {object} response.Response "获取项目列表失败"
 // @Security ApiKeyAuth
 // @Router /api/v1/project/getProjectList [get]
-func (ctrl *ProjectController) GetProjectList(ctx *gin.Context) (response.Response, error) {
+func (ctrl *ProjectController) GetProjectList(ctx *gin.Context, cla jwt.UserClaims) (response.Response, error) {
 
-	list, err := ctrl.service.GetProjectList(ctx)
+	list, err := ctrl.service.GetProjectList(ctx, cla)
 	if err != nil {
 		return response.Response{
 			Code: 400,
@@ -60,6 +62,7 @@ func (ctrl *ProjectController) GetProjectList(ctx *gin.Context) (response.Respon
 		Code: 200,
 		Msg:  "获取列表成功",
 	}, nil
+
 }
 
 // Create 创建项目
@@ -139,9 +142,6 @@ func (ctrl *ProjectController) Detail(ctx *gin.Context, cla jwt.UserClaims) (res
 			Data: nil,
 		}, err
 	}
-	if cla.UserRule != 2 {
-		detail.Apikey = "*********"
-	}
 	return response.Response{
 		Code: 200,
 		Msg:  "获取成功",
@@ -180,6 +180,13 @@ func (ctrl *ProjectController) Delete(ctx *gin.Context, cla jwt.UserClaims) (res
 	p := uint(pid)
 	err = ctrl.service.Delete(ctx, cla, p)
 	if err != nil {
+		if err.Error() == "无权限" {
+			return response.Response{
+				Code: 400,
+				Msg:  "无权限",
+				Data: nil,
+			}, nil
+		}
 		return response.Response{
 			Code: 400,
 			Msg:  "",
@@ -256,7 +263,7 @@ func (ctrl *ProjectController) Update(ctx *gin.Context, req request.UpdateProjec
 // @Failure 400 {object} response.Response "请求错误（参数错误/无 project_id）"
 // @Failure 500 {object} response.Response "服务器错误"
 // @Router /api/v1/project/{project_id}/getUsers [get]
-func (ctrl *ProjectController) GetUsers(ctx *gin.Context, cla jwt.UserClaims) (response.Response, error) {
+func (ctrl *ProjectController) GetUsers(ctx *gin.Context) (response.Response, error) {
 	projectID := ctx.Param("project_id")
 	if projectID == "" {
 		return response.Response{
@@ -302,7 +309,7 @@ func (ctrl *ProjectController) GetAllTags(ctx *gin.Context, cla jwt.UserClaims) 
 		return response.Response{
 			Code: 403,
 			Msg:  "无权限",
-		}, nil
+		}, errors.New("no power")
 	}
 	projectID := ctx.Param("project_id")
 	if projectID == "" {
@@ -352,7 +359,7 @@ func (ctrl *ProjectController) AddUsers(ctx *gin.Context, req request.AddUsersRe
 		return response.Response{
 			Code: 400,
 			Msg:  "api_key is necessary",
-		}, nil
+		}, errors.New("api_key is necessary")
 	}
 	userRole := cla.UserRule
 	err := ctrl.service.AddUsers(ctx, userRole, uid, key, req.AddUsers)
@@ -440,5 +447,66 @@ func (ctrl *ProjectController) GiveProjectRole(ctx *gin.Context, req request.Add
 		Code: 200,
 		Msg:  "更新成功",
 		Data: data,
+	}, nil
+}
+
+// SelectUser 搜索用户
+// @Summary 根据用户名称搜索用户
+// @Description 根据用户名称搜索用户
+// @Tags Project
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Param api_key header string true "API 认证密钥(api_key)"
+// @Param the_query query string true "查询关键字"
+// @Success 200 {object} response.Response "获取成功"
+// @Failure 400 {object} response.Response "请求错误（参数错误/无query）"
+// @Failure 500 {object} response.Response "服务器错误"
+// @Router /api/v1/project/selectUser [get]
+func (ctrl *ProjectController) SelectUser(ctx *gin.Context, cla jwt.UserClaims) (response.Response, error) {
+	if cla.UserRule == 0 {
+		return response.Response{
+			Msg:  "no power",
+			Code: 403,
+			Data: nil,
+		}, errors.New("no power")
+	}
+	key := ctx.GetHeader("api_key")
+	if key == "" {
+		return response.Response{
+			Code: 400,
+			Msg:  "api_key is necessary",
+		}, errors.New("api_key is necessary")
+	}
+	query := ctx.DefaultQuery("the_query", "")
+	if query == "" {
+		return response.Response{
+			Msg:  "query is necessary",
+			Code: 400,
+			Data: nil,
+		}, errors.New("query is necessary")
+	}
+	users, err := ctrl.service.SelectUser(ctx, query, key)
+	if err != nil {
+		return response.Response{
+			Msg:  "数据搜索有误",
+			Code: 400,
+			Data: nil,
+		}, err
+	}
+	var da []response.UserInfo
+	for _, user := range users {
+		da = append(da, response.UserInfo{
+			Avatar: user.Avatar,
+			Name:   user.Name,
+			Id:     user.ID,
+			Role:   user.UserRole,
+			Email:  user.Email,
+		})
+	}
+	return response.Response{
+		Msg:  "",
+		Code: 200,
+		Data: da,
 	}, nil
 }

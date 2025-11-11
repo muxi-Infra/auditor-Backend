@@ -1,0 +1,27 @@
+filebeat.inputs:
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/app/*.log  # 容器内日志路径（与挂载对应）
+    json.keys_under_root: true  # 解析JSON格式日志
+    json.overwrite_keys: true
+    tags: ["auditor-logs"]  # 自定义标签，方便后续过滤
+
+# 输出到Logstash（而非直接到ES）
+output.logstash:
+  hosts: ["${LOGSTASH_HOST}:${LOGSTASH_PORT}"]  # 从环境变量获取地址
+
+# 配置Elasticsearch用于设置索引模板（可选，依赖ES）
+setup.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+  username: "elastic"
+  password: "changeme123"
+
+# 自动设置索引模板
+setup.template:
+  enabled: true
+  pattern: "auditor-logs-*"
+  name: "auditor-logs"
+
+# 日志级别（调试用）
+logging.level: debug

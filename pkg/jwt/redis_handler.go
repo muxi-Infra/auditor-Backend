@@ -86,23 +86,6 @@ func (r *RedisJWTHandler) CheckSession(ctx *gin.Context, ssid string) (bool, err
 	return val > 0, err
 }
 
-//	func (r *RedisJWTHandler) Login(ctx context.Context, email string) error {
-//		err := r.cmd.Set(ctx, "login:"+BASENAME+email, "logged_in", time.Hour).Err()
-//		return err
-//	}
-//
-//	func (r *RedisJWTHandler) CheckLogin(ctx context.Context, email string) error {
-//		key := "login:" + email
-//
-//		exists, err := r.cmd.Exists(ctx, key).Result()
-//		if err != nil {
-//			return err
-//		}
-//		if exists > 0 {
-//			return errorxs.New("已有用户登录")
-//		}
-//		return nil
-//	}
 func (r *RedisJWTHandler) GetSByKey(ctx context.Context, cacheKey string) (string, error) {
 	re, err := r.cmd.Get(ctx, cacheKey).Result()
 	if err != nil {

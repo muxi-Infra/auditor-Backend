@@ -20,6 +20,22 @@ definitions:
           $ref: '#/definitions/request.AddUser'
         type: array
     type: object
+  request.AuditByLLMReq:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/request.AuditItem'
+        type: array
+    type: object
+  request.AuditItem:
+    properties:
+      contents:
+        $ref: '#/definitions/response.Contents'
+      id:
+        type: integer
+      projectID:
+        type: integer
+    type: object
   request.AuditReq:
     properties:
       item_id:
@@ -166,7 +182,7 @@ definitions:
   request.UserRole:
     properties:
       role:
-        description: 审核平台的权限，并非项目中的权限
+        description: 审核平台的权限，并非项目中的权限,0无权限，1普通用户，2管理者
         type: integer
       user_id:
         type: integer
@@ -509,6 +525,32 @@ paths:
       summary: 上传条目,这个似乎不用接
       tags:
       - Item
+  /api/v1/llm/audit:
+    post:
+      consumes:
+      - application/json
+      description: 根据请求将需要审核的条目加入ai审核队列
+      parameters:
+      - description: 审核请求
+        in: body
+        name: auditReq
+        required: true
+        schema:
+          $ref: '#/definitions/request.AuditByLLMReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功返回success
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 审核失败
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: ai审核条目
+      tags:
+      - LLM
   /api/v1/project/{project_id}/delete:
     delete:
       consumes:
@@ -827,6 +869,42 @@ paths:
       summary: 更新项目成员权限
       tags:
       - Project
+  /api/v1/project/selectUser:
+    get:
+      consumes:
+      - application/json
+      description: 根据用户名称搜索用户
+      parameters:
+      - description: API 认证密钥(api_key)
+        in: header
+        name: api_key
+        required: true
+        type: string
+      - description: 查询关键字
+        in: query
+        name: the_query
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求错误（参数错误/无query）
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 根据用户名称搜索用户
+      tags:
+      - Project
   /api/v1/remove/delete:
     delete:
       consumes:
@@ -1101,6 +1179,62 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 获取自己信息
+      tags:
+      - User
+  /api/v1/user/getNoPermissionUsers:
+    get:
+      consumes:
+      - application/json
+      description: 获取已注册但待审核成员
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/response.UserInfo'
+                  type: array
+              type: object
+        "400":
+          description: 请求错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 获取待审核成员
+      tags:
+      - User
+  /api/v1/user/getProjectRole/{project_id}:
+    get:
+      consumes:
+      - application/json
+      description: 获取用户在某个project的projectRole
+      parameters:
+      - description: project ID
+        in: path
+        name: project_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: integer
+              type: object
+        "400":
+          description: 请求错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 获取projectRole
       tags:
       - User
   /api/v1/user/getUsers:

@@ -16,6 +16,8 @@ type UserController interface {
 	SelectUsers(g *gin.Context) (response.Response, error)
 	GetUserInfo(g *gin.Context) (response.Response, error)
 	ChangeUsersRole(ctx *gin.Context, req request.ChangeUserRolesReq, cla jwt.UserClaims) (response.Response, error)
+	GetNoPermissionUsers(ctx *gin.Context, cla jwt.UserClaims) (response.Response, error)
+	GetProjectRole(ctx *gin.Context, cla jwt.UserClaims) (response.Response, error)
 }
 
 func UserRoutes(
@@ -32,4 +34,6 @@ func UserRoutes(
 	UserGroup.GET("/getUsers", authMiddleware, ginx.Wrap(c.SelectUsers))
 	UserGroup.GET("/:id/getUserInfo", authMiddleware, ginx.Wrap(c.GetUserInfo))
 	UserGroup.POST("/changeRoles", authMiddleware, ginx.WrapClaimsAndReq(c.ChangeUsersRole))
+	UserGroup.GET("/getNoPermissionUsers", authMiddleware, ginx.WrapClaims(c.GetNoPermissionUsers))
+	UserGroup.GET("/getProjectRole/:project_id", authMiddleware, ginx.WrapClaims(c.GetProjectRole))
 }
