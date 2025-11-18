@@ -12,10 +12,6 @@ import (
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/langchain/model"
 )
 
-const (
-	HookBackPath = "/webhook"
-)
-
 func auditStatusToString(status int) string {
 	switch status {
 	case model.Pending:

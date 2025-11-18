@@ -54,6 +54,7 @@ func InitWebServer(confPath string) *App {
 		dao.NewUserDAO,
 		dao.NewProjectDAO,
 		dao.NewItemDao,
+		dao.NewCommentDao,
 		cache.NewProjectCache,
 		jwt.NewRedisJWTHandler,
 		service.NewAuthService,

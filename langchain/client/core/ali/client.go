@@ -58,6 +58,7 @@ func (ac *AlClient) WrapLogger(logger logger.Logger) {
 	ac.log = logger
 }
 
+// SendMessage todo: 加入go routine池避免协程数量过多压垮服务；携带ctx进行超时控制、优雅取消。
 func (ac *AlClient) SendMessage(content string, pics []string) (model.AuditResult, error) {
 	// 为提高速度，这里并发审核图片和文本。
 	var (
@@ -67,16 +68,18 @@ func (ac *AlClient) SendMessage(content string, pics []string) (model.AuditResul
 		wg           sync.WaitGroup
 	)
 	// 文本审核
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		tr, err := ac.auditText(content)
-		if err != nil {
-			textErr = err
-			return
-		}
-		textResult = parseTextResponse(tr)
-	}()
+	if content != "" {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			tr, err := ac.auditText(content)
+			if err != nil {
+				textErr = err
+				return
+			}
+			textResult = parseTextResponse(tr)
+		}()
+	}
 	// 图片审核
 	if len(pics) > 0 {
 		wg.Add(1)
@@ -102,6 +105,7 @@ func (ac *AlClient) Transform(role string, contents response.Contents) (content 
 func (ac *AlClient) auditImages(pics []model.ImageParameters) []*gre.ImageModerationResponseBodyData {
 	var wait sync.WaitGroup
 	res := make([]*gre.ImageModerationResponseBodyData, 0, 5)
+
 	for _, pic := range pics {
 		wait.Add(1)
 		go func() {
@@ -114,6 +118,7 @@ func (ac *AlClient) auditImages(pics []model.ImageParameters) []*gre.ImageModera
 			res = append(res, re)
 		}()
 	}
+
 	wait.Wait()
 	return res
 }
@@ -157,6 +162,7 @@ func (ac *AlClient) auditImage(pic model.ImageParameters) (*gre.ImageModerationR
 		Service:           tea.String("baselineCheck"), // 基线检测
 		ServiceParameters: tea.String(string(serviceParameters)),
 	}
+
 	result, err := ac.client.ImageModerationWithOptions(imageModerationRequest, ac.runtime)
 	if err != nil {
 		return nil, err
@@ -164,6 +170,7 @@ func (ac *AlClient) auditImage(pic model.ImageParameters) (*gre.ImageModerationR
 	if *result.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("response not success. status:%d", *result.StatusCode)
 	}
+
 	body := result.Body
 	if *body.Code != http.StatusOK {
 		return nil, fmt.Errorf("%s  body-code:%d", *body.Msg, *body.Code)

@@ -9,7 +9,7 @@ import (
 
 type RemoveController interface {
 	Upload(g *gin.Context, req request.UploadReq) (response.Response, error)
-	Update(g *gin.Context, req request.UploadReq) (response.Response, error)
+	Update(g *gin.Context, req request.RemoveUpdateReq) (response.Response, error)
 	Get(g *gin.Context) (response.Response, error)
 	Delete(g *gin.Context) (response.Response, error)
 }

@@ -102,12 +102,15 @@ type AddUser struct {
 	UserId      uint `json:"user_id"`
 	ProjectRole int  `json:"project_role"`
 }
+
 type AddUsersReq struct {
 	AddUsers []AddUser `json:"add_users"`
 }
+
 type DeleteUsers struct {
 	Ids []uint `json:"ids"`
 }
+
 type WebHookData struct {
 	Id     uint
 	Status string

@@ -433,7 +433,7 @@ func (d *UserDAO) Upload(ctx context.Context, req request.UploadReq, id uint, ti
 	return it.ID, errors.New("该条目已被创建")
 }
 
-func (d *UserDAO) UpdateItem(ctx context.Context, req request.UploadReq, id uint, time time.Time) (uint, error) {
+func (d *UserDAO) UpdateItem(ctx context.Context, req request.UploadReq, id uint, t time.Time) (uint, error) {
 	var it model.Item
 	err := d.DB.WithContext(ctx).Where("hook_id=?", req.Id).First(&it).Error
 	if err != nil {
@@ -441,32 +441,34 @@ func (d *UserDAO) UpdateItem(ctx context.Context, req request.UploadReq, id uint
 	}
 	it.Status = 0
 	it.ProjectId = id
-	it.Author = req.Author
-	it.Tags = req.Tags
-	it.PublicTime = time
-	it.Content = req.Content.Topic.Content
-	it.Title = req.Content.Topic.Title
-	it.Pictures = req.Content.Topic.Pictures
-	it.HookUrl = req.HookUrl
-	it.HookId = req.Id
 
-	var comment = []model.Comment{
-		model.Comment{Content: req.Content.LastComment.Content,
-			Pictures: req.Content.LastComment.Pictures,
-			ItemId:   it.ID},
-		model.Comment{
-			Content:  req.Content.NextComment.Content,
-			Pictures: req.Content.NextComment.Pictures,
-			ItemId:   it.ID},
+	if req.Author != "" {
+		it.Author = req.Author
 	}
-	//var comment2 =
-	//}
-	it.Comments = comment
-	err = d.DB.WithContext(ctx).Updates(&it).Error
+	if len(req.Tags) > 0 {
+		it.Tags = req.Tags
+	}
+	if req.Content.Topic.Title != "" {
+		it.Title = req.Content.Topic.Title
+	}
+	if req.Content.Topic.Content != "" {
+		it.Content = req.Content.Topic.Content
+	}
+	if req.PublicTime != 0 {
+		it.PublicTime = t
+	}
+	if len(req.Content.Topic.Pictures) > 0 {
+		it.Pictures = req.Content.Topic.Pictures
+	}
+	if req.HookUrl != "" {
+		it.HookUrl = req.HookUrl
+	}
+
+	err = d.DB.WithContext(ctx).Select("*").Updates(&it).Error
 	if err != nil {
 		return 0, err
 	}
-
+	
 	return it.ID, nil
 }
 

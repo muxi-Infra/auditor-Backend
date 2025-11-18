@@ -1753,7 +1753,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "contents": {
-                    "$ref": "#/definitions/response.Contents"
+                    "$ref": "#/definitions/response.Content"
                 },
                 "id": {
                     "type": "integer"
@@ -1947,7 +1947,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "content": {
-                    "$ref": "#/definitions/response.Contents"
+                    "$ref": "#/definitions/response.Content"
                 },
                 "extra": {},
                 "hook_url": {
@@ -2005,7 +2005,7 @@ const docTemplate = `{
                 }
             }
         },
-        "response.Contents": {
+        "response.Content": {
             "type": "object",
             "properties": {
                 "last_comment": {
@@ -2061,7 +2061,7 @@ const docTemplate = `{
                     "description": "item具体内容，包含题目内容和评论",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/response.Contents"
+                            "$ref": "#/definitions/response.Content"
                         }
                     ]
                 },

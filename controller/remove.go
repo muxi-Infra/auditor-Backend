@@ -20,9 +20,9 @@ type RemoveController struct {
 type RemoveItemService interface {
 	CheckPower(c context.Context, apikey string) (bool, uint, error)
 	Upload(c context.Context, req request.UploadReq, projectId uint) (uint, error)
-	Update(c context.Context, req request.UploadReq, projectId uint) (uint, error)
+	Update(c context.Context, req request.RemoveUpdateReq, projectId uint) (uint, error)
 	Delete(c context.Context, itemId uint, projectId uint) error
-	Get(c context.Context, itemIds []uint, projectId uint) ([]model.Item, error)
+	Get(c context.Context, itemIds []uint, projectId uint) (*model.RemoveItemsStatus, error)
 }
 
 // NewRemoveController remove方面的控制器，处理http请求与结果处理，数据库方面逻辑交给service
@@ -59,7 +59,7 @@ func (c *RemoveController) Upload(g *gin.Context, req request.UploadReq) (respon
 	if err != nil {
 		var re = response.Response{
 			Code: http.StatusInternalServerError,
-			Data: fmt.Errorf("%d:%w", itemId, err).Error(),
+			Msg:  fmt.Errorf("%d:%w", itemId, err).Error(),
 		}
 		return re, err
 	}
@@ -84,7 +84,7 @@ func (c *RemoveController) Upload(g *gin.Context, req request.UploadReq) (respon
 // @Success 200 {object} response.Response "成功返回项目id"
 // @Failure 400 {object} response.Response "修改失败"
 // @Router /api/v1/remove/update [put]
-func (c *RemoveController) Update(g *gin.Context, req request.UploadReq) (response.Response, error) {
+func (c *RemoveController) Update(g *gin.Context, req request.RemoveUpdateReq) (response.Response, error) {
 	id, err := c.CheckPower(g)
 	if err != nil {
 		return response.Response{Code: http.StatusBadRequest, Msg: fmt.Errorf("power check err:%w", err).Error()}, err
@@ -185,6 +185,7 @@ func (c *RemoveController) Get(g *gin.Context) (response.Response, error) {
 	}
 	return re, nil
 }
+
 func stringSliceToUintSlice(strs []string) ([]uint, error) {
 	var result []uint
 	for _, s := range strs {

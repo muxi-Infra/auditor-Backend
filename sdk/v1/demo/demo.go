@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/sdk/webhook"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/sdk/v1/webhook"
 	"github.com/gin-gonic/gin"
 )
 

@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/sdk/client"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/sdk/v1/client"
 	"net/http"
 	"time"
 )

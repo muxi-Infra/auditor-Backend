@@ -2,6 +2,7 @@ package client
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
@@ -21,6 +22,7 @@ const GetPath = "/remove/get"
 type MuxiAuditClient struct {
 	c   *http.Client
 	url string
+	ctx context.Context
 }
 
 func NewMuxiAuditClient(c *http.Client, ul string) *MuxiAuditClient {

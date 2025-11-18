@@ -4,17 +4,18 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"golang.org/x/sync/errgroup"
+	"os"
+	"strconv"
+	"sync"
+	"time"
+
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/apikey"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/jwt"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/logger"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/dao"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/model"
-	"golang.org/x/sync/errgroup"
-	"os"
-	"strconv"
-	"sync"
-	"time"
 )
 
 type ItemService struct {
@@ -101,12 +102,12 @@ func (s *ItemService) Hook(reqbody request.WebHookData, item model.Item) error {
 }
 
 func (s *ItemService) RoleBack(item model.Item) {
-
 	err := s.userDAO.RollBack(item.ID, 0, "")
 	if err != nil {
 		s.logger.Error("role back error", logger.Error(fmt.Errorf("回滚失败: item=%+v, 原因: %w", item, err)))
 	}
 }
+
 func (s *ItemService) SearchHistory(ctx context.Context, id uint) ([]model.Item, error) {
 	var items []model.Item
 	err := s.userDAO.SearchHistory(ctx, &items, id)
@@ -115,6 +116,7 @@ func (s *ItemService) SearchHistory(ctx context.Context, id uint) ([]model.Item,
 	}
 	return items, nil
 }
+
 func (s *ItemService) Upload(ctx context.Context, req request.UploadReq, key string) (uint, error) {
 	claims, err := apikey.ParseAPIKey(key)
 	if err != nil {
@@ -133,6 +135,7 @@ func (s *ItemService) Upload(ctx context.Context, req request.UploadReq, key str
 	}
 	return id, nil
 }
+
 func (s *ItemService) GetDetail(ctx context.Context, id uint) (model.Item, error) {
 	item, err := s.userDAO.GetItemDetail(ctx, id)
 	if err != nil {
