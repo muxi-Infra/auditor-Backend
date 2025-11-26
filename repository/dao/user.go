@@ -35,7 +35,7 @@ type UserDAOInterface interface {
 	CreateUserProject(ctx context.Context, projectId uint, uid uint, projectRole int) error
 	GetProjectDetails(ctx context.Context, id uint) (model.Project, error)
 	Select(ctx context.Context, req request.SelectReq) ([]model.Item, error)
-	AuditItem(ctx context.Context, ItemId uint, Status int, Reason string, id uint) error
+	AuditItem(ctx context.Context, ItemId uint, Status model.ItemStatus, Reason string, id uint) error
 	SelectItemById(ctx context.Context, id uint) (model.Item, error)
 	SearchHistory(ctx context.Context, items *[]model.Item, id uint) error
 	Upload(ctx context.Context, req request.UploadReq, id uint, time time.Time) (uint, error)
@@ -320,7 +320,7 @@ func (d *UserDAO) Select(ctx context.Context, req request.SelectReq) ([]model.It
 	return items, nil
 }
 
-func (d *UserDAO) AuditItem(ctx context.Context, ItemId uint, Status int, Reason string, id uint) error {
+func (d *UserDAO) AuditItem(ctx context.Context, ItemId uint, Status model.ItemStatus, Reason string, id uint) error {
 	var item model.Item
 	err := d.DB.WithContext(ctx).Where(" id = ?", ItemId).First(&item).Error
 	if err != nil {
@@ -468,7 +468,7 @@ func (d *UserDAO) UpdateItem(ctx context.Context, req request.UploadReq, id uint
 	if err != nil {
 		return 0, err
 	}
-	
+
 	return it.ID, nil
 }
 

@@ -8,6 +8,14 @@ import (
 	"time"
 )
 
+type ItemStatus int
+
+const (
+	Pending ItemStatus = iota
+	Pass
+	Reject
+)
+
 type User struct {
 	gorm.Model
 	Name     string    `gorm:"column:name;unique;not null"` // 指定列名为 name，唯一约束且不能为空
@@ -59,7 +67,7 @@ type ProjectList struct {
 
 type Item struct {
 	gorm.Model
-	Status     int             `gorm:"column:status;not null"`
+	Status     ItemStatus      `gorm:"column:status;not null"`
 	ProjectId  uint            `gorm:"column:project_id;not null"`
 	Author     string          `gorm:"column:author;not null"`
 	Tags       GormStringSlice `gorm:"type:json"`
@@ -96,8 +104,8 @@ type UserInfos struct {
 }
 
 type RemoveItemStatus struct {
-	Status int  `json:"status"`
-	HookId uint `json:"hook_id"`
+	Status ItemStatus `json:"status"`
+	HookId uint       `json:"hook_id"`
 }
 
 type RemoveItemsStatus struct {

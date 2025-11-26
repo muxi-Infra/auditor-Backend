@@ -26,7 +26,7 @@ func main() {
 
 	s.WebHook("/webhook", chain, c.WebHook)
 
-	r.Run(":8081")
+	r.Run("0.0.0.0:8081")
 }
 
 type Controller struct{}

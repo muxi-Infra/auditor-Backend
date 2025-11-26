@@ -10,6 +10,7 @@ import (
 
 type LLMController interface {
 	Audit(ctx *gin.Context, req request.AuditByLLMReq, cla jwt.UserClaims) (response.Response, error)
+	Close()
 }
 
 // LLMRoutes 其他应用上传或修改item的接口

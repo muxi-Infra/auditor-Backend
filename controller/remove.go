@@ -45,8 +45,8 @@ func NewRemoveController(service *service.RemoveService) *RemoveController {
 // @Success 200 {object} response.Response "成功返回项目id"
 // @Failure 400 {object} response.Response "获取项目列表失败"
 // @Router /api/v1/remove/upload [post]
-func (c *RemoveController) Upload(g *gin.Context, req request.UploadReq) (response.Response, error) {
-	id, err := c.CheckPower(g)
+func (c *RemoveController) Upload(ctx *gin.Context, req request.UploadReq) (response.Response, error) {
+	id, err := c.CheckPower(ctx)
 	if err != nil {
 		return response.Response{
 			Code: http.StatusBadRequest,
@@ -55,7 +55,7 @@ func (c *RemoveController) Upload(g *gin.Context, req request.UploadReq) (respon
 	}
 
 	//上传item的逻辑
-	itemId, err := c.service.Upload(g, req, id)
+	itemId, err := c.service.Upload(ctx, req, id)
 	if err != nil {
 		var re = response.Response{
 			Code: http.StatusInternalServerError,
@@ -84,12 +84,12 @@ func (c *RemoveController) Upload(g *gin.Context, req request.UploadReq) (respon
 // @Success 200 {object} response.Response "成功返回项目id"
 // @Failure 400 {object} response.Response "修改失败"
 // @Router /api/v1/remove/update [put]
-func (c *RemoveController) Update(g *gin.Context, req request.RemoveUpdateReq) (response.Response, error) {
-	id, err := c.CheckPower(g)
+func (c *RemoveController) Update(ctx *gin.Context, req request.RemoveUpdateReq) (response.Response, error) {
+	id, err := c.CheckPower(ctx)
 	if err != nil {
 		return response.Response{Code: http.StatusBadRequest, Msg: fmt.Errorf("power check err:%w", err).Error()}, err
 	}
-	itemId, err := c.service.Update(g, req, id)
+	itemId, err := c.service.Update(ctx, req, id)
 	if err != nil {
 		var re = response.Response{
 			Code: http.StatusInternalServerError,
@@ -117,13 +117,13 @@ func (c *RemoveController) Update(g *gin.Context, req request.RemoveUpdateReq) (
 // @Success 200 {object} response.Response "成功返回删除的项目id"
 // @Failure 400 {object} response.Response "删除项目失败"
 // @Router /api/v1/remove/delete [delete]
-func (c *RemoveController) Delete(g *gin.Context) (response.Response, error) {
-	id, err := c.CheckPower(g)
+func (c *RemoveController) Delete(ctx *gin.Context) (response.Response, error) {
+	id, err := c.CheckPower(ctx)
 	if err != nil {
 		return response.Response{Code: http.StatusBadRequest, Msg: fmt.Errorf("power check err:%w", err).Error()}, err
 	}
 	//获取参数,其实是hook_id
-	data := g.Param("Itemid")
+	data := ctx.Param("Itemid")
 	fmt.Println(data)
 	itemId, err := strconv.ParseUint(data, 10, 64)
 	if err != nil {
@@ -131,7 +131,7 @@ func (c *RemoveController) Delete(g *gin.Context) (response.Response, error) {
 	}
 
 	//删除逻辑
-	err = c.service.Delete(g, uint(itemId), id)
+	err = c.service.Delete(ctx, uint(itemId), id)
 	if err != nil {
 		var re = response.Response{
 			Code: http.StatusInternalServerError,
@@ -159,10 +159,10 @@ func (c *RemoveController) Delete(g *gin.Context) (response.Response, error) {
 // @Success 200 {object} response.Response "成功返回项目信息"
 // @Failure 400 {object} response.Response "获取项目失败"
 // @Router /api/v1/remove/get [get]
-func (c *RemoveController) Get(g *gin.Context) (response.Response, error) {
-	idsStr := g.Query("ids")          // 获取字符串 "1,2,3"
+func (c *RemoveController) Get(ctx *gin.Context) (response.Response, error) {
+	idsStr := ctx.Query("ids")        // 获取字符串 "1,2,3"
 	ids := strings.Split(idsStr, ",") // 手动切割成字符串数组
-	id, err := c.CheckPower(g)
+	id, err := c.CheckPower(ctx)
 	if err != nil {
 		return response.Response{Code: http.StatusBadRequest, Msg: fmt.Errorf("power check err:%w", err).Error()}, err
 	}
@@ -170,7 +170,7 @@ func (c *RemoveController) Get(g *gin.Context) (response.Response, error) {
 	if err != nil {
 		return response.Response{}, err
 	}
-	items, err := c.service.Get(g, ItemIds, id)
+	items, err := c.service.Get(ctx, ItemIds, id)
 	if err != nil {
 		var re = response.Response{
 			Code: http.StatusBadRequest,
@@ -199,14 +199,13 @@ func stringSliceToUintSlice(strs []string) ([]uint, error) {
 }
 
 // CheckPower 鉴权控制器
-func (c *RemoveController) CheckPower(g *gin.Context) (uint, error) {
-	ac := g.GetHeader("api_key")
+func (c *RemoveController) CheckPower(ctx *gin.Context) (uint, error) {
+	ac := ctx.GetHeader("api_key")
 	if ac == "" {
-
 		return 0, errors.New("http header parameters required")
 	}
 	//鉴权,返回project_id
-	ok, id, err := c.service.CheckPower(g, ac)
+	ok, id, err := c.service.CheckPower(ctx, ac)
 	if !ok || err != nil {
 		return 0, err
 	}

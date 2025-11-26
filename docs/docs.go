@@ -423,7 +423,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/llm/audit": {
+        "/api/v1/confluentinc-llm/audit": {
             "post": {
                 "description": "根据请求将需要审核的条目加入ai审核队列",
                 "consumes": [

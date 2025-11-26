@@ -32,7 +32,7 @@ func RegisterProjectRoutes(
 	authGroup := s.Group("/project")
 	authGroup.GET("/getProjectList", authMiddleware, ginx.WrapClaims(c.GetProjectList))
 	authGroup.POST("/create", authMiddleware, ginx.WrapReq(c.Create))
-	authGroup.DELETE("/:project_id/delete", authMiddleware, ginx.WrapClaims(c.Delete))
+	authGroup.DELETE("/:project_id", authMiddleware, ginx.WrapClaims(c.Delete))
 	authGroup.GET("/:project_id/detail", authMiddleware, ginx.WrapClaims(c.Detail))
 	authGroup.POST("/:project_id/update", authMiddleware, ginx.WrapClaimsAndReq(c.Update))
 	authGroup.GET("/:project_id/getUsers", authMiddleware, ginx.Wrap(c.GetUsers))

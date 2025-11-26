@@ -1,5 +1,7 @@
 package response
 
+import "github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/model"
+
 type LoginResp struct {
 	Token string `json:"token"`
 }
@@ -23,13 +25,13 @@ type SelectResp struct {
 
 // Item todo 枚举优化状态码
 type Item struct {
-	Id         uint     `json:"id"`
-	Author     string   `json:"author"`
-	Tags       []string `json:"tags"`
-	Status     int      `json:"status"` //0未审核1通过2不通过
-	PublicTime int64    `json:"public_time"`
-	Auditor    uint     `json:"auditor"`
-	Content    Contents `json:"content"` //item具体内容，包含题目内容和评论
+	Id         uint             `json:"id"`
+	Author     string           `json:"author"`
+	Tags       []string         `json:"tags"`
+	Status     model.ItemStatus `json:"status"` //0未审核1通过2不通过
+	PublicTime int64            `json:"public_time"`
+	Auditor    uint             `json:"auditor"`
+	Content    Contents         `json:"content"` //item具体内容，包含题目内容和评论
 }
 
 // todo 将这些基本结构体分出response
