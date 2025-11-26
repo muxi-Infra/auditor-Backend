@@ -4,9 +4,13 @@
 package main
 
 import (
+	"github.com/google/wire"
+	"gorm.io/gorm"
+
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/client"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/config"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/controller"
+	confluentinc_llm "github.com/cqhasy/2025-Muxi-Team-auditor-Backend/events/confluentinc-llm"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/ioc"
 	lcl "github.com/cqhasy/2025-Muxi-Team-auditor-Backend/langchain/client"
 	lc "github.com/cqhasy/2025-Muxi-Team-auditor-Backend/langchain/config"
@@ -15,10 +19,8 @@ import (
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/viperx"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/cache"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/dao"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/router"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/server"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/service"
-	"github.com/google/wire"
-	"gorm.io/gorm"
 )
 
 // wire.go
@@ -43,6 +45,7 @@ func InitWebServer(confPath string) *App {
 		config.NewPrometheusConf,
 		config.NewMiddleWareConf,
 		config.NewQiniuConf,
+		config.NewKafkaConf,
 		lc.NewMuxiAIConf,
 		// 初始化基础依赖
 		ioc.InitDB,
@@ -50,12 +53,15 @@ func InitWebServer(confPath string) *App {
 		ioc.InitRedis,
 		ioc.NewRedisCache,
 		ioc.InitPrometheus,
+		ioc.InitProducer,
 		// 初始化具体模块
 		dao.NewUserDAO,
 		dao.NewProjectDAO,
 		dao.NewItemDao,
+		dao.NewCommentDao,
 		cache.NewProjectCache,
 		jwt.NewRedisJWTHandler,
+		confluentinc_llm.NewLlmProducer,
 		service.NewAuthService,
 		service.NewUserService,
 		ProvideUserDAO,
@@ -74,7 +80,7 @@ func InitWebServer(confPath string) *App {
 		controller.NewRemoveController,
 		controller.NewLLMController,
 		client.NewOAuthClient,
-		router.NewRouter,
+		server.NewServer,
 
 		// 中间件
 		middleware.NewAuthMiddleware,

@@ -1,6 +1,7 @@
 package ioc
 
 import (
+	"fmt"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/config"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/logger"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/dao"
@@ -32,5 +33,6 @@ type gormLoggerFunc func(msg string, fields ...logger.Field)
 
 // TODO 修改日志系统
 func (g gormLoggerFunc) Printf(s string, i ...interface{}) {
-	g(s, logger.Field{Key: "args", Val: i})
+	formatedMsg := fmt.Sprintf(s, i...)
+	g(formatedMsg, logger.Field{Key: "args", Val: i})
 }

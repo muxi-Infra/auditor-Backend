@@ -42,7 +42,7 @@ func (z *ZapLogger) toArgs(args []Field) []zap.Field {
 	return res
 }
 
-// DefaultLogger 用于test
+// DefaultLogger 用于test和部分插件的初始化临时替代
 type DefaultLogger struct {
 	log *defLog.Logger
 }

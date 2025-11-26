@@ -141,10 +141,10 @@ func (s *ProjectService) Detail(ctx context.Context, id uint) (response.GetDetai
 	if err != nil {
 		return response.GetDetailResp{}, err
 	}
-	countMap := map[int]int{
-		0: 0,
-		1: 0,
-		2: 0,
+	countMap := map[model.ItemStatus]int{
+		model.Pending: 0,
+		model.Pass:    0,
+		model.Reject:  0,
 	}
 	for _, item := range project.Items {
 		countMap[item.Status]++

@@ -1,7 +1,16 @@
 # 仓库根目录
-REPODIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
-# 构建输出目录
-BUILDDIR := $(REPODIR)/dist
+ifeq ($(OS),Windows_NT)
+    # Windows: 直接用 CURDIR（当前工作目录，即项目根目录），强制转换为 \ 分隔符
+    REPODIR := $(subst /,\,$(CURDIR))
+    BUILDDIR := $(REPODIR)\dist
+else
+    # Linux/WSL: 保持原逻辑
+    REPODIR := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+    BUILDDIR := $(REPODIR)/dist
+endif
+
+# 构建输出目录（确保是项目根目录下的 dist）
+
 
 # 服务名称（与docker-compose.yml保持一致）
 ES_CONTAINER := elasticsearch
@@ -34,9 +43,14 @@ build:
 	@echo "Cleaning up and downloading modules..."
 	go mod tidy
 	@echo "Building for Linux amd64..."
+ifeq ($(OS),Windows_NT)
+	if not exist "$(BUILDDIR)" mkdir "$(BUILDDIR)"
+	set "GOOS=linux" && set "GOARCH=amd64" && go build -o "$(BUILDDIR)\app" "$(REPODIR)"
+else
 	mkdir -p $(BUILDDIR)
 	GOOS=linux GOARCH=amd64 go build -o $(BUILDDIR)/app $(REPODIR)
-	@echo "Build completed: $(BUILDDIR)/app"
+endif
+	@echo "Build completed: $(BUILDDIR)\app"
 
 #deploy everything
 .PHONY:deploy

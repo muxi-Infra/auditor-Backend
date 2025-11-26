@@ -3,8 +3,17 @@ package model
 import (
 	"database/sql/driver"
 	"encoding/json"
+	"fmt"
 	"gorm.io/gorm"
 	"time"
+)
+
+type ItemStatus int
+
+const (
+	Pending ItemStatus = iota
+	Pass
+	Reject
 )
 
 type User struct {
@@ -58,14 +67,14 @@ type ProjectList struct {
 
 type Item struct {
 	gorm.Model
-	Status     int             `gorm:"column:status;not null"`
+	Status     ItemStatus      `gorm:"column:status;not null"`
 	ProjectId  uint            `gorm:"column:project_id;not null"`
 	Author     string          `gorm:"column:author;not null"`
 	Tags       GormStringSlice `gorm:"type:json"`
 	PublicTime time.Time       `gorm:"column:public_time;not null"`
 	Content    string          `gorm:"column:content;not null"`
 	Title      string          `gorm:"column:title;not null"`
-	Comments   []Comment       `gorm:"foreignKey:ItemId"`
+	Comments   []Comment       `gorm:"foreignKey:ItemId;references:ID;constraint:OnDelete:CASCADE"`
 	Auditor    uint            `gorm:"column:auditor;"`
 	Reason     string          `gorm:"column:reason"`
 	Pictures   GormStringSlice `gorm:"type:json"`
@@ -94,6 +103,15 @@ type UserInfos struct {
 	ProjectPermit []ProjectPermit `json:"project_permit"`
 }
 
+type RemoveItemStatus struct {
+	Status ItemStatus `json:"status"`
+	HookId uint       `json:"hook_id"`
+}
+
+type RemoveItemsStatus struct {
+	Items []RemoveItemStatus `json:"items"`
+}
+
 type GormStringSlice []string
 
 func (g GormStringSlice) Value() (driver.Value, error) {
@@ -101,5 +119,15 @@ func (g GormStringSlice) Value() (driver.Value, error) {
 }
 
 func (g *GormStringSlice) Scan(value interface{}) error {
-	return json.Unmarshal(value.([]byte), g)
+	if value == nil {
+		*g = []string{}
+		return nil
+	}
+
+	b, ok := value.([]byte)
+	if !ok {
+		return fmt.Errorf("failed to scan GormStringSlice: %v", value)
+	}
+
+	return json.Unmarshal(b, g)
 }

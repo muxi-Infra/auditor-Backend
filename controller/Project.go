@@ -160,9 +160,8 @@ func (ctrl *ProjectController) Detail(ctx *gin.Context, cla jwt.UserClaims) (res
 // @Success 200 {object} response.Response "删除成功"
 // @Failure 400 {object} response.Response "删除失败"
 // @Security ApiKeyAuth
-// @Router /api/v1/project/{project_id}/delete [delete]
+// @Router /api/v1/project/{project_id} [delete]
 func (ctrl *ProjectController) Delete(ctx *gin.Context, cla jwt.UserClaims) (response.Response, error) {
-
 	projectID := ctx.Param("project_id")
 	if projectID == "" {
 		return response.Response{

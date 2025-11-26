@@ -66,6 +66,10 @@ type QiNiuYunConfig struct {
 	Domain    string `yaml:"domain"`
 }
 
+type KafkaConfig struct {
+	Addr []string `yaml:"addr"`
+}
+
 func NewAppConf(s *viperx.VipperSetting) *AppConf {
 	var appConf = &AppConf{}
 	err := s.ReadSection("app", appConf)
@@ -144,4 +148,15 @@ func NewQiniuConf(s *viperx.VipperSetting) *QiNiuYunConfig {
 		return nil
 	}
 	return qiniuConf
+}
+
+func NewKafkaConf(s *viperx.VipperSetting) *KafkaConfig {
+	var kafkaConf = &KafkaConfig{}
+
+	err := s.ReadSection("kafka", kafkaConf)
+	if err != nil {
+		return nil
+	}
+
+	return kafkaConf
 }
