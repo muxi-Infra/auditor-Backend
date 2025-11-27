@@ -21,6 +21,7 @@ type ProjectController interface {
 	DeleteUsers(ctx *gin.Context, req request.DeleteUsers, cla jwt.UserClaims) (response.Response, error)
 	GiveProjectRole(ctx *gin.Context, req request.AddUsersReq, cla jwt.UserClaims) (response.Response, error)
 	SelectUser(ctx *gin.Context, cla jwt.UserClaims) (response.Response, error)
+	GetItemNums(ctx *gin.Context, cla jwt.UserClaims) (response.Response, error)
 }
 
 func RegisterProjectRoutes(
@@ -28,17 +29,18 @@ func RegisterProjectRoutes(
 	authMiddleware gin.HandlerFunc,
 	c ProjectController,
 ) {
-	//认证服务
-	authGroup := s.Group("/project")
-	authGroup.GET("/getProjectList", authMiddleware, ginx.WrapClaims(c.GetProjectList))
-	authGroup.POST("/create", authMiddleware, ginx.WrapReq(c.Create))
-	authGroup.DELETE("/:project_id", authMiddleware, ginx.WrapClaims(c.Delete))
-	authGroup.GET("/:project_id/detail", authMiddleware, ginx.WrapClaims(c.Detail))
-	authGroup.POST("/:project_id/update", authMiddleware, ginx.WrapClaimsAndReq(c.Update))
-	authGroup.GET("/:project_id/getUsers", authMiddleware, ginx.Wrap(c.GetUsers))
-	authGroup.GET("/:project_id/getAllTags", authMiddleware, ginx.WrapClaims(c.GetAllTags))
-	authGroup.POST("/addUsers", authMiddleware, ginx.WrapClaimsAndReq(c.AddUsers))
-	authGroup.DELETE("/deleteUsers", authMiddleware, ginx.WrapClaimsAndReq(c.DeleteUsers))
-	authGroup.PUT("giveProjectRole", authMiddleware, ginx.WrapClaimsAndReq(c.GiveProjectRole))
-	authGroup.GET("/selectUser", authMiddleware, ginx.WrapClaims(c.SelectUser))
+	// 项目服务
+	projectGroup := s.Group("/project")
+	projectGroup.GET("/getProjectList", authMiddleware, ginx.WrapClaims(c.GetProjectList))
+	projectGroup.POST("/create", authMiddleware, ginx.WrapReq(c.Create))
+	projectGroup.DELETE("/:project_id", authMiddleware, ginx.WrapClaims(c.Delete))
+	projectGroup.GET("/:project_id/detail", authMiddleware, ginx.WrapClaims(c.Detail))
+	projectGroup.POST("/:project_id/update", authMiddleware, ginx.WrapClaimsAndReq(c.Update))
+	projectGroup.GET("/:project_id/getUsers", authMiddleware, ginx.Wrap(c.GetUsers))
+	projectGroup.GET("/:project_id/getAllTags", authMiddleware, ginx.WrapClaims(c.GetAllTags))
+	projectGroup.POST("/addUsers", authMiddleware, ginx.WrapClaimsAndReq(c.AddUsers))
+	projectGroup.DELETE("/deleteUsers", authMiddleware, ginx.WrapClaimsAndReq(c.DeleteUsers))
+	projectGroup.PUT("giveProjectRole", authMiddleware, ginx.WrapClaimsAndReq(c.GiveProjectRole))
+	projectGroup.GET("/selectUser", authMiddleware, ginx.WrapClaims(c.SelectUser))
+	projectGroup.GET("/:project_id/getItemNums", authMiddleware, ginx.WrapClaims(c.GetItemNums))
 }
