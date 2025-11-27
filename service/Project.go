@@ -26,6 +26,7 @@ const (
 
 type ProjectService struct {
 	userDAO         dao.UserDAOInterface
+	projectDAO      dao.ProjectDAOInterface
 	redisJwtHandler *jwt.RedisJWTHandler
 	cache           *cache.ProjectCache
 }
@@ -34,8 +35,13 @@ type Count struct {
 	CurrentCount int
 }
 
-func NewProjectService(userDAO dao.UserDAOInterface, redisJwtHandler *jwt.RedisJWTHandler, ca *cache.ProjectCache) *ProjectService {
-	return &ProjectService{userDAO: userDAO, redisJwtHandler: redisJwtHandler, cache: ca}
+func NewProjectService(userDAO dao.UserDAOInterface, projectDao *dao.ProjectDAO, redisJwtHandler *jwt.RedisJWTHandler, ca *cache.ProjectCache) *ProjectService {
+	return &ProjectService{
+		userDAO:         userDAO,
+		projectDAO:      projectDao,
+		redisJwtHandler: redisJwtHandler,
+		cache:           ca,
+	}
 }
 
 func (s *ProjectService) Create(ctx context.Context, req request.CreateProject) (uint, string, error) {
@@ -373,4 +379,8 @@ func (s *ProjectService) SelectUser(ctx context.Context, query string, apiKey st
 	}
 	return users, nil
 
+}
+
+func (s *ProjectService) GetItemNums(ctx context.Context, pid uint) (int64, error) {
+	return s.projectDAO.CountItems(ctx, pid)
 }

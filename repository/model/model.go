@@ -8,12 +8,19 @@ import (
 	"time"
 )
 
+type UserRole int
 type ItemStatus int
 
 const (
-	Pending ItemStatus = iota
-	Pass
-	Reject
+	Pending ItemStatus = 0
+	Pass               = 1
+	Reject             = 2
+)
+
+const (
+	Visitor UserRole = 0
+	Staff   UserRole = 1
+	Manager UserRole = 2
 )
 
 type User struct {
