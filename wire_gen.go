@@ -10,6 +10,7 @@ import (
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/client"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/config"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/controller"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/events/confluentinc-llm"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/ioc"
 	client2 "github.com/cqhasy/2025-Muxi-Team-auditor-Backend/langchain/client"
 	config2 "github.com/cqhasy/2025-Muxi-Team-auditor-Backend/langchain/config"
@@ -18,7 +19,7 @@ import (
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/viperx"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/cache"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/dao"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/router"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/server"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/service"
 	"gorm.io/gorm"
 )
@@ -26,7 +27,7 @@ import (
 // Injectors from wire.go:
 
 func InitWebServer(confPath string) *App {
-	vipperSetting := viperx.NewVipperSetting(confPath)
+	vipperSetting := viperx.NewVipperSettingFromNacos(confPath)
 	oAuthConfig := config.NewOAuthConf(vipperSetting)
 	oAuthClient := client.NewOAuthClient(oAuthConfig)
 	dbConfig := config.NewDBConf(vipperSetting)
@@ -48,16 +49,19 @@ func InitWebServer(confPath string) *App {
 	tubeService := service.NewTubeService(userDAO, redisJWTHandler, qiNiuYunConfig)
 	tubeController := controller.NewTuberController(tubeService)
 	userDAOInterface := ProvideUserDAO(db)
+	projectDAO := dao.NewProjectDAO(db)
 	redisCache := ioc.NewRedisCache(redisClient)
 	cacheInterface := ProvideRedisCache(redisCache)
 	projectCache := cache.NewProjectCache(cacheInterface)
-	projectService := service.NewProjectService(userDAOInterface, redisJWTHandler, projectCache)
+	projectService := service.NewProjectService(userDAOInterface, projectDAO, redisJWTHandler, projectCache)
 	projectController := controller.NewProjectController(projectService)
 	itemDao := dao.NewItemDao(db)
-	projectDAO := dao.NewProjectDAO(db)
 	muxiAI := config2.NewMuxiAIConf(vipperSetting)
 	auditAIClient := client2.AuditAIConnect(muxiAI)
-	llmService := service.NewLLMService(userDAO, itemDao, projectDAO, auditAIClient, logger, projectCache)
+	kafkaConfig := config.NewKafkaConf(vipperSetting)
+	producer := ioc.InitProducer(kafkaConfig)
+	llmProducer := confluentinc_llm.NewLlmProducer(producer, redisClient)
+	llmService := service.NewLLMService(userDAO, itemDao, projectDAO, auditAIClient, logger, projectCache, llmProducer, kafkaConfig)
 	llmController := controller.NewLLMController(llmService)
 	commentDao := dao.NewCommentDao(db)
 	removeService := service.NewRemoveService(userDAO, itemDao, commentDao)
@@ -68,9 +72,9 @@ func InitWebServer(confPath string) *App {
 	prometheusConfig := config.NewPrometheusConf(vipperSetting)
 	prometheus := ioc.InitPrometheus(prometheusConfig)
 	loggerMiddleware := middleware.NewLoggerMiddleware(logger, prometheus)
-	engine := router.NewRouter(authController, userController, itemController, tubeController, projectController, llmController, removeController, authMiddleware, corsMiddleware, loggerMiddleware)
+	serverServer := server.NewServer(authController, userController, itemController, tubeController, projectController, llmController, removeController, authMiddleware, corsMiddleware, loggerMiddleware)
 	appConf := config.NewAppConf(vipperSetting)
-	app := NewApp(engine, appConf)
+	app := NewApp(serverServer, appConf)
 	return app
 }
 

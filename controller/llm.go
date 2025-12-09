@@ -2,7 +2,7 @@ package controller
 
 import (
 	"errors"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/service"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 
@@ -10,6 +10,7 @@ import (
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/jwt"
+	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/service"
 )
 
 const (
@@ -22,6 +23,7 @@ type LLMController struct {
 
 type LLMService interface {
 	Audit(Data []request.AuditItem)
+	Close()
 }
 
 func NewLLMController(service *service.LLMService) *LLMController {
@@ -51,4 +53,9 @@ func (c *LLMController) Audit(ctx *gin.Context, req request.AuditByLLMReq, cla j
 	}
 	c.service.Audit(req.Data)
 	return response.Response{Msg: "success", Code: 0}, nil
+}
+
+func (c *LLMController) Close() {
+	fmt.Println("LLMController Close")
+	c.service.Close()
 }

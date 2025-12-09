@@ -26,6 +26,7 @@ const (
 
 type ProjectService struct {
 	userDAO         dao.UserDAOInterface
+	projectDAO      dao.ProjectDAOInterface
 	redisJwtHandler *jwt.RedisJWTHandler
 	cache           *cache.ProjectCache
 }
@@ -34,8 +35,13 @@ type Count struct {
 	CurrentCount int
 }
 
-func NewProjectService(userDAO dao.UserDAOInterface, redisJwtHandler *jwt.RedisJWTHandler, ca *cache.ProjectCache) *ProjectService {
-	return &ProjectService{userDAO: userDAO, redisJwtHandler: redisJwtHandler, cache: ca}
+func NewProjectService(userDAO dao.UserDAOInterface, projectDao *dao.ProjectDAO, redisJwtHandler *jwt.RedisJWTHandler, ca *cache.ProjectCache) *ProjectService {
+	return &ProjectService{
+		userDAO:         userDAO,
+		projectDAO:      projectDao,
+		redisJwtHandler: redisJwtHandler,
+		cache:           ca,
+	}
 }
 
 func (s *ProjectService) Create(ctx context.Context, req request.CreateProject) (uint, string, error) {
@@ -53,7 +59,7 @@ func (s *ProjectService) Create(ctx context.Context, req request.CreateProject) 
 	project := model.Project{
 		ProjectName: req.Name,
 		Logo:        req.Logo,
-		AuditRule:   req.AudioRule,
+		AuditRule:   req.AuditRule,
 		Users:       users,
 		HookUrl:     req.HookUrl,
 		Description: req.Description,
@@ -141,10 +147,10 @@ func (s *ProjectService) Detail(ctx context.Context, id uint) (response.GetDetai
 	if err != nil {
 		return response.GetDetailResp{}, err
 	}
-	countMap := map[int]int{
-		0: 0,
-		1: 0,
-		2: 0,
+	countMap := map[model.ItemStatus]int{
+		model.Pending: 0,
+		model.Pass:    0,
+		model.Reject:  0,
 	}
 	for _, item := range project.Items {
 		countMap[item.Status]++
@@ -354,6 +360,7 @@ func (s *ProjectService) checkPower(ctx context.Context, userRole int, uid uint,
 	}
 	return projectID, nil
 }
+
 func parseApiKey(key string) (uint, error) {
 	claims, err := apikey.ParseAPIKey(key)
 	if err != nil {
@@ -362,6 +369,7 @@ func parseApiKey(key string) (uint, error) {
 	projectID := uint(claims["sub"].(float64))
 	return projectID, nil
 }
+
 func (s *ProjectService) SelectUser(ctx context.Context, query string, apiKey string) ([]model.User, error) {
 	_, err := parseApiKey(apiKey)
 	if err != nil {
@@ -373,4 +381,8 @@ func (s *ProjectService) SelectUser(ctx context.Context, query string, apiKey st
 	}
 	return users, nil
 
+}
+
+func (s *ProjectService) GetItemNums(ctx context.Context, pid uint) (int64, error) {
+	return s.projectDAO.CountItems(ctx, pid)
 }

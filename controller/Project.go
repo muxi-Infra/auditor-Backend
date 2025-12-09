@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"errors"
+	api_err "github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/errors"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/ginx"
@@ -29,6 +30,7 @@ type ProjectService interface {
 	DeleteUser(ctx context.Context, role int, uid uint, key string, ids []uint) error
 	GiveProjectRole(ctx context.Context, userRole int, uid uint, key string, req []request.AddUser) ([]request.AddUser, error)
 	SelectUser(ctx context.Context, query string, apiKey string) ([]model.User, error)
+	GetItemNums(ctx context.Context, pid uint) (int64, error)
 }
 
 func NewProjectController(service *service.ProjectService) *ProjectController {
@@ -160,7 +162,7 @@ func (ctrl *ProjectController) Detail(ctx *gin.Context, cla jwt.UserClaims) (res
 // @Success 200 {object} response.Response "删除成功"
 // @Failure 400 {object} response.Response "删除失败"
 // @Security ApiKeyAuth
-// @Router /api/v1/project/{project_id}/delete [delete]
+// @Router /api/v1/project/{project_id} [delete]
 func (ctrl *ProjectController) Delete(ctx *gin.Context, cla jwt.UserClaims) (response.Response, error) {
 	projectID := ctx.Param("project_id")
 	if projectID == "" {
@@ -508,4 +510,63 @@ func (ctrl *ProjectController) SelectUser(ctx *gin.Context, cla jwt.UserClaims) 
 		Code: 200,
 		Data: da,
 	}, nil
+}
+
+// GetItemNums 获取某project下items总数
+// @Summary 获取某project下items总数
+// @Description 根据project id 获取某project下items总数
+// @Tags Project
+// @Accept json
+// @Produce json
+// @Param project_id path int true "项目ID"
+// @Success 200 {object} response.Response "获取成功"
+// @Failure 400 {object} response.Response "请求错误（参数错误/无project_id）"
+// @Failure 500 {object} response.Response "服务器错误"
+// @Router /api/v1/project/{project_id}/getItemNums [get]
+func (ctrl *ProjectController) GetItemNums(ctx *gin.Context, cla jwt.UserClaims) (response.Response, error) {
+	if !IfStaff(cla.UserRule) {
+		return response.Response{
+			Msg:  "no power",
+			Code: 403,
+			Data: nil,
+		}, api_err.PERMISSION_DENIED_ERROR(errors.New("user is not our person"))
+	}
+
+	projectID := ctx.Param("project_id")
+	if projectID == "" {
+		return response.Response{
+			Code: 400,
+			Msg:  "需要project_id",
+		}, errors.New("project_id is necessary")
+	}
+
+	pid, err := strconv.ParseUint(projectID, 10, 64)
+	if err != nil {
+		return response.Response{
+			Code: 400,
+			Msg:  "获取project_id失败",
+		}, err
+	}
+
+	count, err := ctrl.service.GetItemNums(ctx, uint(pid))
+	if err != nil {
+		return response.Response{
+			Code: 400,
+			Msg:  "获取items Number 失败",
+		}, err
+	}
+
+	return response.Response{
+		Code: 200,
+		Msg:  "success",
+		Data: count,
+	}, nil
+}
+
+func IfStaff(role int) bool {
+	if model.UserRole(role) == model.Manager || model.UserRole(role) == model.Staff {
+		return true
+	}
+
+	return false
 }

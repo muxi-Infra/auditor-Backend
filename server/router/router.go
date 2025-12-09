@@ -10,11 +10,11 @@ import (
 func NewRouter(
 	OAuth *controller.AuthController,
 	User *controller.UserController,
-	Item *controller.ItemController,
-	Tube *controller.TubeController,
 	Project *controller.ProjectController,
+	Item *controller.ItemController,
 	LLm *controller.LLMController,
 	Remove *controller.RemoveController,
+	Tube *controller.TubeController,
 	AuthMiddleware *middleware.AuthMiddleware,
 	corsMiddleware *middleware.CorsMiddleware,
 	loggerMiddleware *middleware.LoggerMiddleware,

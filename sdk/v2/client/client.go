@@ -55,28 +55,35 @@ func (c *Client) UploadItem(ctx context.Context, req *request.UploadReq) (respon
 		}
 
 		return response.UploadItemResp{
-			Code:   errorx.RequestErrCode,
-			Msg:    "请求失败",
+			Basic: response.Basic{
+				Code:   errorx.RequestErrCode,
+				Msg:    "请求失败",
+				Errorx: errorx.New(row.Code, errorx.RequestErrCode, row.Msg, err),
+			},
 			ItemID: 0,
-			Errorx: errorx.New(row.Code, errorx.RequestErrCode, row.Msg, err),
 		}, nil
 	}
 
 	da, err := extractInt(row)
 	if err != nil {
 		return response.UploadItemResp{
-			Code:   errorx.SeverDataIllegalCode,
-			Msg:    "响应数据data格式错误",
+			Basic: response.Basic{
+				Code:   errorx.SeverDataIllegalCode,
+				Msg:    "响应数据data格式错误",
+				Errorx: err,
+			},
+
 			ItemID: 0,
-			Errorx: err,
 		}, nil
 	}
 
 	return response.UploadItemResp{
-		Code:   errorx.SuccessCode,
-		Msg:    "success",
+		Basic: response.Basic{
+			Code:   errorx.SuccessCode,
+			Msg:    "success",
+			Errorx: nil,
+		},
 		ItemID: da,
-		Errorx: nil,
 	}, nil
 }
 
@@ -93,28 +100,34 @@ func (c *Client) UpdateItem(ctx context.Context, req *request.UpdateReq) (respon
 		}
 
 		return response.UpdateItemResp{
-			Code:   errorx.RequestErrCode,
-			Msg:    "请求失败",
+			Basic: response.Basic{
+				Code:   errorx.RequestErrCode,
+				Msg:    "请求失败",
+				Errorx: errorx.New(row.Code, errorx.RequestErrCode, row.Msg, err),
+			},
 			ItemID: 0,
-			Errorx: errorx.New(row.Code, errorx.RequestErrCode, row.Msg, err),
-		}, err
+		}, nil
 	}
 
 	da, err := extractInt(row)
 	if err != nil {
 		return response.UpdateItemResp{
-			Code:   errorx.SeverDataIllegalCode,
-			Msg:    "响应数据data格式错误",
+			Basic: response.Basic{
+				Code:   errorx.SeverDataIllegalCode,
+				Msg:    "响应数据data格式错误",
+				Errorx: err,
+			},
 			ItemID: 0,
-			Errorx: err,
 		}, nil
 	}
 
 	return response.UpdateItemResp{
-		Code:   errorx.SuccessCode,
-		Msg:    "success",
+		Basic: response.Basic{
+			Code:   errorx.SuccessCode,
+			Msg:    "success",
+			Errorx: nil,
+		},
 		ItemID: da,
-		Errorx: nil,
 	}, nil
 }
 
@@ -129,29 +142,36 @@ func (c *Client) DeleteItem(ctx context.Context, req *request.DeleteReq) (respon
 		if errors.As(err, &errorx.DefaultErr) {
 			return response.DeleteItemResp{}, err
 		}
+
 		return response.DeleteItemResp{
-			Code:   errorx.RequestErrCode,
-			Msg:    "请求失败",
+			Basic: response.Basic{
+				Code:   errorx.RequestErrCode,
+				Msg:    "请求失败",
+				Errorx: errorx.New(row.Code, errorx.RequestErrCode, row.Msg, err),
+			},
 			ItemID: 0,
-			Errorx: errorx.New(row.Code, errorx.RequestErrCode, row.Msg, err),
 		}, nil
 	}
 
 	da, err := extractInt(row)
 	if err != nil {
 		return response.DeleteItemResp{
-			Code:   errorx.SeverDataIllegalCode,
-			Msg:    "响应数据data格式错误",
+			Basic: response.Basic{
+				Code:   errorx.SeverDataIllegalCode,
+				Msg:    "响应数据data格式错误",
+				Errorx: err,
+			},
 			ItemID: 0,
-			Errorx: err,
 		}, nil
 	}
 
 	return response.DeleteItemResp{
-		Code:   errorx.SuccessCode,
-		Msg:    "success",
+		Basic: response.Basic{
+			Code:   errorx.SuccessCode,
+			Msg:    "success",
+			Errorx: nil,
+		},
 		ItemID: da,
-		Errorx: nil,
 	}, nil
 }
 
@@ -167,22 +187,28 @@ func (c *Client) GetItems(ctx context.Context, req *request.GetItemsStatusReq) (
 		}
 
 		return response.GetItemsResp{
-			Code: errorx.RequestErrCode,
-			Msg:  "请求失败",
-		}, err
+			Basic: response.Basic{
+				Code:   errorx.RequestErrCode,
+				Msg:    "请求失败",
+				Errorx: errorx.New(row.Code, errorx.RequestErrCode, row.Msg, err),
+			},
+			Items: nil,
+		}, nil
 	}
 
 	da, err := extractItemsStatus(row)
 	if err != nil {
 		return response.GetItemsResp{
-			Code:   errorx.SeverDataIllegalCode,
-			Msg:    "响应数据data格式错误",
-			Items:  nil,
-			Errorx: err,
+			Basic: response.Basic{
+				Code:   errorx.SeverDataIllegalCode,
+				Msg:    "响应数据data格式错误",
+				Errorx: err,
+			},
+			Items: nil,
 		}, nil
 	}
 
-	re := make([]response.ItemsStatus, 0, 10)
+	re := make([]response.ItemsStatus, 0, len(da.Items))
 	for _, v := range da.Items {
 		re = append(re, response.ItemsStatus{
 			Id:     v.HookId,
@@ -191,9 +217,11 @@ func (c *Client) GetItems(ctx context.Context, req *request.GetItemsStatusReq) (
 	}
 
 	return response.GetItemsResp{
-		Code:   errorx.SuccessCode,
-		Items:  re,
-		Msg:    "success",
-		Errorx: nil,
+		Basic: response.Basic{
+			Code:   errorx.SuccessCode,
+			Msg:    "success",
+			Errorx: nil,
+		},
+		Items: re,
 	}, nil
 }

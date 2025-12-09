@@ -23,6 +23,10 @@ oauth:
   clientId: "fake-client-id"
   clientSecret: "fake-client-secret"
 
+# 消息队列
+kafka:
+  - addr: "localhost:9094"
+
 # 日志配置
 log:
   path: "./logs/app.log"

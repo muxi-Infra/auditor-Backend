@@ -27,7 +27,7 @@ type UpdateUserRoleReq struct {
 type CreateProject struct {
 	Name        string          `json:"name"`
 	Logo        string          `json:"logo"`
-	AudioRule   string          `json:"audio_rule"` //审核规则
+	AuditRule   string          `json:"audit_rule"` //审核规则
 	Users       []UserInProject `json:"users"`
 	HookUrl     string          `json:"hook_url"`
 	Description string          `json:"description"`
@@ -36,19 +36,19 @@ type GetProjectDetail struct {
 	ProjectId uint `json:"project_id"`
 }
 type SelectReq struct {
-	ProjectID uint     `json:"project_id"`
-	RoundTime [][]int  `json:"round_time"` //日期
-	Tags      []string `json:"tags"`       //标签
-	Statuses  []int    `json:"statuses"`
-	Auditors  []uint   `json:"auditors"`
-	Page      int      `json:"page"`
-	PageSize  int      `json:"page_size"`
-	Query     string   `json:"query"` //查询字段
+	ProjectID uint               `json:"project_id"`
+	RoundTime [][]int            `json:"round_time"` //日期
+	Tags      []string           `json:"tags"`       //标签
+	Statuses  []model.ItemStatus `json:"statuses"`
+	Auditors  []uint             `json:"auditors"`
+	Page      int                `json:"page"`
+	PageSize  int                `json:"page_size"`
+	Query     string             `json:"query"` //查询字段
 }
 type AuditReq struct {
-	Reason string `json:"reason"`
-	Status int    `json:"status"` //0未审核，1通过，2未通过
-	ItemId uint   `json:"item_id"`
+	Reason string           `json:"reason"`
+	Status model.ItemStatus `json:"status"` //0未审核，1通过，2未通过
+	ItemId uint             `json:"item_id"`
 }
 type UploadReq struct {
 	HookUrl    string            `json:"hook_url"`

@@ -29,10 +29,10 @@ type Data struct {
 	Msg    string
 }
 
-var M = map[int]string{
-	0: "未审核",
-	1: "通过",
-	2: "不通过",
+var M = map[model.ItemStatus]string{
+	model.Pending: "未审核",
+	model.Pass:    "通过",
+	model.Reject:  "不通过",
 }
 
 func NewItemService(userDAO *dao.UserDAO, redisJwtHandler *jwt.RedisJWTHandler, lo logger.Logger) *ItemService {

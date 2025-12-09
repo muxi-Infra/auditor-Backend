@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
+	"strconv"
 	"time"
 
 	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
@@ -95,4 +97,16 @@ func hookBack(t string, data request.HookPayload, authorization string) ([]byte,
 	}
 
 	return nil, lasterr
+}
+
+func envInt(key string, defaultVal int) int {
+	v := os.Getenv(key)
+	if v == "" {
+		return defaultVal
+	}
+	n, err := strconv.Atoi(v)
+	if err != nil {
+		return defaultVal
+	}
+	return n
 }

@@ -44,7 +44,7 @@ func sendToAudit(c *client.Client, id uint, author, title, content string, pics 
 		internal.WithTopicText(title, content),
 		internal.WithTopicPictures(pics))
 
-	req, err := request.NewUploadReq("localhost:8081", id, con, request.WithUploadAuthor(author))
+	req, err := request.NewUploadReq("http://localhost:8081/api/v1/webhook ", id, con, request.WithUploadAuthor(author))
 	if err != nil {
 		log.Println(err)
 		return
@@ -56,8 +56,8 @@ func sendToAudit(c *client.Client, id uint, author, title, content string, pics 
 		return
 	}
 
-	if resp.Errorx != nil {
-		log.Println(resp.Errorx)
+	if resp.Basic.Errorx != nil {
+		log.Println(resp.Basic.Errorx)
 		return
 	}
 
@@ -77,8 +77,8 @@ func getAuditStatus(c *client.Client, ids []int) {
 		return
 	}
 
-	if resp.Errorx != nil {
-		log.Println(resp.Errorx)
+	if resp.Basic.Errorx != nil {
+		log.Println(resp.Basic.Errorx)
 		return
 	}
 
@@ -93,8 +93,8 @@ func updateItem(c *client.Client, req *request.UpdateReq) {
 		return
 	}
 
-	if resp.Errorx != nil {
-		log.Println(resp.Errorx)
+	if resp.Basic.Errorx != nil {
+		log.Println(resp.Basic.Errorx)
 		return
 	}
 
@@ -108,8 +108,8 @@ func deleteItem(c *client.Client, req *request.DeleteReq) {
 		return
 	}
 
-	if resp.Errorx != nil {
-		log.Println(resp.Errorx)
+	if resp.Basic.Errorx != nil {
+		log.Println(resp.Basic.Errorx)
 		return
 	}
 
