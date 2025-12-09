@@ -27,7 +27,7 @@ import (
 // Injectors from wire.go:
 
 func InitWebServer(confPath string) *App {
-	vipperSetting := viperx.NewVipperSetting(confPath)
+	vipperSetting := viperx.NewVipperSettingFromNacos(confPath)
 	oAuthConfig := config.NewOAuthConf(vipperSetting)
 	oAuthClient := client.NewOAuthClient(oAuthConfig)
 	dbConfig := config.NewDBConf(vipperSetting)
@@ -49,13 +49,13 @@ func InitWebServer(confPath string) *App {
 	tubeService := service.NewTubeService(userDAO, redisJWTHandler, qiNiuYunConfig)
 	tubeController := controller.NewTuberController(tubeService)
 	userDAOInterface := ProvideUserDAO(db)
+	projectDAO := dao.NewProjectDAO(db)
 	redisCache := ioc.NewRedisCache(redisClient)
 	cacheInterface := ProvideRedisCache(redisCache)
 	projectCache := cache.NewProjectCache(cacheInterface)
-	projectService := service.NewProjectService(userDAOInterface, redisJWTHandler, projectCache)
+	projectService := service.NewProjectService(userDAOInterface, projectDAO, redisJWTHandler, projectCache)
 	projectController := controller.NewProjectController(projectService)
 	itemDao := dao.NewItemDao(db)
-	projectDAO := dao.NewProjectDAO(db)
 	muxiAI := config2.NewMuxiAIConf(vipperSetting)
 	auditAIClient := client2.AuditAIConnect(muxiAI)
 	kafkaConfig := config.NewKafkaConf(vipperSetting)

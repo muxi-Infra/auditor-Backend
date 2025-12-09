@@ -35,8 +35,8 @@ const (
 const (
 	retry         = 3
 	GroupID       = "LLM_1"
-	TopicPending  = "PendingToAuditItems"
-	TopicFinished = "FinishedAuditItems"
+	TopicPending  = "muxi_auditor_pending_audit_items"
+	TopicFinished = "muxi_auditor_finished_audit_items"
 	TimeOut       = 500 * time.Millisecond
 )
 

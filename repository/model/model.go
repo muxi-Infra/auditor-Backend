@@ -8,12 +8,19 @@ import (
 	"time"
 )
 
+type UserRole int
 type ItemStatus int
 
 const (
-	Pending ItemStatus = iota
-	Pass
-	Reject
+	Pending ItemStatus = 0
+	Pass               = 1
+	Reject             = 2
+)
+
+const (
+	Visitor UserRole = 0
+	Staff   UserRole = 1
+	Manager UserRole = 2
 )
 
 type User struct {
@@ -35,9 +42,7 @@ type Project struct {
 	Users       []User `gorm:"many2many:user_projects;"`
 	Items       []Item `gorm:"foreignKey:ProjectId"`
 	Apikey      string `gorm:"column:apikey"`
-	//AccessKey   string `gorm:"column:access_key;not null;uniqueIndex,size:64"`
-	//SecretKey   string `gorm:"column:secret_key;not null"`
-	HookUrl string `gorm:"column:hook_url;not null"`
+	HookUrl     string `gorm:"column:hook_url;not null"`
 }
 
 type UserProject struct {

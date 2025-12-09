@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  auditor-backend:
+    image: muxi-auditor:v1.0.0
+    container_name: muxi-auditor
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    volumes:
+      - ./config.yaml:/data/conf/config.yaml  # 映射本地配置文件
+      - ./logs:/app/logs                       # 映射日志目录
+    ports:
+      - "12810:8080"
+    networks:
+      - muxi-network
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    container_name: audit-redis
+    environment:
+      - REDIS_PASSWORD=*******   # 设置 Redis 密码
+    command: [ "redis-server", "--requirepass", "${REDIS_PASSWORD}" ]
+    ports:
+      - "6379:6379"
+    volumes:
+      - auditor_redis_data:/data
+    networks:
+      - muxi-network
+    restart: unless-stopped
+
+volumes:
+  auditor_redis_data:
+    driver: local
+
+networks:
+  muxi-network:
+    driver: bridge

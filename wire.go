@@ -35,7 +35,7 @@ func ProvideRedisCache(c *ioc.RedisCache) cache.CacheInterface {
 
 func InitWebServer(confPath string) *App {
 	wire.Build(
-		viperx.NewVipperSetting,
+		viperx.NewVipperSettingFromNacos,
 		config.NewAppConf,
 		config.NewJWTConf,
 		config.NewOAuthConf,

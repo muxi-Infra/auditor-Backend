@@ -27,7 +27,7 @@ type UpdateUserRoleReq struct {
 type CreateProject struct {
 	Name        string          `json:"name"`
 	Logo        string          `json:"logo"`
-	AudioRule   string          `json:"audio_rule"` //审核规则
+	AuditRule   string          `json:"audit_rule"` //审核规则
 	Users       []UserInProject `json:"users"`
 	HookUrl     string          `json:"hook_url"`
 	Description string          `json:"description"`

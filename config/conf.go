@@ -67,7 +67,9 @@ type QiNiuYunConfig struct {
 }
 
 type KafkaConfig struct {
-	Addr []string `yaml:"addr"`
+	Addr     []string `yaml:"addr"`
+	User     string   `yaml:"user"`
+	Password string   `yaml:"password"`
 }
 
 func NewAppConf(s *viperx.VipperSetting) *AppConf {

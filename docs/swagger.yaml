@@ -1,4 +1,29 @@
 definitions:
+  github_com_cqhasy_2025-Muxi-Team-auditor-Backend_api_request.UploadReq:
+    properties:
+      author:
+        type: string
+      content:
+        $ref: '#/definitions/response.Contents'
+      extra: {}
+      hook_url:
+        type: string
+      id:
+        description: hook_id
+        type: integer
+      public_time:
+        type: integer
+      tags:
+        items:
+          type: string
+        type: array
+    type: object
+  model.ItemStatus:
+    enum:
+    - 0
+    type: integer
+    x-enum-varnames:
+    - Pending
   model.ProjectPermit:
     properties:
       project_id:
@@ -43,8 +68,9 @@ definitions:
       reason:
         type: string
       status:
+        allOf:
+        - $ref: '#/definitions/model.ItemStatus'
         description: 0未审核，1通过，2未通过
-        type: integer
     type: object
   request.ChangeUserRolesReq:
     properties:
@@ -114,7 +140,7 @@ definitions:
         type: array
       statuses:
         items:
-          type: integer
+          $ref: '#/definitions/model.ItemStatus'
         type: array
       tags:
         description: 标签
@@ -152,25 +178,6 @@ definitions:
         type: integer
       user_id:
         type: integer
-    type: object
-  request.UploadReq:
-    properties:
-      author:
-        type: string
-      content:
-        $ref: '#/definitions/response.Contents'
-      extra: {}
-      hook_url:
-        type: string
-      id:
-        description: hook_id
-        type: integer
-      public_time:
-        type: integer
-      tags:
-        items:
-          type: string
-        type: array
     type: object
   request.UserInProject:
     properties:
@@ -240,8 +247,9 @@ definitions:
       public_time:
         type: integer
       status:
+        allOf:
+        - $ref: '#/definitions/model.ItemStatus'
         description: 0未审核1通过2不通过
-        type: integer
       tags:
         items:
           type: string
@@ -503,7 +511,7 @@ paths:
         name: uploadReq
         required: true
         schema:
-          $ref: '#/definitions/request.UploadReq'
+          $ref: '#/definitions/github_com_cqhasy_2025-Muxi-Team-auditor-Backend_api_request.UploadReq'
       - description: API 认证密钥(api_key)
         in: header
         name: api_key
@@ -551,7 +559,7 @@ paths:
       summary: ai审核条目
       tags:
       - LLM
-  /api/v1/project/{project_id}/delete:
+  /api/v1/project/{project_id}:
     delete:
       consumes:
       - application/json
@@ -639,6 +647,35 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 获取某个项目中所有的标签
+      tags:
+      - Project
+  /api/v1/project/{project_id}/getItemNums:
+    get:
+      consumes:
+      - application/json
+      description: 根据project id 获取某project下items总数
+      parameters:
+      - description: 项目ID
+        in: path
+        name: project_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 获取成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求错误（参数错误/无project_id）
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 获取某project下items总数
       tags:
       - Project
   /api/v1/project/{project_id}/getUsers:
@@ -905,25 +942,15 @@ paths:
       summary: 根据用户名称搜索用户
       tags:
       - Project
-  /api/v1/remove/delete:
+  /api/v1/remove/delete/{Itemid}:
     delete:
       consumes:
       - application/json
       description: 通过使用提供的sdk供调用方快速删除项目
       parameters:
-      - description: 访问凭证 AccessKey
+      - description: 访问凭证 ApiKey
         in: header
-        name: AccessKey
-        required: true
-        type: string
-      - description: 时间戳 Timestamp（单位秒或毫秒）
-        in: header
-        name: Timestamp
-        required: true
-        type: string
-      - description: 签名 Signature
-        in: header
-        name: Signature
+        name: api_key
         required: true
         type: string
       - description: 要删除的项目ID（Itemid）
@@ -951,19 +978,9 @@ paths:
       - application/json
       description: 通过使用提供的sdk供调用方快速获取项目信息，如果只传一个0表示获取全部
       parameters:
-      - description: 访问凭证 AccessKey
+      - description: 访问凭证 ApiKey
         in: header
-        name: AccessKey
-        required: true
-        type: string
-      - description: 时间戳 Timestamp（单位秒或毫秒）
-        in: header
-        name: Timestamp
-        required: true
-        type: string
-      - description: 签名 Signature
-        in: header
-        name: Signature
+        name: api_key
         required: true
         type: string
       - description: '项目ID列表，多个ID用英文逗号分隔，如: 1,2,3'
@@ -991,19 +1008,9 @@ paths:
       - application/json
       description: 通过使用提供的sdk供调用方快速更改项目信息
       parameters:
-      - description: 访问凭证 AccessKey
+      - description: 访问凭证 ApiKey
         in: header
-        name: AccessKey
-        required: true
-        type: string
-      - description: 时间戳 Timestamp（单位秒或毫秒）
-        in: header
-        name: Timestamp
-        required: true
-        type: string
-      - description: 签名 Signature
-        in: header
-        name: Signature
+        name: api_key
         required: true
         type: string
       - description: 上传请求体
@@ -1011,7 +1018,7 @@ paths:
         name: UploadReq
         required: true
         schema:
-          $ref: '#/definitions/request.UploadReq'
+          $ref: '#/definitions/github_com_cqhasy_2025-Muxi-Team-auditor-Backend_api_request.UploadReq'
       produces:
       - application/json
       responses:
@@ -1032,19 +1039,9 @@ paths:
       - application/json
       description: 通过使用提供的sdk供调用方快速上传项目
       parameters:
-      - description: 访问凭证 AccessKey
+      - description: 访问凭证 ApiKey
         in: header
-        name: AccessKey
-        required: true
-        type: string
-      - description: 时间戳 Timestamp（单位秒或毫秒）
-        in: header
-        name: Timestamp
-        required: true
-        type: string
-      - description: 签名 Signature
-        in: header
-        name: Signature
+        name: api_key
         required: true
         type: string
       - description: 上传请求体
@@ -1052,7 +1049,7 @@ paths:
         name: UploadReq
         required: true
         schema:
-          $ref: '#/definitions/request.UploadReq'
+          $ref: '#/definitions/github_com_cqhasy_2025-Muxi-Team-auditor-Backend_api_request.UploadReq'
       produces:
       - application/json
       responses:

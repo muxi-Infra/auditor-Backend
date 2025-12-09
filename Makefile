@@ -55,12 +55,15 @@ endif
 #deploy everything
 .PHONY:deploy
 deploy:
-	docker compose up -d
+	docker compose -f docker-compose-deploy.yml up -d
 
 # only app
 .PHONY:docker
 docker:
-	docker-compose -f docker/production.yml up -d
+	@echo "开始构建镜像"
+	docker build -t muxi-auditor:v1.0.0 .
+	@echo "准备启动"
+	docker run -it --rm -p 8080:8080 -v ./config/config.yaml:/data/conf/config.yaml muxi-auditor:v1.0.0
 
 .PHONY:es
 es:

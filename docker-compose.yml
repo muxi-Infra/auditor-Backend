@@ -78,27 +78,53 @@ services:
       - muxi-network
 
   kafka:
-    image: bitnami/kafka:latest
+    image: apache/kafka:4.1.1
     container_name: muxi-kafka
     ports:
-      - "9092:9092"   # 容器内部通信
-      - "9094:9094"   # 宿主机访问
-    volumes:
-      - "kafka_data:/bitnami"
+      - "9092:9092"   # 外部访问
+      - "19092:19092" # broker 内部通信
+      - "29093:29093" # controller 内部通信
+    user: root
     environment:
-      # KRaft settings
-      - KAFKA_CFG_NODE_ID=0
-      - KAFKA_CFG_PROCESS_ROLES=controller,broker
-      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
-      # Listeners
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,PLAINTEXT_HOST://:9094,CONTROLLER://:9093
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9094
-      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
-      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
-      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@muxi-kafka:29093'
+
+      # Listener 配置
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+      KAFKA_LISTENERS: 'CONTROLLER://:29093,PLAINTEXT://:19092,PLAINTEXT_HOST://:9092'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT_HOST://49.235.184.225:9092,PLAINTEXT://muxi-kafka:19092,CONTROLLER://muxi-kafka:29093'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+
+      # Cluster 配置
+      CLUSTER_ID: '4L6g3nShT-eMCtK--X86sw'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_SHARE_COORDINATOR_STATE_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_SHARE_COORDINATOR_STATE_TOPIC_MIN_ISR: 1
+
+      # 数据目录
+      KAFKA_LOG_DIRS: '/kafka/data'
+
+    volumes:
+      - ./kafka_data:/kafka/data
     networks:
       - muxi-network
     restart: unless-stopped
+
+  init-kafka:
+    image: apache/kafka:4.1.1
+    user: root
+    depends_on:
+      - kafka
+    networks:
+      - muxi-network
+    entrypoint: bash -c "/docker-entrypoint-initdb.d/kafka-init.sh"
+    volumes:
+      - ./script/kafka/init-kafka.sh:/docker-entrypoint-initdb.d/kafka-init.sh
 
   kafdrop:
     image: obsidiandynamics/kafdrop:latest
@@ -106,7 +132,7 @@ services:
     ports:
       - "9000:9000"   # 浏览器访问 Kafdrop
     environment:
-      KAFKA_BROKERCONNECT: muxi-kafka:9092   # 容器内部访问 Kafka
+      KAFKA_BROKERCONNECT: muxi-kafka:19092   # 容器内部访问 Kafka broker
       JVM_OPTS: "-Xms32M -Xmx64M"
     networks:
       - muxi-network

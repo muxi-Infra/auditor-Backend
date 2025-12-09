@@ -20,6 +20,10 @@ type LlmConsumer struct {
 
 func initConsumer(conf *config.KafkaConfig, groupId string) *kafka.Consumer {
 	c, err := kafka.NewConsumer(&kafka.ConfigMap{
+		"security.protocol":  "SASL_PLAINTEXT",
+		"sasl.mechanisms":    "PLAIN",
+		"sasl.username":      conf.User,
+		"sasl.password":      conf.Password,
 		"bootstrap.servers":  strings.Join(conf.Addr, ","),
 		"auto.offset.reset":  "latest",
 		"group.id":           groupId,

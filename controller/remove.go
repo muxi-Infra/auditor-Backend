@@ -38,9 +38,7 @@ func NewRemoveController(service *service.RemoveService) *RemoveController {
 // @Tags Remove
 // @Accept json
 // @Produce json
-// @Param AccessKey header string true "访问凭证 AccessKey"
-// @Param Timestamp header string true "时间戳 Timestamp（单位秒或毫秒）"
-// @Param Signature header string true "签名 Signature"
+// @Param api_key header string true "访问凭证 ApiKey"
 // @Param UploadReq body request.UploadReq true "上传请求体"
 // @Success 200 {object} response.Response "成功返回项目id"
 // @Failure 400 {object} response.Response "获取项目列表失败"
@@ -77,9 +75,7 @@ func (c *RemoveController) Upload(ctx *gin.Context, req request.UploadReq) (resp
 // @Tags Remove
 // @Accept json
 // @Produce json
-// @Param AccessKey header string true "访问凭证 AccessKey"
-// @Param Timestamp header string true "时间戳 Timestamp（单位秒或毫秒）"
-// @Param Signature header string true "签名 Signature"
+// @Param api_key header string true "访问凭证 ApiKey"
 // @Param UploadReq body request.UploadReq true "上传请求体"
 // @Success 200 {object} response.Response "成功返回项目id"
 // @Failure 400 {object} response.Response "修改失败"
@@ -110,13 +106,11 @@ func (c *RemoveController) Update(ctx *gin.Context, req request.RemoveUpdateReq)
 // @Tags Remove
 // @Accept json
 // @Produce json
-// @Param AccessKey header string true "访问凭证 AccessKey"
-// @Param Timestamp header string true "时间戳 Timestamp（单位秒或毫秒）"
-// @Param Signature header string true "签名 Signature"
+// @Param api_key header string true "访问凭证 ApiKey"
 // @Param Itemid path uint true "要删除的项目ID（Itemid）"
 // @Success 200 {object} response.Response "成功返回删除的项目id"
 // @Failure 400 {object} response.Response "删除项目失败"
-// @Router /api/v1/remove/delete [delete]
+// @Router /api/v1/remove/delete/{Itemid} [delete]
 func (c *RemoveController) Delete(ctx *gin.Context) (response.Response, error) {
 	id, err := c.CheckPower(ctx)
 	if err != nil {
@@ -124,7 +118,6 @@ func (c *RemoveController) Delete(ctx *gin.Context) (response.Response, error) {
 	}
 	//获取参数,其实是hook_id
 	data := ctx.Param("Itemid")
-	fmt.Println(data)
 	itemId, err := strconv.ParseUint(data, 10, 64)
 	if err != nil {
 		return response.Response{Code: http.StatusBadRequest, Msg: fmt.Errorf("item id err:%w", err).Error()}, err
@@ -152,9 +145,7 @@ func (c *RemoveController) Delete(ctx *gin.Context) (response.Response, error) {
 // @Tags Remove
 // @Accept json
 // @Produce json
-// @Param AccessKey header string true "访问凭证 AccessKey"
-// @Param Timestamp header string true "时间戳 Timestamp（单位秒或毫秒）"
-// @Param Signature header string true "签名 Signature"
+// @Param api_key header string true "访问凭证 ApiKey"
 // @Param ids query string true "项目ID列表，多个ID用英文逗号分隔，如: 1,2,3"
 // @Success 200 {object} response.Response "成功返回项目信息"
 // @Failure 400 {object} response.Response "获取项目失败"

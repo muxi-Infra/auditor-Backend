@@ -10,6 +10,10 @@ import (
 
 func InitProducer(conf *config.KafkaConfig) *kafka.Producer {
 	p, err := kafka.NewProducer(&kafka.ConfigMap{
+		"security.protocol": "SASL_PLAINTEXT",
+		"sasl.mechanisms":   "PLAIN",
+		"sasl.username":     conf.User,
+		"sasl.password":     conf.Password,
 		"bootstrap.servers": strings.Join(conf.Addr, ","), // 这里连宿主机映射的端口
 		"retries":           5,                            // 内部重试次数
 		"retry.backoff.ms":  500,                          // 重试间隔

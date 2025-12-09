@@ -350,7 +350,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/request.UploadReq"
+                            "$ref": "#/definitions/github_com_cqhasy_2025-Muxi-Team-auditor-Backend_api_request.UploadReq"
                         }
                     },
                     {
@@ -772,7 +772,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/project/{project_id}/delete": {
+        "/api/v1/project/{project_id}": {
             "delete": {
                 "security": [
                     {
@@ -919,6 +919,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/project/{project_id}/getItemNums": {
+            "get": {
+                "description": "根据project id 获取某project下items总数",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "获取某project下items总数",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "项目ID",
+                        "name": "project_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "获取成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "请求错误（参数错误/无project_id）",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/project/{project_id}/getUsers": {
             "get": {
                 "security": [
@@ -1026,7 +1070,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/remove/delete": {
+        "/api/v1/remove/delete/{Itemid}": {
             "delete": {
                 "description": "通过使用提供的sdk供调用方快速删除项目",
                 "consumes": [
@@ -1042,22 +1086,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "访问凭证 AccessKey",
-                        "name": "AccessKey",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "时间戳 Timestamp（单位秒或毫秒）",
-                        "name": "Timestamp",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "签名 Signature",
-                        "name": "Signature",
+                        "description": "访问凭证 ApiKey",
+                        "name": "api_key",
                         "in": "header",
                         "required": true
                     },
@@ -1101,22 +1131,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "访问凭证 AccessKey",
-                        "name": "AccessKey",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "时间戳 Timestamp（单位秒或毫秒）",
-                        "name": "Timestamp",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "签名 Signature",
-                        "name": "Signature",
+                        "description": "访问凭证 ApiKey",
+                        "name": "api_key",
                         "in": "header",
                         "required": true
                     },
@@ -1160,22 +1176,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "访问凭证 AccessKey",
-                        "name": "AccessKey",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "时间戳 Timestamp（单位秒或毫秒）",
-                        "name": "Timestamp",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "签名 Signature",
-                        "name": "Signature",
+                        "description": "访问凭证 ApiKey",
+                        "name": "api_key",
                         "in": "header",
                         "required": true
                     },
@@ -1185,7 +1187,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/request.UploadReq"
+                            "$ref": "#/definitions/github_com_cqhasy_2025-Muxi-Team-auditor-Backend_api_request.UploadReq"
                         }
                     }
                 ],
@@ -1221,22 +1223,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "访问凭证 AccessKey",
-                        "name": "AccessKey",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "时间戳 Timestamp（单位秒或毫秒）",
-                        "name": "Timestamp",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "签名 Signature",
-                        "name": "Signature",
+                        "description": "访问凭证 ApiKey",
+                        "name": "api_key",
                         "in": "header",
                         "required": true
                     },
@@ -1246,7 +1234,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/request.UploadReq"
+                            "$ref": "#/definitions/github_com_cqhasy_2025-Muxi-Team-auditor-Backend_api_request.UploadReq"
                         }
                     }
                 ],
@@ -1705,6 +1693,43 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "github_com_cqhasy_2025-Muxi-Team-auditor-Backend_api_request.UploadReq": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "type": "string"
+                },
+                "content": {
+                    "$ref": "#/definitions/response.Contents"
+                },
+                "extra": {},
+                "hook_url": {
+                    "type": "string"
+                },
+                "id": {
+                    "description": "hook_id",
+                    "type": "integer"
+                },
+                "public_time": {
+                    "type": "integer"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "model.ItemStatus": {
+            "type": "integer",
+            "enum": [
+                0
+            ],
+            "x-enum-varnames": [
+                "Pending"
+            ]
+        },
         "model.ProjectPermit": {
             "type": "object",
             "properties": {
@@ -1753,7 +1778,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "contents": {
-                    "$ref": "#/definitions/response.Content"
+                    "$ref": "#/definitions/response.Contents"
                 },
                 "id": {
                     "type": "integer"
@@ -1774,7 +1799,11 @@ const docTemplate = `{
                 },
                 "status": {
                     "description": "0未审核，1通过，2未通过",
-                    "type": "integer"
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.ItemStatus"
+                        }
+                    ]
                 }
             }
         },
@@ -1881,7 +1910,7 @@ const docTemplate = `{
                 "statuses": {
                     "type": "array",
                     "items": {
-                        "type": "integer"
+                        "$ref": "#/definitions/model.ItemStatus"
                     }
                 },
                 "tags": {
@@ -1940,34 +1969,6 @@ const docTemplate = `{
                 }
             }
         },
-        "request.UploadReq": {
-            "type": "object",
-            "properties": {
-                "author": {
-                    "type": "string"
-                },
-                "content": {
-                    "$ref": "#/definitions/response.Content"
-                },
-                "extra": {},
-                "hook_url": {
-                    "type": "string"
-                },
-                "id": {
-                    "description": "hook_id",
-                    "type": "integer"
-                },
-                "public_time": {
-                    "type": "integer"
-                },
-                "tags": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
         "request.UserInProject": {
             "type": "object",
             "properties": {
@@ -2005,7 +2006,7 @@ const docTemplate = `{
                 }
             }
         },
-        "response.Content": {
+        "response.Contents": {
             "type": "object",
             "properties": {
                 "last_comment": {
@@ -2061,7 +2062,7 @@ const docTemplate = `{
                     "description": "item具体内容，包含题目内容和评论",
                     "allOf": [
                         {
-                            "$ref": "#/definitions/response.Content"
+                            "$ref": "#/definitions/response.Contents"
                         }
                     ]
                 },
@@ -2073,7 +2074,11 @@ const docTemplate = `{
                 },
                 "status": {
                     "description": "0未审核1通过2不通过",
-                    "type": "integer"
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/model.ItemStatus"
+                        }
+                    ]
                 },
                 "tags": {
                     "type": "array",
