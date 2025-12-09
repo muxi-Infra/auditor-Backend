@@ -3,15 +3,16 @@ package viperx
 import (
 	"bytes"
 	"fmt"
-	"github.com/nacos-group/nacos-sdk-go/clients"
-	"github.com/nacos-group/nacos-sdk-go/common/constant"
-	"github.com/nacos-group/nacos-sdk-go/vo"
-	"github.com/spf13/viper"
 	"log"
 	"net/url"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/nacos-group/nacos-sdk-go/clients"
+	"github.com/nacos-group/nacos-sdk-go/common/constant"
+	"github.com/nacos-group/nacos-sdk-go/vo"
+	"github.com/spf13/viper"
 )
 
 func NewVipperSettingFromNacos(path string) *VipperSetting {

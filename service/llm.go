@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/langchain/errorx"
+	"github.com/muxi-Infra/auditor-Backend/langchain/errorx"
 	"os"
 	"os/signal"
 	"strconv"
@@ -14,17 +14,17 @@ import (
 
 	"github.com/redis/go-redis/v9"
 
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/config"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/events"
-	confluentincllm "github.com/cqhasy/2025-Muxi-Team-auditor-Backend/events/confluentinc-llm"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/langchain/client"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/langchain/model"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/logger"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/cache"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/dao"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/service/pool"
+	"github.com/muxi-Infra/auditor-Backend/api/request"
+	"github.com/muxi-Infra/auditor-Backend/api/response"
+	"github.com/muxi-Infra/auditor-Backend/config"
+	"github.com/muxi-Infra/auditor-Backend/events"
+	confluentincllm "github.com/muxi-Infra/auditor-Backend/events/confluentinc-llm"
+	"github.com/muxi-Infra/auditor-Backend/langchain/client"
+	"github.com/muxi-Infra/auditor-Backend/langchain/model"
+	"github.com/muxi-Infra/auditor-Backend/pkg/logger"
+	"github.com/muxi-Infra/auditor-Backend/repository/cache"
+	"github.com/muxi-Infra/auditor-Backend/repository/dao"
+	"github.com/muxi-Infra/auditor-Backend/service/pool"
 )
 
 const (

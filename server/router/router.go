@@ -1,9 +1,10 @@
 package router
 
 import (
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/controller"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/middleware"
 	"github.com/gin-gonic/gin"
+
+	"github.com/muxi-Infra/auditor-Backend/controller"
+	"github.com/muxi-Infra/auditor-Backend/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 

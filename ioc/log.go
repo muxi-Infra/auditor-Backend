@@ -2,14 +2,15 @@ package ioc
 
 import (
 	"encoding/json"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/config"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/logger"
 	"go.uber.org/zap"
 	"go.uber.org/zap/buffer"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
 	"os"
 	"strings"
+
+	"github.com/muxi-Infra/auditor-Backend/config"
+	"github.com/muxi-Infra/auditor-Backend/pkg/logger"
 )
 
 func InitLogger(logConfig *config.LogConfig) logger.Logger {

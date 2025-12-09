@@ -1,8 +1,8 @@
 package ioc
 
 import (
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/config"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/prometheusx"
+	"github.com/muxi-Infra/auditor-Backend/config"
+	"github.com/muxi-Infra/auditor-Backend/pkg/prometheusx"
 	"github.com/prometheus/client_golang/prometheus"
 )
 

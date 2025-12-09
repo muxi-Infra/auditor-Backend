@@ -2,7 +2,7 @@ package request
 
 import (
 	"github.com/alibabacloud-go/tea/tea"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/sdk/v2/internal"
+	"github.com/muxi-Infra/auditor-Backend/sdk/v2/internal"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"

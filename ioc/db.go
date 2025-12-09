@@ -2,12 +2,13 @@ package ioc
 
 import (
 	"fmt"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/config"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/logger"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/dao"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	glogger "gorm.io/gorm/logger"
+
+	"github.com/muxi-Infra/auditor-Backend/config"
+	"github.com/muxi-Infra/auditor-Backend/pkg/logger"
+	"github.com/muxi-Infra/auditor-Backend/repository/dao"
 )
 
 func InitDB(conf *config.DBConfig, l logger.Logger) *gorm.DB {

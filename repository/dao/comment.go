@@ -3,9 +3,10 @@ package dao
 import (
 	"context"
 	"errors"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/model"
 	"gorm.io/gorm"
+
+	"github.com/muxi-Infra/auditor-Backend/api/request"
+	"github.com/muxi-Infra/auditor-Backend/repository/model"
 )
 
 type CommentDaoInterface interface {

@@ -11,10 +11,10 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/sdk/v2/api/errorx"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/sdk/v2/api/request"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/sdk/v2/api/response"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/sdk/v2/config"
+	"github.com/muxi-Infra/auditor-Backend/sdk/v2/api/errorx"
+	"github.com/muxi-Infra/auditor-Backend/sdk/v2/api/request"
+	"github.com/muxi-Infra/auditor-Backend/sdk/v2/api/response"
+	"github.com/muxi-Infra/auditor-Backend/sdk/v2/config"
 )
 
 const UploadPath = "/remove/upload"

@@ -1,6 +1,6 @@
 package response
 
-import "github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/model"
+import "github.com/muxi-Infra/auditor-Backend/repository/model"
 
 type LoginResp struct {
 	Token string `json:"token"`

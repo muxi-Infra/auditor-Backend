@@ -6,8 +6,8 @@ import (
 	"gorm.io/gorm"
 	"time"
 
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/model"
+	"github.com/muxi-Infra/auditor-Backend/api/request"
+	"github.com/muxi-Infra/auditor-Backend/repository/model"
 )
 
 type ItemDaoInterface interface {

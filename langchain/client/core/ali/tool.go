@@ -7,9 +7,9 @@ import (
 
 	gre "github.com/alibabacloud-go/green-20220302/v2/client"
 
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/langchain/model"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/stringx"
+	"github.com/muxi-Infra/auditor-Backend/api/response"
+	"github.com/muxi-Infra/auditor-Backend/langchain/model"
+	"github.com/muxi-Infra/auditor-Backend/pkg/stringx"
 )
 
 const (

@@ -4,14 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/apikey"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/model"
 	"gorm.io/gorm"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/muxi-Infra/auditor-Backend/api/request"
+	"github.com/muxi-Infra/auditor-Backend/api/response"
+	"github.com/muxi-Infra/auditor-Backend/pkg/apikey"
+	"github.com/muxi-Infra/auditor-Backend/repository/model"
 )
 
 // UserDAOInterface 应该拆分文件的，太懒了😆

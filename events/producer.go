@@ -1,8 +1,9 @@
 package events
 
 import (
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/logger"
 	"time"
+
+	"github.com/muxi-Infra/auditor-Backend/pkg/logger"
 )
 
 type Producer interface {

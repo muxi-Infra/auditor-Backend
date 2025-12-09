@@ -1,6 +1,6 @@
 package errorx
 
-import "github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/stringx"
+import "github.com/muxi-Infra/auditor-Backend/pkg/stringx"
 
 type AIError struct {
 	Domain  string // 错误码

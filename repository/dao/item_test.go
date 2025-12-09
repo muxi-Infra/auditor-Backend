@@ -1,8 +1,8 @@
 package dao
 
 import (
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/config"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/ioc"
+	"github.com/muxi-Infra/auditor-Backend/config"
+	"github.com/muxi-Infra/auditor-Backend/ioc"
 )
 
 func Init() ItemDaoInterface {
