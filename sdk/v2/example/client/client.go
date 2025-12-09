@@ -35,8 +35,8 @@ func main() {
 	updateItem(c, ur)
 
 	// deleteItem 的使用实例：
-	dr, _ := request.NewDeleteReq(1)
-	deleteItem(c, dr)
+	//dr, _ := request.NewDeleteReq(1)
+	//deleteItem(c, dr)
 }
 
 func sendToAudit(c *client.Client, id uint, author, title, content string, pics []string) {
