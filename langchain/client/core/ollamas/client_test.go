@@ -2,7 +2,7 @@ package ollamas
 
 import (
 	"fmt"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
+	"github.com/muxi-Infra/auditor-Backend/api/response"
 	"testing"
 )
 

@@ -4,14 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/model"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/service"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/muxi-Infra/auditor-Backend/api/request"
+	"github.com/muxi-Infra/auditor-Backend/api/response"
+	"github.com/muxi-Infra/auditor-Backend/repository/model"
+	"github.com/muxi-Infra/auditor-Backend/service"
 )
 
 type RemoveController struct {

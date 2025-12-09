@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/sdk/v2/api/errorx"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/sdk/v2/api/response"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/sdk/v2/internal"
+	"github.com/muxi-Infra/auditor-Backend/sdk/v2/api/errorx"
+	"github.com/muxi-Infra/auditor-Backend/sdk/v2/api/response"
+	"github.com/muxi-Infra/auditor-Backend/sdk/v2/internal"
 )
 
 func extractInt(row response.Resp) (int, error) {

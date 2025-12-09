@@ -2,12 +2,14 @@ package service
 
 import (
 	"context"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/jwt"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/dao"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/model"
-	"github.com/gin-gonic/gin"
 	"math/rand"
 	"time"
+
+	"github.com/gin-gonic/gin"
+
+	"github.com/muxi-Infra/auditor-Backend/pkg/jwt"
+	"github.com/muxi-Infra/auditor-Backend/repository/dao"
+	"github.com/muxi-Infra/auditor-Backend/repository/model"
 )
 
 const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"

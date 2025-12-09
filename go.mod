@@ -1,4 +1,4 @@
-module github.com/cqhasy/2025-Muxi-Team-auditor-Backend
+module github.com/muxi-Infra/auditor-Backend
 
 go 1.24.4
 

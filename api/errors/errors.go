@@ -1,8 +1,9 @@
 package errors
 
 import (
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/errorx"
 	"net/http"
+
+	"github.com/muxi-Infra/auditor-Backend/pkg/errorx"
 )
 
 // 400

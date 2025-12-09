@@ -3,8 +3,8 @@ package webhook
 import (
 	"encoding/json"
 	"github.com/IBM/sarama"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
 	"github.com/gin-gonic/gin"
+	"github.com/muxi-Infra/auditor-Backend/api/request"
 
 	"net/http"
 )

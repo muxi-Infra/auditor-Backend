@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/langchain/errorx"
 	"golang.org/x/sync/errgroup"
 	"net/http"
 	"time"
@@ -15,9 +14,10 @@ import (
 	util "github.com/alibabacloud-go/tea-utils/v2/service"
 	"github.com/alibabacloud-go/tea/tea"
 
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/langchain/model"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/logger"
+	"github.com/muxi-Infra/auditor-Backend/api/response"
+	"github.com/muxi-Infra/auditor-Backend/langchain/errorx"
+	"github.com/muxi-Infra/auditor-Backend/langchain/model"
+	"github.com/muxi-Infra/auditor-Backend/pkg/logger"
 )
 
 const (

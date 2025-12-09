@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/config"
+	"github.com/muxi-Infra/auditor-Backend/config"
 )
 
 func InitProducer(conf *config.KafkaConfig) *kafka.Producer {

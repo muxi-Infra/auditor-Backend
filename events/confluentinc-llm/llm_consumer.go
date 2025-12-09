@@ -2,11 +2,12 @@ package confluentinc_llm
 
 import (
 	"errors"
-	"github.com/confluentinc/confluent-kafka-go/kafka"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/config"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/logger"
 	"strings"
 	"time"
+
+	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/muxi-Infra/auditor-Backend/config"
+	"github.com/muxi-Infra/auditor-Backend/pkg/logger"
 )
 
 const (

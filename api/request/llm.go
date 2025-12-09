@@ -1,6 +1,6 @@
 package request
 
-import "github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
+import "github.com/muxi-Infra/auditor-Backend/api/response"
 
 type AuditItem struct {
 	ID        uint

@@ -1,6 +1,6 @@
 package events
 
-import "github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/logger"
+import "github.com/muxi-Infra/auditor-Backend/pkg/logger"
 
 type Consumer interface {
 	Subscribe(topics []string)

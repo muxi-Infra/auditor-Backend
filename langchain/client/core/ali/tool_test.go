@@ -2,12 +2,14 @@ package ali
 
 import (
 	"fmt"
+	"testing"
+
 	gre "github.com/alibabacloud-go/green-20220302/v2/client"
 	"github.com/alibabacloud-go/tea/tea"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/langchain/model"
 	"github.com/stretchr/testify/assert"
-	"testing"
+
+	"github.com/muxi-Infra/auditor-Backend/api/response"
+	"github.com/muxi-Infra/auditor-Backend/langchain/model"
 )
 
 func TestParse(t *testing.T) {

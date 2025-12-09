@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/sdk/v2/api/request"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/sdk/v2/client"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/sdk/v2/internal"
+	"github.com/muxi-Infra/auditor-Backend/sdk/v2/api/request"
+	"github.com/muxi-Infra/auditor-Backend/sdk/v2/client"
+	"github.com/muxi-Infra/auditor-Backend/sdk/v2/internal"
 )
 
 func main() {

@@ -10,12 +10,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/apikey"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/jwt"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/logger"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/dao"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/model"
+	"github.com/muxi-Infra/auditor-Backend/api/request"
+	"github.com/muxi-Infra/auditor-Backend/pkg/apikey"
+	"github.com/muxi-Infra/auditor-Backend/pkg/jwt"
+	"github.com/muxi-Infra/auditor-Backend/pkg/logger"
+	"github.com/muxi-Infra/auditor-Backend/repository/dao"
+	"github.com/muxi-Infra/auditor-Backend/repository/model"
 )
 
 type ItemService struct {

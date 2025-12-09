@@ -1,12 +1,12 @@
 package client
 
 import (
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/langchain/client/core/ali"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/langchain/client/core/ollamas"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/langchain/config"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/langchain/model"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/logger"
+	"github.com/muxi-Infra/auditor-Backend/api/response"
+	"github.com/muxi-Infra/auditor-Backend/langchain/client/core/ali"
+	"github.com/muxi-Infra/auditor-Backend/langchain/client/core/ollamas"
+	"github.com/muxi-Infra/auditor-Backend/langchain/config"
+	"github.com/muxi-Infra/auditor-Backend/langchain/model"
+	"github.com/muxi-Infra/auditor-Backend/pkg/logger"
 )
 
 type AuditAIClient interface {

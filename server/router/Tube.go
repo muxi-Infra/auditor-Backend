@@ -1,9 +1,10 @@
 package router
 
 import (
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/ginx"
 	"github.com/gin-gonic/gin"
+
+	"github.com/muxi-Infra/auditor-Backend/api/response"
+	"github.com/muxi-Infra/auditor-Backend/pkg/ginx"
 )
 
 // TubeController 获取图床token的接口

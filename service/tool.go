@@ -10,8 +10,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/langchain/model"
+	"github.com/muxi-Infra/auditor-Backend/api/request"
+	"github.com/muxi-Infra/auditor-Backend/langchain/model"
 )
 
 func auditStatusToString(status int) string {

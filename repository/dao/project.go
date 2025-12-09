@@ -2,8 +2,9 @@ package dao
 
 import (
 	"context"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/model"
 	"gorm.io/gorm"
+
+	"github.com/muxi-Infra/auditor-Backend/repository/model"
 )
 
 type ProjectDAOInterface interface {

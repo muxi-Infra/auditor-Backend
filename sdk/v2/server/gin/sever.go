@@ -1,9 +1,10 @@
 package gin
 
 import (
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/sdk/v2/api/request"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/sdk/v2/api/response"
 	"github.com/gin-gonic/gin"
+
+	"github.com/muxi-Infra/auditor-Backend/sdk/v2/api/request"
+	"github.com/muxi-Infra/auditor-Backend/sdk/v2/api/response"
 )
 
 type Server struct {

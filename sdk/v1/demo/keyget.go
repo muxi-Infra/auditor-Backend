@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/sdk/v1/keyget"
 	"github.com/gin-gonic/gin"
+	"github.com/muxi-Infra/auditor-Backend/sdk/v1/keyget"
 	"github.com/spf13/viper"
 	"log"
 )
