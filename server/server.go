@@ -2,11 +2,12 @@ package server
 
 import (
 	"context"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/controller"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/middleware"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/server/router"
 	"net/http"
 	"time"
+
+	"github.com/muxi-Infra/auditor-Backend/controller"
+	"github.com/muxi-Infra/auditor-Backend/middleware"
+	"github.com/muxi-Infra/auditor-Backend/server/router"
 )
 
 type Server struct {

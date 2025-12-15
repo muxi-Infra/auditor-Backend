@@ -3,7 +3,8 @@ package prompt
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
+
+	"github.com/muxi-Infra/auditor-Backend/api/response"
 )
 
 func BuildPrompt(auditRole string, contents response.Contents) string {

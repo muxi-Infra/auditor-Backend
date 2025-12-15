@@ -3,13 +3,14 @@ package service
 import (
 	"context"
 	merr "errors"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/jwt"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/dao"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/repository/model"
 	"gorm.io/gorm"
 	"sync"
+
+	"github.com/muxi-Infra/auditor-Backend/api/request"
+	"github.com/muxi-Infra/auditor-Backend/api/response"
+	"github.com/muxi-Infra/auditor-Backend/pkg/jwt"
+	"github.com/muxi-Infra/auditor-Backend/repository/dao"
+	"github.com/muxi-Infra/auditor-Backend/repository/model"
 )
 
 const maxConcurrency = 10

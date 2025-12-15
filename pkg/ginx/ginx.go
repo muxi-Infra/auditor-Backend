@@ -2,9 +2,11 @@ package ginx
 
 import (
 	"errors"
-	api_errors "github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/errors"
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
+
+	api_errors "github.com/muxi-Infra/auditor-Backend/api/errors"
 )
 
 const RESP_CTX = "ginx_resp"

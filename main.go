@@ -9,8 +9,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	conf "github.com/cqhasy/2025-Muxi-Team-auditor-Backend/config"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/server"
+	conf "github.com/muxi-Infra/auditor-Backend/config"
+	"github.com/muxi-Infra/auditor-Backend/server"
 )
 
 func main() {

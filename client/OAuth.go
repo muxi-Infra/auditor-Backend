@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	conf "github.com/cqhasy/2025-Muxi-Team-auditor-Backend/config"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
+
+	conf "github.com/muxi-Infra/auditor-Backend/config"
 )
 
 type OAuthClient struct {

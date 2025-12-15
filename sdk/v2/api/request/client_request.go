@@ -2,7 +2,7 @@ package request
 
 import (
 	"fmt"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/sdk/v2/internal"
+	"github.com/muxi-Infra/auditor-Backend/sdk/v2/internal"
 )
 
 // UploadReq

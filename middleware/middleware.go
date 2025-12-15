@@ -2,18 +2,19 @@ package middleware
 
 import (
 	"fmt"
-	api_errors "github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/errors"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/config"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/ioc"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/errorx"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/ginx"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/jwt"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/logger"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"
+
+	api_errors "github.com/muxi-Infra/auditor-Backend/api/errors"
+	"github.com/muxi-Infra/auditor-Backend/api/response"
+	"github.com/muxi-Infra/auditor-Backend/config"
+	"github.com/muxi-Infra/auditor-Backend/ioc"
+	"github.com/muxi-Infra/auditor-Backend/pkg/errorx"
+	"github.com/muxi-Infra/auditor-Backend/pkg/ginx"
+	"github.com/muxi-Infra/auditor-Backend/pkg/jwt"
+	"github.com/muxi-Infra/auditor-Backend/pkg/logger"
 )
 
 type CorsMiddleware struct {

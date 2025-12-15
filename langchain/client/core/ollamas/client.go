@@ -5,13 +5,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/langchain/prompt"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/logger"
 	"net/http"
 	"strings"
 
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/langchain/model"
+	"github.com/muxi-Infra/auditor-Backend/api/response"
+	"github.com/muxi-Infra/auditor-Backend/langchain/model"
+	"github.com/muxi-Infra/auditor-Backend/langchain/prompt"
+	"github.com/muxi-Infra/auditor-Backend/pkg/logger"
 )
 
 type OllamaClient struct {

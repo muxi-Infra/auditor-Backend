@@ -10,7 +10,7 @@ import (
 	"github.com/redis/go-redis/v9"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/logger"
+	"github.com/muxi-Infra/auditor-Backend/pkg/logger"
 )
 
 const KafkaFailed = "LLMAuditProduceFailed"

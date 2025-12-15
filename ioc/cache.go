@@ -3,8 +3,10 @@ package ioc
 import (
 	"context"
 	"fmt"
-	conf "github.com/cqhasy/2025-Muxi-Team-auditor-Backend/config"
+
 	"github.com/redis/go-redis/v9"
+
+	conf "github.com/muxi-Infra/auditor-Backend/config"
 )
 
 func InitRedis(cfg *conf.CacheConfig) *redis.Client {

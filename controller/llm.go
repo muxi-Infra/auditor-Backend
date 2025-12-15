@@ -6,11 +6,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	api_errors "github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/errors"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/request"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/api/response"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/pkg/jwt"
-	"github.com/cqhasy/2025-Muxi-Team-auditor-Backend/service"
+	api_errors "github.com/muxi-Infra/auditor-Backend/api/errors"
+	"github.com/muxi-Infra/auditor-Backend/api/request"
+	"github.com/muxi-Infra/auditor-Backend/api/response"
+	"github.com/muxi-Infra/auditor-Backend/pkg/jwt"
+	"github.com/muxi-Infra/auditor-Backend/service"
 )
 
 const (
