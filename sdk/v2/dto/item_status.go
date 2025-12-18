@@ -1,4 +1,4 @@
-package internal
+package dto
 
 type ItemStatus struct {
 	HookId int `json:"hook_id"`

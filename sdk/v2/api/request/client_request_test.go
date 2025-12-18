@@ -2,7 +2,7 @@ package request
 
 import (
 	"github.com/alibabacloud-go/tea/tea"
-	"github.com/muxi-Infra/auditor-Backend/sdk/v2/internal"
+	"github.com/muxi-Infra/auditor-Backend/sdk/v2/dto"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
@@ -12,7 +12,7 @@ func TestNewAuditReq(t *testing.T) {
 	// Define valid parameters
 	hookUrl := "http://example.com/webhook"
 	id := uint(1)
-	contents := internal.NewContents(internal.WithTopicText("11", "11"))
+	contents := dto.NewContents(dto.WithTopicText("11", "11"))
 
 	// Test creating a valid UploadReq
 	req, err := NewUploadReq(hookUrl, id, contents)
@@ -38,7 +38,7 @@ func TestIsValid(t *testing.T) {
 	// Test for valid case
 	hookUrl := "http://example.com/webhook"
 	id := uint(1)
-	contents := internal.NewContents(internal.WithTopicText("11", "11"))
+	contents := dto.NewContents(dto.WithTopicText("11", "11"))
 	req := &UploadReq{
 		HookUrl: &hookUrl,
 		Id:      &id,
@@ -91,7 +91,7 @@ func TestIsValid(t *testing.T) {
 func TestWithOptions(t *testing.T) {
 	hookUrl := "http://example.com/webhook"
 	id := uint(1)
-	contents := internal.NewContents(internal.WithTopicText("11", "11"))
+	contents := dto.NewContents(dto.WithTopicText("11", "11"))
 
 	// Test adding optional fields using options
 	req, err := NewUploadReq(hookUrl, id, contents,
@@ -109,7 +109,7 @@ func TestWithOptions(t *testing.T) {
 func TestWithExtra(t *testing.T) {
 	hookUrl := "http://example.com/webhook"
 	id := uint(1)
-	contents := internal.NewContents(internal.WithTopicText("11", "11"))
+	contents := dto.NewContents(dto.WithTopicText("11", "11"))
 
 	extraData := map[string]interface{}{"key1": "value1", "key2": 2}
 	req, err := NewUploadReq(hookUrl, id, contents, WithUploadExtra(extraData))
@@ -123,7 +123,7 @@ func TestWithExtra(t *testing.T) {
 func TestWithAuthorEmpty(t *testing.T) {
 	hookUrl := "http://example.com/webhook"
 	id := uint(1)
-	contents := internal.NewContents(internal.WithTopicText("11", "11"))
+	contents := dto.NewContents(dto.WithTopicText("11", "11"))
 
 	// Test empty author string, which should set Author to nil
 	req, err := NewUploadReq(hookUrl, id, contents, WithUploadAuthor(""))

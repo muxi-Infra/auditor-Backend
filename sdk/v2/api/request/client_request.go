@@ -2,20 +2,20 @@ package request
 
 import (
 	"fmt"
-	"github.com/muxi-Infra/auditor-Backend/sdk/v2/internal"
+	"github.com/muxi-Infra/auditor-Backend/sdk/v2/dto"
 )
 
 // UploadReq
 // 这里重新定义了一遍req而并没用使用审核外部定义的结构体，
 // 是为了不暴露内部实现让用户无感知.
 type UploadReq struct {
-	HookUrl    *string            `json:"hook_url,omitempty"`    // 必填
-	Id         *uint              `json:"id,omitempty"`          // 必填，hook_id
-	Author     *string            `json:"author,omitempty"`      // 可选
-	PublicTime *int64             `json:"public_time,omitempty"` // 可选
-	Tags       *[]string          `json:"tags,omitempty"`        // 可选
-	Content    *internal.Contents `json:"content,omitempty"`     // 必填
-	Extra      interface{}        `json:"extra,omitempty"`       // 可选扩展字段
+	HookUrl    *string       `json:"hook_url,omitempty"`    // 必填
+	Id         *uint         `json:"id,omitempty"`          // 必填，hook_id
+	Author     *string       `json:"author,omitempty"`      // 可选
+	PublicTime *int64        `json:"public_time,omitempty"` // 可选
+	Tags       *[]string     `json:"tags,omitempty"`        // 可选
+	Content    *dto.Contents `json:"content,omitempty"`     // 必填
+	Extra      interface{}   `json:"extra,omitempty"`       // 可选扩展字段
 }
 
 type UploadOpt func(*UploadReq)
@@ -35,7 +35,7 @@ func (req *UploadReq) IsValid() bool {
 }
 
 // NewUploadReq 你应当始终使用此函数来创建对象
-func NewUploadReq(hookUrl string, id uint, contents *internal.Contents, opts ...UploadOpt) (*UploadReq, error) {
+func NewUploadReq(hookUrl string, id uint, contents *dto.Contents, opts ...UploadOpt) (*UploadReq, error) {
 	req := &UploadReq{
 		HookUrl: &hookUrl,
 		Id:      &id,
@@ -89,13 +89,13 @@ func WithUploadExtra(extra interface{}) UploadOpt {
 }
 
 type UpdateReq struct {
-	HookUrl    *string            `json:"hook_url,omitempty"`    // 可选
-	Id         *uint              `json:"id,omitempty"`          // 必填，hook_id
-	Author     *string            `json:"author,omitempty"`      // 可选
-	PublicTime *int64             `json:"public_time,omitempty"` // 可选
-	Tags       *[]string          `json:"tags,omitempty"`        // 可选
-	Content    *internal.Contents `json:"content,omitempty"`     // 可选
-	Extra      interface{}        `json:"extra,omitempty"`       // 可选扩展字段
+	HookUrl    *string       `json:"hook_url,omitempty"`    // 可选
+	Id         *uint         `json:"id,omitempty"`          // 必填，hook_id
+	Author     *string       `json:"author,omitempty"`      // 可选
+	PublicTime *int64        `json:"public_time,omitempty"` // 可选
+	Tags       *[]string     `json:"tags,omitempty"`        // 可选
+	Content    *dto.Contents `json:"content,omitempty"`     // 可选
+	Extra      interface{}   `json:"extra,omitempty"`       // 可选扩展字段
 }
 
 func NewUpdateReq(id uint, opts ...UpdateOpt) (*UpdateReq, error) {
@@ -113,7 +113,7 @@ func NewUpdateReq(id uint, opts ...UpdateOpt) (*UpdateReq, error) {
 	return req, nil
 }
 
-func WithUpdateContent(content *internal.Contents) UpdateOpt {
+func WithUpdateContent(content *dto.Contents) UpdateOpt {
 	return func(req *UpdateReq) {
 		if content == nil {
 			return
