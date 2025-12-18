@@ -7,7 +7,7 @@ import (
 
 	"github.com/muxi-Infra/auditor-Backend/sdk/v2/api/request"
 	"github.com/muxi-Infra/auditor-Backend/sdk/v2/client"
-	"github.com/muxi-Infra/auditor-Backend/sdk/v2/internal"
+	"github.com/muxi-Infra/auditor-Backend/sdk/v2/dto"
 )
 
 func main() {
@@ -27,10 +27,10 @@ func main() {
 
 	// updateItem 的使用实例：
 	ur, _ := request.NewUpdateReq(1, request.WithUpdateAuthor("chen"),
-		request.WithUpdateContent(internal.NewContents(internal.WithTopicText("update_test",
+		request.WithUpdateContent(dto.NewContents(dto.WithTopicText("update_test",
 			"这是更新后的测试内容^^"),
-			internal.WithTopicPictures([]string{"http://lib.cqhasy.top/up0-1758728125.jpeg"}),
-			internal.WithLastCommentText("comment"))),
+			dto.WithTopicPictures([]string{"http://lib.cqhasy.top/up0-1758728125.jpeg"}),
+			dto.WithLastCommentText("comment"))),
 	)
 	updateItem(c, ur)
 
@@ -40,9 +40,9 @@ func main() {
 }
 
 func sendToAudit(c *client.Client, id uint, author, title, content string, pics []string) {
-	con := internal.NewContents(
-		internal.WithTopicText(title, content),
-		internal.WithTopicPictures(pics))
+	con := dto.NewContents(
+		dto.WithTopicText(title, content),
+		dto.WithTopicPictures(pics))
 
 	req, err := request.NewUploadReq("http://localhost:8081/api/v1/webhook ", id, con, request.WithUploadAuthor(author))
 	if err != nil {

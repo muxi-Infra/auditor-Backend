@@ -1,4 +1,4 @@
-package internal
+package dto
 
 type Contents struct {
 	Topic       Topics  `json:"topic"`

@@ -6,7 +6,7 @@ import (
 
 	"github.com/muxi-Infra/auditor-Backend/sdk/v2/api/errorx"
 	"github.com/muxi-Infra/auditor-Backend/sdk/v2/api/response"
-	"github.com/muxi-Infra/auditor-Backend/sdk/v2/internal"
+	"github.com/muxi-Infra/auditor-Backend/sdk/v2/dto"
 )
 
 func extractInt(row response.Resp) (int, error) {
@@ -22,17 +22,17 @@ func extractInt(row response.Resp) (int, error) {
 	return int(v), nil
 }
 
-func extractItemsStatus(row response.Resp) (internal.ItemsStatus, error) {
+func extractItemsStatus(row response.Resp) (dto.ItemsStatus, error) {
 	b, err := marshalData(row.Data)
 	if err != nil {
-		return internal.ItemsStatus{}, errorx.MarshalErr(err)
+		return dto.ItemsStatus{}, errorx.MarshalErr(err)
 	}
 
-	var result internal.ItemsStatus
+	var result dto.ItemsStatus
 	if err := json.Unmarshal(b, &result); err != nil {
-		return internal.ItemsStatus{}, errorx.SeverDataIllegal(&errorx.TypeMismatchCause{
+		return dto.ItemsStatus{}, errorx.SeverDataIllegal(&errorx.TypeMismatchCause{
 			ActualType:   fmt.Sprintf("%T", row.Data),
-			ExpectedType: "internal.Contents",
+			ExpectedType: "dto.Contents",
 			ActualValue:  row.Data,
 		}, row.Code)
 	}
