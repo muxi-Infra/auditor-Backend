@@ -1,5 +1,6 @@
 package dto
 
+// Contents todo: 这里的数据都应该用字节的，我测很早之前写的没有考虑到，要动的地方很多啊。
 type Contents struct {
 	Topic       Topics  `json:"topic"`
 	LastComment Comment `json:"last_comment"`

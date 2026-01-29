@@ -1,6 +1,8 @@
 package errorx
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // 似乎把成功的code也放在error这里有些不太合适，但一时也没想好放哪
 const (
@@ -8,8 +10,10 @@ const (
 	SuccessCode          = 20010
 	SeverDataIllegalCode = 20011
 	// 400系列
-	RequestErrCode = 40010
-	MarshalErrCode = 40019
+	RequestErrCode     = 40010
+	MarshalErrCode     = 40019
+	CustomErrCode      = 40020
+	SDKResponseErrCode = 50010
 )
 
 var (

@@ -129,7 +129,6 @@ func (ic *ItemController) Audit(c *gin.Context, req request.AuditReq, cla jwt.Us
 	}
 
 	go func() {
-
 		er := ic.service.Hook(data, item)
 
 		if er != nil {

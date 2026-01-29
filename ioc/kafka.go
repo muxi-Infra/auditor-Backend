@@ -1,7 +1,6 @@
 package ioc
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
@@ -23,17 +22,6 @@ func InitProducer(conf *config.KafkaConfig) *kafka.Producer {
 	if err != nil {
 		panic(err)
 	}
-
-	go func() {
-		for e := range p.Events() {
-			switch ev := e.(type) {
-			case *kafka.Message:
-				if ev.TopicPartition.Error != nil {
-					fmt.Println("发送失败:", ev.TopicPartition.Error)
-				}
-			}
-		}
-	}()
 
 	return p
 }

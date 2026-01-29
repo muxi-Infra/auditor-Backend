@@ -195,7 +195,7 @@ func (l *LLMService) tryHook(result model.AuditResult) bool {
 		_, err = hookBack(item.HookUrl, request.HookPayload{
 			Event: "audit result back",
 			Data:  data,
-			Try:   retry,
+			Try:   i,
 		}, "")
 
 		if err != nil {
