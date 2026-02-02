@@ -65,11 +65,14 @@ func hookBack(t string, data request.HookPayload, authorization string) ([]byte,
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal hook payload: %w", err)
 	}
-	var lasterr error
+
+	var lastErr error
+	var lastCode int
+	client := &http.Client{}
 	for i := 0; i < data.Try; i++ {
 		reqs, err := http.NewRequest("POST", t, bytes.NewBuffer(jsonBytes))
 		if err != nil {
-			lasterr = err
+			lastErr = err
 			time.Sleep(time.Second)
 			continue
 		}
@@ -77,10 +80,9 @@ func hookBack(t string, data request.HookPayload, authorization string) ([]byte,
 		if authorization != "" {
 			reqs.Header.Set("Authorization", authorization)
 		}
-		client := &http.Client{}
 		resp, err := client.Do(reqs)
 		if err != nil {
-			lasterr = err
+			lastErr = err
 			time.Sleep(time.Second)
 			continue
 		}
@@ -88,15 +90,17 @@ func hookBack(t string, data request.HookPayload, authorization string) ([]byte,
 		body, readErr := io.ReadAll(resp.Body)
 		resp.Body.Close()
 		if readErr != nil {
-			lasterr = readErr
+			lastErr = readErr
 			break
 		}
+		// 确保只有这一条路径可以无错误返回
 		if resp.StatusCode == http.StatusOK {
 			return body, nil
 		}
+		lastCode = resp.StatusCode
 	}
 
-	return nil, lasterr
+	return nil, fmt.Errorf("failed to call hook back: %w, lastStatusCode: %d", lastErr, lastCode)
 }
 
 func envInt(key string, defaultVal int) int {

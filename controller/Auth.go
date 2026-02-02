@@ -2,8 +2,6 @@ package controller
 
 import (
 	"context"
-	"fmt"
-
 	"github.com/gin-gonic/gin"
 	"github.com/muxi-Infra/auditor-Backend/api/request"
 	"github.com/muxi-Infra/auditor-Backend/api/response"
@@ -97,7 +95,6 @@ func (c *AuthController) Login(ctx *gin.Context, req request.LoginReq) (response
 // @Router /api/v1/auth/logout [get]
 func (c *AuthController) Logout(ctx *gin.Context) (response.Response, error) {
 	err := c.service.Logout(ctx)
-	fmt.Println(err)
 	if err != nil {
 		return response.Response{
 			Msg:  "",
@@ -105,7 +102,6 @@ func (c *AuthController) Logout(ctx *gin.Context) (response.Response, error) {
 			Data: err.Error(),
 		}, err
 	}
-	fmt.Println(2)
 	return response.Response{
 		Msg:  "成功登出",
 		Code: 200,

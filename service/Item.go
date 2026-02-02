@@ -96,6 +96,7 @@ func (s *ItemService) Hook(reqbody request.WebHookData, item model.Item) error {
 	}
 	_, err = hookBack(item.HookUrl, req, "")
 	if err != nil {
+		s.logger.Error("hook back failed", logger.Error(err))
 		return err
 	}
 	return nil
