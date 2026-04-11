@@ -33,11 +33,6 @@ ES_PASSWORD := changeme123
 # compose文件路径（关键：指向es子目录）
 ES_COMPOSE_FILE := ./filebeat/docker-compose.yaml
 
-.PHONY: tests
-tests:
-	@echo "beginning to run test...."
-
-
 .PHONY: build
 build:
 	@echo "Cleaning up and downloading modules..."
@@ -51,19 +46,6 @@ else
 	GOOS=linux GOARCH=amd64 go build -o $(BUILDDIR)/app $(REPODIR)
 endif
 	@echo "Build completed: $(BUILDDIR)\app"
-
-#deploy everything
-.PHONY:deploy
-deploy:
-	docker compose -f docker-compose-deploy.yml up -d
-
-# only app
-.PHONY:docker
-docker:
-	@echo "开始构建镜像"
-	docker build -t muxi-auditor:v1.0.0 .
-	@echo "准备启动"
-	docker run -it --rm -p 8080:8080 -v ./config/config.yaml:/data/conf/config.yaml muxi-auditor:v1.0.0
 
 .PHONY:es
 es:

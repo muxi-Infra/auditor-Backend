@@ -140,6 +140,7 @@ func (s *ItemService) Upload(ctx context.Context, req request.UploadReq, key str
 func (s *ItemService) GetDetail(ctx context.Context, id uint) (model.Item, error) {
 	item, err := s.userDAO.GetItemDetail(ctx, id)
 	if err != nil {
+		s.logger.Error("get item detail error", logger.Error(err), logger.Int("id", int(id)))
 		return model.Item{}, errors.New("获取条目失败")
 	}
 	return item, nil

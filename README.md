@@ -2,16 +2,31 @@
 
 ## 如何使用？
 
-你可以通过MakeFIle的相关指令便捷操作：
+#### 请先安装mise，使用mise中所指定的tool来管理代码:
+```bash
+winget install jdx.mise
+curl https://mise.run | sh
+brew install mise
+```
+#### Install dependencies (including Go)
+```shell
+mise install
+```
 
+#### Trust the mise configuration (required on first setup)
+```shell
+mise trust
+```
+
+你可以通过mise的相关指令便捷操作：
 ```bash
 # 直接构建应用 -- 您需要预先完善好config.yaml和.env文件
-make build 
+mise run build
+mise run build-prod 
 # 这会在dist目录生成可执行文件 （windows和linux支持），请保证env文件和可执行文件在同级目录
 
 #如果您是mac用户，或者有云部署的需求
-make docker
-make deploy
+mise run deploy
 ```
 
 

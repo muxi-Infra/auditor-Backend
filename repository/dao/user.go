@@ -510,7 +510,7 @@ func (d *UserDAO) UpdateProject(ctx context.Context, id uint, req request.Update
 }
 func (d *UserDAO) GetItemDetail(ctx context.Context, itemId uint) (model.Item, error) {
 	var item model.Item
-	err := d.DB.WithContext(ctx).First(&item, itemId).Error
+	err := d.DB.WithContext(ctx).Preload("Comments").First(&item, itemId).Error
 	if err != nil {
 		return model.Item{}, err
 	}

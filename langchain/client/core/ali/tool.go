@@ -13,9 +13,9 @@ import (
 )
 
 const (
-	ContentTag     = "content: "
-	LastCommentTag = "评论1: "
-	NextCommentTag = "评论2: "
+	ContentTag     = "需要审核的content: "
+	LastCommentTag = "(辅助上下文信息，这是评论树的根评论): "
+	NextCommentTag = "(辅助上下文信息，这是父评论): "
 )
 
 /*

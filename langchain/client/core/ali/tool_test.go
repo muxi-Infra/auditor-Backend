@@ -29,7 +29,7 @@ func TestParse(t *testing.T) {
 		},
 	}
 	text, pic := parseContent(contents)
-	assert.Equal(t, text, "hello china\ncontent: \n中国真好啊\n评论1: \n你逗我呢\n评论2: \n乐子别叫")
+	assert.Equal(t, text, "hello china\n需要审核的content: \n中国真好啊\n(辅助上下文信息，这是评论树的根评论): \n你逗我呢\n(辅助上下文信息，这是父评论): \n乐子别叫")
 	assert.Equal(t, pic, []string{"111", "222", "333", "444", "555", "666"})
 	fmt.Println(text, pic)
 }

@@ -62,7 +62,7 @@ func (d *DefaultLogger) Info(msg string, args ...Field) {
 }
 
 func (d *DefaultLogger) Debug(msg string, args ...Field) {
-	d.log.Printf(msg)
+	d.log.Print(msg)
 }
 
 func (d *DefaultLogger) Warn(msg string, args ...Field) {

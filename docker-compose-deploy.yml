@@ -3,7 +3,7 @@ version: '3.8'
 services:
   auditor-backend:
     user: "0:0"
-    image: muxi-auditor:v1.0.0
+    image: muxi-auditor:${VERSION}
     container_name: muxi-auditor
     restart: unless-stopped
     env_file:

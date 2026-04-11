@@ -1,0 +1,42 @@
+name: CI
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+jobs:
+  test:
+    name: Run test.go
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: jdx/mise-action@v3
+      - name: Tests
+        run: mise run test
+
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+         ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build (No Push for PR)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          tags: |
+            muxi/auditor_backend:${{ github.sha }}
+            muxi/auditor_backend:latest
+          file: ./Dockerfile
+          build-args:
+            Project_Name=muxi-auditor
+            Port=12810
