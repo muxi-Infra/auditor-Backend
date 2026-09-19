@@ -94,7 +94,12 @@ func (s *ItemService) Hook(reqbody request.WebHookData, item model.Item) error {
 		Data:  reqbody,
 		Try:   num,
 	}
-	_, err = hookBack(item.HookUrl, req, "")
+	apiKey, err := s.userDAO.GetProjectAPIKey(context.Background(), item.ProjectId)
+	if err != nil {
+		s.logger.Error("get project api_key failed", logger.Error(err), logger.Int("project_id", int(item.ProjectId)))
+		return err
+	}
+	_, err = hookBack(item.HookUrl, req, apiKey)
 	if err != nil {
 		s.logger.Error("hook back failed", logger.Error(err))
 		return err
