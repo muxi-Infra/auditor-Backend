@@ -17,6 +17,7 @@ func main() {
 	// 可选加载 .env（不存在则忽略）；容器内建议用环境变量或 env_file 注入
 	_ = godotenv.Load()
 	app := InitWebServer(os.Getenv("CONFIG_PATH"))
+	
 	go func() {
 		defer func() {
 			if err := recover(); err != nil {
