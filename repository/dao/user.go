@@ -35,6 +35,7 @@ type UserDAOInterface interface {
 	CreateProject(ctx context.Context, project *model.Project) (uint, string, error)
 	CreateUserProject(ctx context.Context, projectId uint, uid uint, projectRole int) error
 	GetProjectDetails(ctx context.Context, id uint) (model.Project, error)
+	GetProjectAPIKey(ctx context.Context, id uint) (string, error)
 	Select(ctx context.Context, req request.SelectReq) ([]model.Item, error)
 	AuditItem(ctx context.Context, ItemId uint, Status model.ItemStatus, Reason string, id uint) error
 	SelectItemById(ctx context.Context, id uint) (model.Item, error)
@@ -237,6 +238,20 @@ func (d *UserDAO) GetProjectDetails(ctx context.Context, id uint) (model.Project
 	return project, nil
 
 }
+func (d *UserDAO) GetProjectAPIKey(ctx context.Context, id uint) (string, error) {
+	var project model.Project
+	err := d.DB.WithContext(ctx).Select("apikey").First(&project, id).Error
+	if err != nil {
+		return "", err
+	}
+	
+	if project.Apikey == "" {
+		return "", errors.New("project api_key is empty")
+	}
+
+	return project.Apikey, nil
+}
+
 func (d *UserDAO) FindProjectByID(ctx context.Context, id uint) (model.Project, error) {
 	var project model.Project
 	err := d.DB.WithContext(ctx).Where("id = ?", id).First(&project).Error

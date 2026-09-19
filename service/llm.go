@@ -191,12 +191,17 @@ func (l *LLMService) tryHook(result model.AuditResult) bool {
 			Status: auditStatusForHook(result.Result),
 			Msg:    item.Reason,
 		}
+		apiKey, err := l.userDAO.GetProjectAPIKey(context.Background(), item.ProjectId)
+		if err != nil {
+			l.log.Error("get project api_key failed", logger.Error(err), logger.Int("project_id", int(item.ProjectId)))
+			continue
+		}
 
 		_, err = hookBack(item.HookUrl, request.HookPayload{
 			Event: "audit result back",
 			Data:  data,
 			Try:   i,
-		}, "")
+		}, apiKey)
 
 		if err != nil {
 			l.log.Error(err.Error())

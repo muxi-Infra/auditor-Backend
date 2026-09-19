@@ -60,7 +60,7 @@ func auditStatusToInt(status string) int {
 	return -1
 }
 
-func hookBack(t string, data request.HookPayload, authorization string) ([]byte, error) {
+func hookBack(t string, data request.HookPayload, apiKey string) ([]byte, error) {
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal hook payload: %w", err)
@@ -77,8 +77,8 @@ func hookBack(t string, data request.HookPayload, authorization string) ([]byte,
 			continue
 		}
 		reqs.Header.Set("Content-Type", "application/json")
-		if authorization != "" {
-			reqs.Header.Set("Authorization", authorization)
+		if apiKey != "" {
+			reqs.Header.Set("api_key", apiKey)
 		}
 		resp, err := client.Do(reqs)
 		if err != nil {
