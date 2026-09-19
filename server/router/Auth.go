@@ -24,5 +24,4 @@ func RegisterOAuthRoutes(
 	authGroup := s.Group("/auth")
 	authGroup.POST("/login", ginx.WrapReq(c.Login))
 	authGroup.GET("/logout", authMiddleware, ginx.Wrap(c.Logout))
-
 }
