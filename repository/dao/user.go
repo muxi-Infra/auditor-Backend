@@ -35,6 +35,7 @@ type UserDAOInterface interface {
 	CreateProject(ctx context.Context, project *model.Project) (uint, string, error)
 	CreateUserProject(ctx context.Context, projectId uint, uid uint, projectRole int) error
 	GetProjectDetails(ctx context.Context, id uint) (model.Project, error)
+	CountItemStatus(ctx context.Context, projectId uint) (map[model.ItemStatus]int, error)
 	GetProjectAPIKey(ctx context.Context, id uint) (string, error)
 	Select(ctx context.Context, req request.SelectReq) ([]model.Item, error)
 	AuditItem(ctx context.Context, ItemId uint, Status model.ItemStatus, Reason string, id uint) error
@@ -50,7 +51,7 @@ type UserDAOInterface interface {
 	GetUserProjectRoles(ctx context.Context, users []model.User, projects []model.Project) ([]response.UserAllInfo, error)
 	GetItems(ctx context.Context, pid uint) ([]model.Item, error)
 	GetItemDetail(ctx context.Context, itemId uint) (model.Item, error)
-	GetItemByHookId(ctx context.Context, hookId uint) (model.Item, error)
+	GetItemByHookId(ctx context.Context, hookId uint, projectId uint) (model.Item, error)
 	DeleteItemByHookId(ctx context.Context, hookId uint, projectId uint) error
 	UpdateUserProject(ctx context.Context, projectId uint, uid uint, projectRole int) error
 	GetUserProjects(ctx context.Context, uid uint) ([]model.Project, error)
@@ -231,12 +232,34 @@ func (d *UserDAO) CreateProject(ctx context.Context, project *model.Project) (ui
 }
 func (d *UserDAO) GetProjectDetails(ctx context.Context, id uint) (model.Project, error) {
 	var project model.Project
-	err := d.DB.WithContext(ctx).Preload("Items").Preload("Users").First(&project, id).Error
+	err := d.DB.WithContext(ctx).Preload("Users").First(&project, id).Error
 	if err != nil {
 		return model.Project{}, err
 	}
 	return project, nil
 
+}
+
+// CountItemStatus 按状态聚合统计某项目下的条目数量，避免把全部 items 读进内存
+func (d *UserDAO) CountItemStatus(ctx context.Context, projectId uint) (map[model.ItemStatus]int, error) {
+	type statusCount struct {
+		Status model.ItemStatus
+		Count  int
+	}
+	var rows []statusCount
+	err := d.DB.WithContext(ctx).Model(&model.Item{}).
+		Select("status, COUNT(*) AS count").
+		Where("project_id = ?", projectId).
+		Group("status").
+		Scan(&rows).Error
+	if err != nil {
+		return nil, err
+	}
+	counts := make(map[model.ItemStatus]int, len(rows))
+	for _, r := range rows {
+		counts[r.Status] = r.Count
+	}
+	return counts, nil
 }
 func (d *UserDAO) GetProjectAPIKey(ctx context.Context, id uint) (string, error) {
 	var project model.Project
@@ -328,6 +351,14 @@ func (d *UserDAO) Select(ctx context.Context, req request.SelectReq) ([]model.It
 		query = query.Where("title LIKE ? OR author LIKE ?", keyword, keyword)
 	}
 
+	if req.PageSize > 0 {
+		offset := (req.Page - 1) * req.PageSize
+		if offset < 0 {
+			offset = 0
+		}
+		query = query.Order("created_at DESC, id DESC").Limit(req.PageSize).Offset(offset)
+	}
+
 	var items []model.Item
 	if err := query.Find(&items).Error; err != nil {
 		return nil, errors.New("查询 Item 失败")
@@ -409,49 +440,112 @@ func (d *UserDAO) SearchHistory(ctx context.Context, items *[]model.Item, id uin
 	return nil
 }
 func (d *UserDAO) Upload(ctx context.Context, req request.UploadReq, id uint, time time.Time) (uint, error) {
+	// 先按默认作用域查活跃行，避免复活软删行时与已存在的活跃行重复
 	var it model.Item
-	err := d.DB.WithContext(ctx).Where("hook_id =? AND project_id = ?", req.Id, id).First(&it).Error
-	if err != nil {
-
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			var item = model.Item{
-				Status:     0,
-				ProjectId:  id,
-				Author:     req.Author,
-				Tags:       req.Tags,
-				PublicTime: time,
-				Content:    req.Content.Topic.Content,
-				Title:      req.Content.Topic.Title,
-				Pictures:   req.Content.Topic.Pictures,
-				HookUrl:    req.HookUrl,
-				HookId:     req.Id,
-			}
-			var comment = []model.Comment{model.Comment{
-				Content:  req.Content.LastComment.Content,
-				Pictures: req.Content.LastComment.Pictures,
-				ItemId:   item.ID,
-			}, model.Comment{
-				Content:  req.Content.NextComment.Content,
-				Pictures: req.Content.NextComment.Pictures,
-				ItemId:   item.ID,
-			}}
-			item.Comments = comment
-			err = d.DB.WithContext(ctx).Create(&item).Error
-
-			if err != nil {
-				return 0, err
-			}
-
-			return item.ID, nil
-		}
+	err := d.DB.WithContext(ctx).
+		Where("hook_id =? AND project_id = ?", req.Id, id).
+		First(&it).Error
+	if err == nil {
+		return it.ID, errors.New("该条目已被创建")
+	}
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return 0, err
 	}
-	return it.ID, errors.New("该条目已被创建")
+
+	// 无活跃行：若有软删行则复活复用，避免"删后重传"累积
+	err = d.DB.WithContext(ctx).Unscoped().
+		Where("hook_id =? AND project_id = ? AND deleted_at IS NOT NULL", req.Id, id).
+		Order("id DESC").
+		First(&it).Error
+	if err == nil {
+		if err = d.reviveItem(ctx, &it, req, time); err != nil {
+			return 0, err
+		}
+		return it.ID, nil
+	}
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return 0, err
+	}
+
+	var item = model.Item{
+		Status:     0,
+		ProjectId:  id,
+		Author:     req.Author,
+		Tags:       req.Tags,
+		PublicTime: time,
+		Content:    req.Content.Topic.Content,
+		Title:      req.Content.Topic.Title,
+		Pictures:   req.Content.Topic.Pictures,
+		HookUrl:    req.HookUrl,
+		HookId:     req.Id,
+	}
+	var comment = []model.Comment{model.Comment{
+		Content:  req.Content.LastComment.Content,
+		Pictures: req.Content.LastComment.Pictures,
+		ItemId:   item.ID,
+	}, model.Comment{
+		Content:  req.Content.NextComment.Content,
+		Pictures: req.Content.NextComment.Pictures,
+		ItemId:   item.ID,
+	}}
+	item.Comments = comment
+	err = d.DB.WithContext(ctx).Create(&item).Error
+
+	if err != nil {
+		return 0, err
+	}
+
+	return item.ID, nil
+}
+
+// reviveItem 复用已软删的条目行：清除软删标记并套用本次上传的内容，避免"删后重传"累积行
+func (d *UserDAO) reviveItem(ctx context.Context, it *model.Item, req request.UploadReq, t time.Time) error {
+	return d.DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		it.Status = model.Pending
+		it.Author = req.Author
+		it.Tags = req.Tags
+		it.PublicTime = t
+		it.Title = req.Content.Topic.Title
+		it.Content = req.Content.Topic.Content
+		it.Pictures = req.Content.Topic.Pictures
+		it.HookUrl = req.HookUrl
+		it.Auditor = 0
+		it.Reason = ""
+
+		if err := tx.Unscoped().Model(&model.Item{}).
+			Where("id = ?", it.ID).
+			Update("deleted_at", nil).Error; err != nil {
+			return err
+		}
+		if err := tx.Model(&model.Item{}).
+			Where("id = ?", it.ID).
+			Select("status", "author", "tags", "public_time", "title", "content", "pictures", "hook_url", "auditor", "reason").
+			Updates(it).Error; err != nil {
+			return err
+		}
+
+		var comments []model.Comment
+		if err := tx.Where("item_id = ?", it.ID).Order("id ASC").Find(&comments).Error; err != nil {
+			return err
+		}
+		contents := [2]response.Comment{req.Content.LastComment, req.Content.NextComment}
+		for i := range comments {
+			if i >= len(contents) {
+				break
+			}
+			comments[i].Content = contents[i].Content
+			comments[i].Pictures = contents[i].Pictures
+			if err := tx.Save(&comments[i]).Error; err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }
 
 func (d *UserDAO) UpdateItem(ctx context.Context, req request.UploadReq, id uint, t time.Time) (uint, error) {
 	var it model.Item
-	err := d.DB.WithContext(ctx).Where("hook_id=?", req.Id).First(&it).Error
+	err := d.DB.WithContext(ctx).Where("hook_id=? AND project_id=?", req.Id, id).First(&it).Error
 	if err != nil {
 		return 0, err
 	}
@@ -607,9 +701,9 @@ func (d *UserDAO) GetItems(ctx context.Context, pid uint) ([]model.Item, error) 
 	return items, nil
 }
 
-func (d *UserDAO) GetItemByHookId(ctx context.Context, hookId uint) (model.Item, error) {
+func (d *UserDAO) GetItemByHookId(ctx context.Context, hookId uint, projectId uint) (model.Item, error) {
 	var item model.Item
-	err := d.DB.WithContext(ctx).Where("hook_id = ?", hookId).First(&item).Error
+	err := d.DB.WithContext(ctx).Where("hook_id = ? AND project_id = ?", hookId, projectId).First(&item).Error
 	if err != nil {
 		return item, err
 	}

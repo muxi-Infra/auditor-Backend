@@ -148,18 +148,14 @@ func (s *ProjectService) Detail(ctx context.Context, id uint) (response.GetDetai
 	if err != nil {
 		return response.GetDetailResp{}, err
 	}
-	countMap := map[model.ItemStatus]int{
-		model.Pending: 0,
-		model.Pass:    0,
-		model.Reject:  0,
-	}
-	for _, item := range project.Items {
-		countMap[item.Status]++
+	countMap, err := s.userDAO.CountItemStatus(ctx, id)
+	if err != nil {
+		return response.GetDetailResp{}, err
 	}
 
 	re := response.GetDetailResp{
-		TotalNumber:   countMap[0] + countMap[1] + countMap[2],
-		CurrentNumber: countMap[0],
+		TotalNumber:   countMap[model.Pending] + countMap[model.Pass] + countMap[model.Reject],
+		CurrentNumber: countMap[model.Pending],
 		Apikey:        project.Apikey,
 		AuditRule:     project.AuditRule,
 		ProjectName:   project.ProjectName,

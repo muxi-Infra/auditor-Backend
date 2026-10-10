@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"gorm.io/gorm"
+
 	"github.com/muxi-Infra/auditor-Backend/api/request"
 	"github.com/muxi-Infra/auditor-Backend/pkg/apikey"
 	"github.com/muxi-Infra/auditor-Backend/repository/dao"
@@ -92,8 +94,11 @@ func (service *RemoveService) Get(c context.Context, itemIds []uint, projectId u
 	var lastErr []string //记录循环中的每一次错误
 
 	for _, id := range itemIds {
-		re, err := service.UDB.GetItemByHookId(c, id)
+		re, err := service.UDB.GetItemByHookId(c, id, projectId)
 		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				continue
+			}
 			lastErr = append(lastErr, fmt.Errorf("item:%d:%w", id, err).Error())
 			continue
 		}

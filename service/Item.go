@@ -45,20 +45,7 @@ func (s *ItemService) Select(ctx context.Context, req request.SelectReq) ([]mode
 	if req.PageSize < 1 {
 		req.PageSize = 10
 	}
-	p := req.PageSize * (req.Page - 1)
-
-	items, err := s.userDAO.Select(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-	if len(items) > p {
-		if len(items) > p+req.PageSize {
-			return items[p : p+req.PageSize], nil
-		} else {
-			return items[p:], nil
-		}
-	}
-	return nil, nil
+	return s.userDAO.Select(ctx, req)
 }
 func (s *ItemService) Audit(ctx context.Context, req request.AuditReq, id uint) (request.WebHookData, model.Item, error) {
 
