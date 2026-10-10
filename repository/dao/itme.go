@@ -54,7 +54,7 @@ func (d *ItemDao) FindItemByID(ctx context.Context, id uint) (*model.Item, error
 
 func (d *ItemDao) UpdateItem(ctx context.Context, req request.RemoveUpdateReq, id uint, t time.Time) (uint, error) {
 	var it model.Item
-	err := d.DB.WithContext(ctx).Model(&model.Item{}).Where("hook_id=?", req.Id).First(&it).Error
+	err := d.DB.WithContext(ctx).Model(&model.Item{}).Where("hook_id=? AND project_id=?", req.Id, id).First(&it).Error
 	if err != nil {
 		return 0, err
 	}

@@ -73,7 +73,7 @@ type ProjectList struct {
 type Item struct {
 	gorm.Model
 	Status     ItemStatus      `gorm:"column:status;not null"`
-	ProjectId  uint            `gorm:"column:project_id;not null"`
+	ProjectId  uint            `gorm:"column:project_id;not null;index"`
 	Author     string          `gorm:"column:author;not null"`
 	Tags       GormStringSlice `gorm:"type:json"`
 	PublicTime time.Time       `gorm:"column:public_time;not null"`
