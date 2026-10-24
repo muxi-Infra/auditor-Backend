@@ -40,11 +40,13 @@ func (s *AuthService) Login(ctx context.Context, email string) (string, int, err
 		return "", 0, err
 	}
 	if user == nil {
-		s.userDAO.Create(ctx, &model.User{
+		if err := s.userDAO.Create(ctx, &model.User{
 			Email:    email,
 			Name:     RandomString(5),
 			UserRole: 0,
-		})
+		}); err != nil {
+			return "", 0, err
+		}
 		return "", 0, nil
 	}
 	token, err := s.redisJwtHandler.Jwt.SetJWTToken(user.ID, user.Email, user.UserRole)
